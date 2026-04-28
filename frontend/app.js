@@ -129,7 +129,12 @@ window.switchView = function(viewId, navElement = null) {
     
     if (viewId === 'home') loadJobs(false);
     else if (viewId === 'history') loadJobs(true);
-    else if (viewId === 'admin') loadAdminAssets();
+    else if (viewId === 'admin') {
+        loadAdminAssets();
+        loadAdminServerAssets();
+        loadAdminAparAssets();
+        loadAdminKwhAssets();
+    }
 }
 
 window.toggleSidebar = function() { document.getElementById('app-sidebar').classList.toggle('open'); }
@@ -408,10 +413,65 @@ window.adminCreateSPK = async function() {
     } catch(e) { alert("Error!"); }
 }
 
+// --- NEW ADMIN CRUD FUNCTIONS ---
+window.adminCreateServer = async function() {
+    let branch = document.getElementById('server-branch').value;
+    let server_location = document.getElementById('server-location').value;
+    if(!branch || !server_location) return alert("Isi semua data!");
+    let res = await fetch(`${API_BASE}/server_assets`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({branch, server_location}) });
+    if(res.ok) { alert("Berhasil ditambah!"); loadAdminServerAssets(); }
+}
+window.loadAdminServerAssets = async function() {
+    let res = await fetch(`${API_BASE}/server_assets`); let data = await res.json();
+    let tbody = document.getElementById('admin-server-table-body'); tbody.innerHTML = '';
+    if (data.data.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem;">Kosong</td></tr>';
+    data.data.forEach(a => tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);"><td style="padding:1rem;">#${a.id}</td><td style="padding:1rem;">${a.branch}</td><td style="padding:1rem;">${a.server_location}</td><td style="padding:1rem;"><button class="btn-secondary" style="color:var(--danger); border-color:var(--danger);" onclick="adminDeleteServer(${a.id})">Hapus</button></td></tr>`);
+}
+window.adminDeleteServer = async function(id) {
+    if(confirm("Hapus?")) { await fetch(`${API_BASE}/server_assets/${id}`, { method: 'DELETE' }); loadAdminServerAssets(); }
+}
+
+window.adminCreateApar = async function() {
+    let branch = document.getElementById('apar-branch').value;
+    let apar_location = document.getElementById('apar-location').value;
+    let fill_date = document.getElementById('apar-fill').value;
+    let expiry_date = document.getElementById('apar-expiry').value;
+    if(!branch || !apar_location) return alert("Isi data!");
+    let res = await fetch(`${API_BASE}/apar_assets`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({branch, apar_location, fill_date, expiry_date}) });
+    if(res.ok) { alert("Berhasil ditambah!"); loadAdminAparAssets(); }
+}
+window.loadAdminAparAssets = async function() {
+    let res = await fetch(`${API_BASE}/apar_assets`); let data = await res.json();
+    let tbody = document.getElementById('admin-apar-table-body'); tbody.innerHTML = '';
+    if (data.data.length === 0) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1rem;">Kosong</td></tr>';
+    data.data.forEach(a => tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);"><td style="padding:1rem;">#${a.id}</td><td style="padding:1rem;">${a.branch}</td><td style="padding:1rem;">${a.apar_location}</td><td style="padding:1rem;">${a.fill_date}</td><td style="padding:1rem;">${a.expiry_date}</td><td style="padding:1rem;"><button class="btn-secondary" style="color:var(--danger); border-color:var(--danger);" onclick="adminDeleteApar(${a.id})">Hapus</button></td></tr>`);
+}
+window.adminDeleteApar = async function(id) {
+    if(confirm("Hapus?")) { await fetch(`${API_BASE}/apar_assets/${id}`, { method: 'DELETE' }); loadAdminAparAssets(); }
+}
+
+window.adminCreateKwh = async function() {
+    let branch = document.getElementById('kwh-branch').value;
+    let kwh_location = document.getElementById('kwh-location').value;
+    if(!branch || !kwh_location) return alert("Isi data!");
+    let res = await fetch(`${API_BASE}/kwh_assets`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({branch, kwh_location}) });
+    if(res.ok) { alert("Berhasil ditambah!"); loadAdminKwhAssets(); }
+}
+window.loadAdminKwhAssets = async function() {
+    let res = await fetch(`${API_BASE}/kwh_assets`); let data = await res.json();
+    let tbody = document.getElementById('admin-kwh-table-body'); tbody.innerHTML = '';
+    if (data.data.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem;">Kosong</td></tr>';
+    data.data.forEach(a => tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);"><td style="padding:1rem;">#${a.id}</td><td style="padding:1rem;">${a.branch}</td><td style="padding:1rem;">${a.kwh_location}</td><td style="padding:1rem;"><button class="btn-secondary" style="color:var(--danger); border-color:var(--danger);" onclick="adminDeleteKwh(${a.id})">Hapus</button></td></tr>`);
+}
+window.adminDeleteKwh = async function(id) {
+    if(confirm("Hapus?")) { await fetch(`${API_BASE}/kwh_assets/${id}`, { method: 'DELETE' }); loadAdminKwhAssets(); }
+}
+
 // --- PROFILE EDITING ---
 window.saveProfile = async function() {
     let newName = document.getElementById('edit-name').value;
     let newRole = document.getElementById('edit-role').value;
+    let newPassword = document.getElementById('edit-password').value;
     if (!newName) return alert("Nama tidak boleh kosong!");
     
     try {
@@ -421,6 +481,13 @@ window.saveProfile = async function() {
             body: JSON.stringify({ name: newName, role: newRole })
         });
         if (res.ok) {
+            if (newPassword) {
+                await fetch(`${API_BASE}/user/${currentUser.id}/password`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ password: newPassword })
+                });
+            }
             currentUser.name = newName;
             currentUser.role = newRole;
             localStorage.setItem('hs_user', JSON.stringify(currentUser));
@@ -469,33 +536,42 @@ window.openJobForm = async function(type) {
         document.getElementById(`cam-${t}`).value = "";
     });
     
-    // Tampilkan field khusus AC jika tipenya tentang AC
+    ['cuci-ac-fields', 'server-fields', 'apar-fields', 'kwh-fields'].forEach(id => {
+        let el = document.getElementById(id);
+        if(el) el.style.display = 'none';
+    });
+    
     let isAC = type.toLowerCase().includes('ac');
-    let acFields = document.getElementById('cuci-ac-fields');
-    if (acFields) {
-        acFields.style.display = isAC ? 'block' : 'none';
-        if (isAC) {
-            // Load branches to dropdown
-            try {
-                let res = await fetch(`${API_BASE}/assets`);
-                let data = await res.json();
-                allAssetsForAdHoc = data.data;
-                
-                let branchSelect = document.getElementById('job-branch');
-                let branches = [...new Set(allAssetsForAdHoc.map(a => (a.branch || '').trim()))].filter(Boolean);
-                branchSelect.innerHTML = '<option value="">Pilih Cabang...</option>';
-                branches.forEach(b => {
-                    branchSelect.innerHTML += `<option value="${b}">${b}</option>`;
-                });
-                document.getElementById('job-room').innerHTML = '<option value="">Pilih Ruangan...</option>';
-                
-                let lastBranch = localStorage.getItem('hs_last_branch');
-                if (lastBranch && branches.includes(lastBranch)) {
-                    branchSelect.value = lastBranch;
-                    window.loadRoomsForAdHoc();
-                }
-            } catch(e) { console.error("Gagal load assets"); }
-        }
+    let isServer = type.toLowerCase().includes('server');
+    let isApar = type.toLowerCase().includes('apar');
+    let isKwh = type.toLowerCase().includes('kwh');
+    
+    if (isAC) {
+        document.getElementById('cuci-ac-fields').style.display = 'block';
+        try {
+            let res = await fetch(`${API_BASE}/assets`); let data = await res.json();
+            allAssetsForAdHoc = data.data;
+            let branchSelect = document.getElementById('job-branch');
+            let branches = [...new Set(allAssetsForAdHoc.map(a => (a.branch || '').trim()))].filter(Boolean);
+            branchSelect.innerHTML = '<option value="">Pilih Cabang...</option>';
+            branches.forEach(b => branchSelect.innerHTML += `<option value="${b}">${b}</option>`);
+            document.getElementById('job-room').innerHTML = '<option value="">Pilih Ruangan...</option>';
+            let lastBranch = localStorage.getItem('hs_last_branch');
+            if (lastBranch && branches.includes(lastBranch)) { branchSelect.value = lastBranch; window.loadRoomsForAdHoc(); }
+        } catch(e) {}
+    }
+    
+    if (isServer) {
+        document.getElementById('server-fields').style.display = 'block';
+        window.loadAdHocData('server');
+    }
+    if (isApar) {
+        document.getElementById('apar-fields').style.display = 'block';
+        window.loadAdHocData('apar');
+    }
+    if (isKwh) {
+        document.getElementById('kwh-fields').style.display = 'block';
+        window.loadAdHocData('kwh');
     }
     
     // Auto-fill tanggal dan jatuh tempo
@@ -580,6 +656,49 @@ window.handlePhoto = function(event, type) {
     reader.readAsDataURL(file);
 }
 
+let allAdhocData = { server: [], apar: [], kwh: [] };
+window.loadAdHocData = async function(type) {
+    try {
+        let res = await fetch(`${API_BASE}/${type}_assets`);
+        let data = await res.json();
+        allAdhocData[type] = data.data;
+        let branchSelect = document.getElementById(`job-${type}-branch`);
+        let branches = [...new Set(data.data.map(a => a.branch))].filter(Boolean);
+        branchSelect.innerHTML = '<option value="">Pilih Cabang...</option>';
+        branches.forEach(b => branchSelect.innerHTML += `<option value="${b}">${b}</option>`);
+    } catch(e) {}
+}
+
+window.loadServerLocations = function() {
+    let branch = document.getElementById('job-server-branch').value;
+    let select = document.getElementById('job-server-location'); select.innerHTML = '<option value="">Pilih Lokasi...</option>';
+    if(branch) allAdhocData.server.filter(a => a.branch === branch).forEach(a => select.innerHTML += `<option value="${a.server_location}">${a.server_location}</option>`);
+}
+
+window.loadAparLocations = function() {
+    let branch = document.getElementById('job-apar-branch').value;
+    let select = document.getElementById('job-apar-location'); select.innerHTML = '<option value="">Pilih Lokasi...</option>';
+    if(branch) allAdhocData.apar.filter(a => a.branch === branch).forEach(a => select.innerHTML += `<option value="${a.apar_location}">${a.apar_location}</option>`);
+}
+
+window.showAparDates = function() {
+    let loc = document.getElementById('job-apar-location').value;
+    let info = document.getElementById('apar-dates-info');
+    if(!loc) { info.style.display = 'none'; return; }
+    let apar = allAdhocData.apar.find(a => a.apar_location === loc);
+    if(apar) {
+        document.getElementById('lbl-apar-fill').innerText = apar.fill_date;
+        document.getElementById('lbl-apar-expiry').innerText = apar.expiry_date;
+        info.style.display = 'block';
+    }
+}
+
+window.loadKwhLocations = function() {
+    let branch = document.getElementById('job-kwh-branch').value;
+    let select = document.getElementById('job-kwh-location'); select.innerHTML = '<option value="">Pilih Lokasi...</option>';
+    if(branch) allAdhocData.kwh.filter(a => a.branch === branch).forEach(a => select.innerHTML += `<option value="${a.kwh_location}">${a.kwh_location}</option>`);
+}
+
 window.loadRoomsForAdHoc = function() {
     let branch = document.getElementById('job-branch').value;
     let roomSelect = document.getElementById('job-room');
@@ -596,22 +715,62 @@ window.loadRoomsForAdHoc = function() {
 
 window.submitAdHocJob = async function() {
     let title = document.getElementById('job-title').value;
-    let branch = document.getElementById('job-branch') ? document.getElementById('job-branch').value : "";
-    let room = document.getElementById('job-room') ? document.getElementById('job-room').value : "";
     let bFile = document.getElementById('cam-before').files[0];
-    let aFile = document.getElementById('cam-after').files[0];
     let notes = document.getElementById('job-notes').value;
     
     if(!title) return alert("Keterangan Unit harus diisi!");
     
+    let branch = "Ad-Hoc"; 
+    let locationDetail = "";
+    
+    let isAC = document.getElementById('cuci-ac-fields').style.display === 'block';
+    let isServer = document.getElementById('server-fields').style.display === 'block';
+    let isApar = document.getElementById('apar-fields').style.display === 'block';
+    let isKwh = document.getElementById('kwh-fields').style.display === 'block';
+
+    if (isAC) {
+        branch = document.getElementById('job-branch').value; 
+        locationDetail = document.getElementById('job-room').value;
+    } else if (isServer) {
+        branch = document.getElementById('job-server-branch').value; 
+        locationDetail = document.getElementById('job-server-location').value;
+    } else if (isApar) {
+        branch = document.getElementById('job-apar-branch').value; 
+        locationDetail = document.getElementById('job-apar-location').value;
+    } else if (isKwh) {
+        branch = document.getElementById('job-kwh-branch').value; 
+        locationDetail = document.getElementById('job-kwh-location').value;
+        let recipient = document.getElementById('kwh-recipient-email').value;
+        
+        if (!bFile) return alert("Foto KWH Wajib dilampirkan!");
+        if (!recipient) return alert("Email penerima wajib diisi!");
+        
+        let formData = new FormData();
+        formData.append("sender_name", currentUser.name);
+        formData.append("sender_email", currentUser.email);
+        formData.append("kwh_location", locationDetail || "Tanpa Lokasi Spesifik");
+        formData.append("recipient_email", recipient);
+        formData.append("photo", bFile);
+        
+        try {
+            let res = await fetch(`${API_BASE}/kwh-email`, { method: 'POST', body: formData });
+            if(res.ok) { 
+                alert("Email Pengajuan KWH Berhasil Dikirim!"); 
+                switchView('home'); 
+                return; 
+            } else { 
+                return alert("Gagal kirim email KWH."); 
+            }
+        } catch(e) { return alert("Koneksi Error"); }
+    }
+
     try {
+        let finalTitle = title + (locationDetail ? ` - ${locationDetail}` : "");
         let res = await fetch(`${API_BASE}/jobs`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({title: title, branch: branch || "Ad-Hoc", assigned_to: currentUser.id})
+            body: JSON.stringify({title: finalTitle, branch: branch, assigned_to: currentUser.id})
         });
-        let data = await res.json();
-        
         if(res.ok) {
             alert("Laporan berhasil dikirim!");
             switchView('home');

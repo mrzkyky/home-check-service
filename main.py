@@ -43,6 +43,23 @@ class AssetCreate(BaseModel):
     ac_type: str
     details: str
 
+class ServerAssetCreate(BaseModel):
+    branch: str
+    server_location: str
+
+class AparAssetCreate(BaseModel):
+    branch: str
+    apar_location: str
+    fill_date: str
+    expiry_date: str
+
+class KwhAssetCreate(BaseModel):
+    branch: str
+    kwh_location: str
+
+class UserPasswordUpdate(BaseModel):
+    password: str
+
 class JobCreate(BaseModel):
     title: str
     branch: str
@@ -76,6 +93,11 @@ async def update_user_profile(user_id: int, payload: UserProfileUpdate):
     database.update_user_profile(user_id, payload.name, payload.role)
     return {"status": "success"}
 
+@app.put("/api/user/{user_id}/password")
+async def update_user_password(user_id: int, payload: UserPasswordUpdate):
+    database.update_user_password(user_id, payload.password)
+    return {"status": "success"}
+
 @app.post("/api/user/{user_id}/avatar")
 async def upload_avatar(user_id: int, file: UploadFile = File(...)):
     ext = file.filename.split('.')[-1]
@@ -104,6 +126,51 @@ async def update_asset(asset_id: int, payload: AssetCreate):
 @app.delete("/api/assets/{asset_id}")
 async def delete_asset(asset_id: int):
     database.delete_asset(asset_id)
+    return {"status": "success"}
+
+# --- SERVER ASSET API ---
+@app.post("/api/server_assets")
+async def create_server_asset(payload: ServerAssetCreate):
+    asset_id = database.create_server_asset(payload.branch, payload.server_location)
+    return {"status": "success", "asset_id": asset_id}
+
+@app.get("/api/server_assets")
+async def get_server_assets():
+    return {"status": "success", "data": database.get_server_assets()}
+
+@app.delete("/api/server_assets/{asset_id}")
+async def delete_server_asset(asset_id: int):
+    database.delete_server_asset(asset_id)
+    return {"status": "success"}
+
+# --- APAR ASSET API ---
+@app.post("/api/apar_assets")
+async def create_apar_asset(payload: AparAssetCreate):
+    asset_id = database.create_apar_asset(payload.branch, payload.apar_location, payload.fill_date, payload.expiry_date)
+    return {"status": "success", "asset_id": asset_id}
+
+@app.get("/api/apar_assets")
+async def get_apar_assets():
+    return {"status": "success", "data": database.get_apar_assets()}
+
+@app.delete("/api/apar_assets/{asset_id}")
+async def delete_apar_asset(asset_id: int):
+    database.delete_apar_asset(asset_id)
+    return {"status": "success"}
+
+# --- KWH ASSET API ---
+@app.post("/api/kwh_assets")
+async def create_kwh_asset(payload: KwhAssetCreate):
+    asset_id = database.create_kwh_asset(payload.branch, payload.kwh_location)
+    return {"status": "success", "asset_id": asset_id}
+
+@app.get("/api/kwh_assets")
+async def get_kwh_assets():
+    return {"status": "success", "data": database.get_kwh_assets()}
+
+@app.delete("/api/kwh_assets/{asset_id}")
+async def delete_kwh_asset(asset_id: int):
+    database.delete_kwh_asset(asset_id)
     return {"status": "success"}
 
 # --- JOBS API ---
@@ -147,6 +214,64 @@ async def submit_progress(job_id: int, asset_id: int = Form(...), notes: str = F
             
     database.submit_progress(job_id, asset_id, b_filename, a_filename, notes)
     return {"status": "success"}
+
+import smtplib
+from email.message import EmailMessage
+
+@app.post("/api/kwh-email")
+async def send_kwh_email(
+    sender_name: str = Form(...),
+    sender_email: str = Form(...),
+    kwh_location: str = Form(...),
+    recipient_email: str = Form(...),
+    photo: UploadFile = File(...)
+):
+    # Setup dummy/central credentials here
+    SMTP_SERVER = "smtp.gmail.com"
+    SMTP_PORT = 587
+    SMTP_USER = "bot@homecheck.my.id" # USER SHOULD CHANGE THIS
+    SMTP_PASS = "APP_PASSWORD_HERE"   # USER SHOULD CHANGE THIS
+    
+    # Save photo temporarily to attach
+    ext = photo.filename.split('.')[-1]
+    filename = f"kwh_req_{uuid.uuid4().hex[:8]}.{ext}"
+    filepath = os.path.join(UPLOAD_DIR, filename)
+    with open(filepath, "wb") as buffer:
+        shutil.copyfileobj(photo.file, buffer)
+    
+    msg = EmailMessage()
+    msg['Subject'] = f"Pengajuan Pulsa Listrik KWH - {kwh_location}"
+    msg['From'] = f"{sender_name} <{SMTP_USER}>"
+    msg['To'] = recipient_email
+    
+    content = f"""Halo,
+
+Terdapat pengajuan pengisian pulsa listrik (token) untuk KWH meter berikut:
+Lokasi KWH: {kwh_location}
+Diajukan oleh: {sender_name} ({sender_email})
+
+Terlampir adalah foto bukti meteran KWH saat ini.
+
+Terima kasih,
+Tim Home-Service
+"""
+    msg.set_content(content)
+    
+    # Attach photo
+    with open(filepath, 'rb') as f:
+        img_data = f.read()
+    msg.add_attachment(img_data, maintype='image', subtype=ext, filename=photo.filename)
+    
+    try:
+        # PENTING: Uncomment baris di bawah kalau SMTP credential sudah benar
+        # server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        # server.starttls()
+        # server.login(SMTP_USER, SMTP_PASS)
+        # server.send_message(msg)
+        # server.quit()
+        return {"status": "success", "detail": "Email (SIMULASI) berhasil dibuat. Silakan konfigurasi SMTP di backend untuk pengiriman asli."}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
 
 if __name__ == "__main__":
     import uvicorn

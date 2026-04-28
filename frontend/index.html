@@ -207,7 +207,10 @@
         <header class="app-header">
             <div class="logo-area">
                 <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-                <h1>🛠️ Home-Service</h1>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <img src="./logo.png" alt="Logo" style="height: 35px; width: 35px; object-fit: contain;">
+                    <h1>Home-Service</h1>
+                </div>
             </div>
             
             <div class="profile-area">
@@ -239,6 +242,10 @@
                     <div class="form-group">
                         <label>Role</label>
                         <input type="text" id="edit-role" class="form-control" readonly style="background:#f1f5f9; color:var(--text-muted);">
+                    </div>
+                    <div class="form-group">
+                        <label>Ganti Password (Opsional)</label>
+                        <input type="password" id="edit-password" class="form-control" placeholder="Kosongkan jika tak diubah">
                     </div>
                     <button class="btn-primary" style="width: 100%; padding: 0.6rem; margin-bottom:0.5rem;" onclick="saveProfile()">Simpan Perubahan</button>
                     <button class="btn-secondary" style="width: 100%; padding: 0.6rem; color:var(--danger); border-color:var(--danger);" onclick="doLogout()">Logout</button>
@@ -305,6 +312,53 @@
                         <div class="form-group">
                             <label>Keterangan Unit / Pekerjaan</label>
                             <input type="text" id="job-title" placeholder="Contoh: AC Bocor, Kulkas Mati" class="form-control">
+                        </div>
+
+                        <!-- Khusus Server -->
+                        <div id="server-fields" style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Maintenance Server</h4>
+                            <div class="form-group">
+                                <label>Lokasi Kantor / Branch</label>
+                                <select id="job-server-branch" class="form-control" onchange="loadServerLocations()"><option value="">Pilih Cabang...</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Pilih Lokasi Server</label>
+                                <select id="job-server-location" class="form-control"><option value="">Pilih Lokasi...</option></select>
+                            </div>
+                        </div>
+
+                        <!-- Khusus APAR -->
+                        <div id="apar-fields" style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Cek APAR</h4>
+                            <div class="form-group">
+                                <label>Lokasi Kantor / Branch</label>
+                                <select id="job-apar-branch" class="form-control" onchange="loadAparLocations()"><option value="">Pilih Cabang...</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Pilih Lokasi APAR</label>
+                                <select id="job-apar-location" class="form-control" onchange="showAparDates()"><option value="">Pilih Lokasi...</option></select>
+                            </div>
+                            <div id="apar-dates-info" style="display:none; padding:10px; background:#e2e8f0; border-radius:6px; margin-top:10px;">
+                                <p style="margin:0; font-size:0.9rem;"><strong>Tgl Pengisian:</strong> <span id="lbl-apar-fill">-</span></p>
+                                <p style="margin:0; font-size:0.9rem;"><strong>Tgl Expired:</strong> <span id="lbl-apar-expiry">-</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Khusus KWH -->
+                        <div id="kwh-fields" style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Pengajuan Pulsa KWH</h4>
+                            <div class="form-group">
+                                <label>Lokasi Kantor / Branch</label>
+                                <select id="job-kwh-branch" class="form-control" onchange="loadKwhLocations()"><option value="">Pilih Cabang...</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Pilih Lokasi KWH</label>
+                                <select id="job-kwh-location" class="form-control"><option value="">Pilih Lokasi...</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Kirim Email Ke (Penerima)</label>
+                                <input type="email" id="kwh-recipient-email" class="form-control" placeholder="finance@homeservice.com">
+                            </div>
                         </div>
 
                         <!-- Khusus Cuci AC -->
@@ -454,7 +508,7 @@
                     </div>
                     
                     <div class="glass-panel" style="margin-bottom:2rem;">
-                        <h3>2. Tambah Master Data Aset AC Baru</h3>
+                        <h3>2. Master Data: AC</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <div class="form-group">
                                 <label>Cabang</label>
@@ -472,24 +526,67 @@
                                 <button class="btn-primary" style="width:100%; height: 50px;" onclick="adminCreateAsset()">Tambahkan Aset</button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="glass-panel">
-                        <h3>3. Daftar Aset AC Tersimpan</h3>
                         <div style="overflow-x: auto; margin-top: 1rem;">
                             <table style="width:100%; border-collapse: collapse; min-width: 600px;">
                                 <thead style="background: var(--border-color); text-align: left;">
-                                    <tr>
-                                        <th style="padding: 1rem;">ID</th>
-                                        <th style="padding: 1rem;">Cabang</th>
-                                        <th style="padding: 1rem;">Ruangan</th>
-                                        <th style="padding: 1rem;">Tipe AC</th>
-                                        <th style="padding: 1rem;">Aksi</th>
-                                    </tr>
+                                    <tr><th>ID</th><th>Cabang</th><th>Ruangan</th><th>Tipe AC</th><th>Aksi</th></tr>
                                 </thead>
                                 <tbody id="admin-assets-table-body">
                                     <tr><td colspan="5" style="padding: 1rem; text-align: center;">Memuat aset...</td></tr>
                                 </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel" style="margin-bottom:2rem;">
+                        <h3>3. Master Data: Server</h3>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <input type="text" id="server-branch" placeholder="Cabang" class="form-control" style="flex:1;">
+                            <input type="text" id="server-location" placeholder="Lokasi Server (Misal: Ruang IT)" class="form-control" style="flex:2;">
+                            <button class="btn-primary" onclick="adminCreateServer()">Tambah</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table style="width:100%; border-collapse: collapse;">
+                                <thead style="background: var(--border-color); text-align: left;">
+                                    <tr><th>ID</th><th>Cabang</th><th>Lokasi Server</th><th>Aksi</th></tr>
+                                </thead>
+                                <tbody id="admin-server-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel" style="margin-bottom:2rem;">
+                        <h3>4. Master Data: APAR</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 1rem; margin-bottom: 1rem;">
+                            <div><small>Cabang</small><input type="text" id="apar-branch" placeholder="Cabang" class="form-control"></div>
+                            <div><small>Lokasi APAR</small><input type="text" id="apar-location" placeholder="Lokasi" class="form-control"></div>
+                            <div><small>Tgl Pengisian</small><input type="date" id="apar-fill" class="form-control"></div>
+                            <div><small>Tgl Kadaluarsa</small><input type="date" id="apar-expiry" class="form-control"></div>
+                            <button class="btn-primary" onclick="adminCreateApar()" style="margin-top:auto;">Tambah</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table style="width:100%; border-collapse: collapse;">
+                                <thead style="background: var(--border-color); text-align: left;">
+                                    <tr><th>ID</th><th>Cabang</th><th>Lokasi APAR</th><th>Tgl Isi</th><th>Tgl Expired</th><th>Aksi</th></tr>
+                                </thead>
+                                <tbody id="admin-apar-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel" style="margin-bottom:2rem;">
+                        <h3>5. Master Data: KWH Meter</h3>
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                            <input type="text" id="kwh-branch" placeholder="Cabang" class="form-control" style="flex:1;">
+                            <input type="text" id="kwh-location" placeholder="Lokasi KWH (Misal: KWH Gedung A)" class="form-control" style="flex:2;">
+                            <button class="btn-primary" onclick="adminCreateKwh()">Tambah</button>
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table style="width:100%; border-collapse: collapse;">
+                                <thead style="background: var(--border-color); text-align: left;">
+                                    <tr><th>ID</th><th>Cabang</th><th>Lokasi KWH</th><th>Aksi</th></tr>
+                                </thead>
+                                <tbody id="admin-kwh-table-body"></tbody>
                             </table>
                         </div>
                     </div>

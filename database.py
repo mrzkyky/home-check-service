@@ -32,6 +32,35 @@ def init_db():
         )
     ''')
 
+    # Table Master Server Assets
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS server_assets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            branch TEXT,
+            server_location TEXT
+        )
+    ''')
+
+    # Table Master APAR Assets
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS apar_assets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            branch TEXT,
+            apar_location TEXT,
+            fill_date TEXT,
+            expiry_date TEXT
+        )
+    ''')
+
+    # Table Master KWH Assets
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS kwh_assets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            branch TEXT,
+            kwh_location TEXT
+        )
+    ''')
+
     # Table Master Tugas (SPK)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS jobs (
@@ -62,11 +91,16 @@ def init_db():
     # Init Superadmin jika belum ada
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] == 0:
-        # Password default 'admin123' (tanpa hash kompleks sementara)
         cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", 
-                       ('admin@homeservice.com', 'admin123', 'Bos Superadmin', 'Superadmin'))
+                       ('superadminhcs@homeservice.com', 'admin123', 'Bos Superadmin', 'Superadmin'))
         cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", 
                        ('teknisi@homeservice.com', 'teknisi123', 'Agus Teknisi', 'Staff'))
+    else:
+        # Cek apakah superadmin baru sudah ada, kalau belum tambahkan
+        cursor.execute("SELECT COUNT(*) FROM users WHERE email='superadminhcs@homeservice.com'")
+        if cursor.fetchone()[0] == 0:
+             cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", 
+                           ('superadminhcs@homeservice.com', 'admin123', 'Bos Superadmin', 'Superadmin'))
         
     conn.commit()
     conn.close()    
@@ -113,6 +147,14 @@ def update_user_profile(user_id: int, name: str, role: str):
     conn.close()
     return True
 
+def update_user_password(user_id: int, new_password: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET password=? WHERE id=?", (new_password, user_id))
+    conn.commit()
+    conn.close()
+    return True
+
 def update_user_avatar(user_id: int, filename: str):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -155,6 +197,85 @@ def delete_asset(asset_id: int):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM ac_assets WHERE id=?", (asset_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+# --- SERVER ASSETS ---
+def create_server_asset(branch: str, server_location: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO server_assets (branch, server_location) VALUES (?, ?)", (branch, server_location))
+    conn.commit()
+    asset_id = cursor.lastrowid
+    conn.close()
+    return asset_id
+
+def get_server_assets():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM server_assets")
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "branch": r[1], "server_location": r[2]} for r in rows]
+
+def delete_server_asset(asset_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM server_assets WHERE id=?", (asset_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+# --- APAR ASSETS ---
+def create_apar_asset(branch: str, apar_location: str, fill_date: str, expiry_date: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO apar_assets (branch, apar_location, fill_date, expiry_date) VALUES (?, ?, ?, ?)", 
+                   (branch, apar_location, fill_date, expiry_date))
+    conn.commit()
+    asset_id = cursor.lastrowid
+    conn.close()
+    return asset_id
+
+def get_apar_assets():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM apar_assets")
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "branch": r[1], "apar_location": r[2], "fill_date": r[3], "expiry_date": r[4]} for r in rows]
+
+def delete_apar_asset(asset_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM apar_assets WHERE id=?", (asset_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+# --- KWH ASSETS ---
+def create_kwh_asset(branch: str, kwh_location: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO kwh_assets (branch, kwh_location) VALUES (?, ?)", (branch, kwh_location))
+    conn.commit()
+    asset_id = cursor.lastrowid
+    conn.close()
+    return asset_id
+
+def get_kwh_assets():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM kwh_assets")
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "branch": r[1], "kwh_location": r[2]} for r in rows]
+
+def delete_kwh_asset(asset_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM kwh_assets WHERE id=?", (asset_id,))
     conn.commit()
     conn.close()
     return True
