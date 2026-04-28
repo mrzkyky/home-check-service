@@ -345,3 +345,132 @@ window.handleAvatarUpload = async function(event) {
         }
     } catch(e) { alert("Error upload foto"); }
 }
+
+// --- AD-HOC JOB FORM (Original Style) ---
+window.openJobForm = async function(type) {
+    document.getElementById('job-form-title').innerText = `Tugas: ${type}`;
+    document.getElementById('job-title').value = "";
+    document.getElementById('job-location').value = "";
+    document.getElementById('job-notes').value = "";
+    
+    // Reset foto
+    ['before', 'after'].forEach(t => {
+        document.getElementById(`img-${t}`).src = "";
+        document.getElementById(`img-${t}`).classList.add('hidden');
+        document.getElementById(`label-${t}`).classList.remove('hidden');
+        document.getElementById(`cam-${t}`).value = "";
+    });
+    
+    // Tampilkan field khusus AC jika tipenya tentang AC
+    let isAC = type.toLowerCase().includes('ac');
+    let acFields = document.getElementById('cuci-ac-fields');
+    if (acFields) {
+        acFields.style.display = isAC ? 'block' : 'none';
+    }
+    
+    // Auto-fill tanggal dan jatuh tempo
+    let now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    let nowStr = now.toISOString().slice(0, 16);
+    let dateInput = document.getElementById('job-date');
+    if (dateInput) {
+        dateInput.value = nowStr;
+        window.calculateDueDate();
+    }
+    
+    // Logic Role Teknisi
+    let techInput = document.getElementById('job-technician');
+    let techNotice = document.getElementById('tech-role-notice');
+    if (techInput) {
+        if (currentUser.role !== 'Superadmin') {
+            techInput.value = currentUser.name;
+            techInput.setAttribute('readonly', true);
+            techInput.style.backgroundColor = 'var(--border-color)';
+            techNotice.style.display = 'block';
+        } else {
+            techInput.value = "";
+            techInput.removeAttribute('readonly');
+            techInput.style.backgroundColor = '';
+            techNotice.style.display = 'none';
+        }
+    }
+    
+    switchView('job-form');
+}
+
+window.calculateDueDate = function() {
+    let dateInput = document.getElementById('job-date');
+    let dueDateInput = document.getElementById('job-due-date');
+    if (!dateInput || !dueDateInput) return;
+    
+    let jobDate = new Date(dateInput.value);
+    if (isNaN(jobDate.getTime())) return;
+    
+    jobDate.setMonth(jobDate.getMonth() + 3);
+    
+    jobDate.setMinutes(jobDate.getMinutes() - jobDate.getTimezoneOffset());
+    dueDateInput.value = jobDate.toISOString().slice(0, 16);
+}
+
+window.getLocation = function() {
+    let locInput = document.getElementById('job-location');
+    locInput.value = "Mencari lokasi...";
+    
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                locInput.value = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+            },
+            (err) => {
+                locInput.value = "Gagal dapat GPS!";
+                alert("Nyalain GPS / Location Permission di HP lu boss!");
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    } else {
+        locInput.value = "Browser ga support GPS";
+    }
+}
+
+window.triggerCamera = function(type) {
+    document.getElementById(`cam-${type}`).click();
+}
+
+window.handlePhoto = function(event, type) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        let img = document.getElementById(`img-${type}`);
+        img.src = e.target.result;
+        img.classList.remove('hidden');
+        document.getElementById(`label-${type}`).classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+window.submitAdHocJob = async function() {
+    let title = document.getElementById('job-title').value;
+    let bFile = document.getElementById('cam-before').files[0];
+    let aFile = document.getElementById('cam-after').files[0];
+    let notes = document.getElementById('job-notes').value;
+    
+    if(!title) return alert("Keterangan Unit harus diisi!");
+    
+    try {
+        let res = await fetch(`${API_BASE}/jobs`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({title: title, branch: "Ad-Hoc", assigned_to: currentUser.id})
+        });
+        let data = await res.json();
+        
+        if(res.ok) {
+            alert("Laporan berhasil dikirim!");
+            switchView('home');
+        } else {
+            alert("Gagal simpan.");
+        }
+    } catch(e) { alert("Gagal koneksi server"); }
+}

@@ -116,10 +116,114 @@
                 
                 <!-- View: Home -->
                 <div id="view-home" class="view active">
-                    <h2>Tugas Aktif Anda</h2>
+                    <h2>Dashboard Menu</h2>
+                    <div class="task-grid" style="margin-bottom: 2.5rem;">
+                        <div class="task-card" onclick="openJobForm('Cuci AC')">
+                            <span class="icon">❄️</span>
+                            <h3>Cuci AC</h3>
+                        </div>
+                        <div class="task-card" onclick="openJobForm('Maintenance Server')">
+                            <span class="icon">🖥️</span>
+                            <h3>Server</h3>
+                        </div>
+                        <div class="task-card" onclick="openJobForm('Cek KWH')">
+                            <span class="icon">⚡</span>
+                            <h3>KWH Meter</h3>
+                        </div>
+                        <div class="task-card" onclick="openJobForm('Cek APAR')">
+                            <span class="icon">🧯</span>
+                            <h3>APAR</h3>
+                        </div>
+                    </div>
+
+                    <h2>Tugas Aktif (SPK)</h2>
                     <ul id="active-jobs-list" class="job-list">
                         <li style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">Memuat tugas...</li>
                     </ul>
+                </div>
+
+                <!-- View: Job Form (Laporan Biasa) -->
+                <div id="view-job-form" class="view">
+                    <button class="back-btn" onclick="switchView('home')">← Kembali ke Dashboard</button>
+                    <h2 id="job-form-title">Laporan Tugas</h2>
+                    
+                    <div class="glass-panel" style="margin-bottom: 2rem;">
+                        <div class="form-group">
+                            <label>Keterangan Unit / Pekerjaan</label>
+                            <input type="text" id="job-title" placeholder="Contoh: AC Bocor, Kulkas Mati" class="form-control">
+                        </div>
+
+                        <!-- Khusus Cuci AC -->
+                        <div id="cuci-ac-fields" style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Cuci / Maintenance AC</h4>
+                            
+                            <div class="form-group">
+                                <label>Lokasi Kantor / Branch</label>
+                                <input type="text" id="job-branch" placeholder="Contoh: Cabang Pusat, Lt 2" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Letak Posisi AC (Ruangan)</label>
+                                <input type="text" id="job-room" placeholder="Contoh: Ruang Meeting A" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Agenda</label>
+                                <select id="job-agenda" class="form-control">
+                                    <option value="Cuci">Cuci AC</option>
+                                    <option value="Maintenance">Maintenance Berkala</option>
+                                    <option value="Perbaikan">Perbaikan Kerusakan</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Tgl & Waktu Pengerjaan</label>
+                                <input type="datetime-local" id="job-date" class="form-control" onchange="calculateDueDate()">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Jatuh Tempo (Otomatis +3 Bulan)</label>
+                                <input type="datetime-local" id="job-due-date" class="form-control" readonly style="background-color: var(--border-color);">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Tim / Teknisi Bertugas</label>
+                                <input type="text" id="job-technician" class="form-control" placeholder="Nama Teknisi / Vendor">
+                                <small id="tech-role-notice" style="color: var(--primary); display: none; margin-top: 5px;">*Diisi otomatis sesuai akun Anda.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>📍 Lokasi Pekerjaan</label>
+                            <div style="display:flex; gap:0.8rem;">
+                                <input type="text" id="job-location" readonly placeholder="Klik Ambil GPS..." style="flex:1; background:#f1f5f9;" class="form-control">
+                                <button class="btn-secondary" onclick="getLocation()">Ambil GPS</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>📷 Dokumentasi</label>
+                            <div class="photo-grid">
+                                <div class="photo-box" id="box-before" onclick="triggerCamera('before')">
+                                    <span id="label-before">Ambil Foto<br><b>BEFORE</b></span>
+                                    <img id="img-before" class="hidden">
+                                </div>
+                                <div class="photo-box" id="box-after" onclick="triggerCamera('after')">
+                                    <span id="label-after">Ambil Foto<br><b>AFTER</b></span>
+                                    <img id="img-after" class="hidden">
+                                </div>
+                            </div>
+                            <input type="file" accept="image/*" capture="environment" id="cam-before" class="hidden" onchange="handlePhoto(event, 'before')">
+                            <input type="file" accept="image/*" capture="environment" id="cam-after" class="hidden" onchange="handlePhoto(event, 'after')">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Catatan Tambahan (Kendala)</label>
+                            <textarea id="job-notes" placeholder="Tulis jika ada kendala atau temuan khusus..." class="form-control"></textarea>
+                        </div>
+                        
+                        <button class="btn-primary" onclick="submitAdHocJob()" style="width: 100%; margin-top: 1rem;">🚀 Simpan & Kirim Laporan</button>
+                    </div>
                 </div>
 
                 <!-- View: Checklist (Job Details) -->
