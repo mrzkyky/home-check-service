@@ -142,6 +142,23 @@ def get_assets_by_branch(branch: str):
     conn.close()
     return [{"id": r[0], "branch": r[1], "room": r[2], "ac_type": r[3], "details": r[4]} for r in rows]
 
+def update_asset(asset_id: int, branch: str, room: str, ac_type: str, details: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE ac_assets SET branch=?, room=?, ac_type=?, details=? WHERE id=?", 
+                   (branch, room, ac_type, details, asset_id))
+    conn.commit()
+    conn.close()
+    return True
+
+def delete_asset(asset_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM ac_assets WHERE id=?", (asset_id,))
+    conn.commit()
+    conn.close()
+    return True
+
 # --- SPK / JOBS MANAGEMENT ---
 def create_job(title: str, branch: str, assigned_to: int):
     conn = sqlite3.connect(DB_PATH)

@@ -96,6 +96,16 @@ async def create_asset(payload: AssetCreate):
 async def get_assets(branch: Optional[str] = None):
     return {"status": "success", "data": database.get_assets_by_branch(branch)}
 
+@app.put("/api/assets/{asset_id}")
+async def update_asset(asset_id: int, payload: AssetCreate):
+    database.update_asset(asset_id, payload.branch, payload.room, payload.ac_type, payload.details)
+    return {"status": "success"}
+
+@app.delete("/api/assets/{asset_id}")
+async def delete_asset(asset_id: int):
+    database.delete_asset(asset_id)
+    return {"status": "success"}
+
 # --- JOBS API ---
 @app.post("/api/jobs")
 async def create_job(payload: JobCreate):

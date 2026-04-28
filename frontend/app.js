@@ -108,6 +108,7 @@ window.switchView = function(viewId, navElement = null) {
     
     if (viewId === 'home') loadJobs(false);
     else if (viewId === 'history') loadJobs(true);
+    else if (viewId === 'admin') loadAdminAssets();
 }
 
 window.toggleSidebar = function() { document.getElementById('app-sidebar').classList.toggle('open'); }
@@ -281,8 +282,69 @@ window.adminCreateAsset = async function() {
         if(res.ok) {
             alert("Aset berhasil ditambah!");
             document.getElementById('asset-room').value = "";
+            loadAdminAssets();
         }
     } catch(e) { alert("Error!"); }
+}
+
+window.loadAdminAssets = async function() {
+    try {
+        let res = await fetch(`${API_BASE}/assets`);
+        let data = await res.json();
+        let tbody = document.getElementById('admin-assets-table-body');
+        tbody.innerHTML = '';
+        
+        if (data.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="padding: 1rem; text-align: center;">Belum ada aset terdaftar.</td></tr>';
+            return;
+        }
+        
+        data.data.forEach(a => {
+            tbody.innerHTML += `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 1rem;">#${a.id}</td>
+                    <td style="padding: 1rem;">${a.branch}</td>
+                    <td style="padding: 1rem;">${a.room}</td>
+                    <td style="padding: 1rem;">${a.ac_type}</td>
+                    <td style="padding: 1rem;">
+                        <button onclick="adminEditAsset(${a.id}, '${a.branch}', '${a.room}', '${a.ac_type}')" style="background:var(--primary); color:white; padding:0.4rem 0.8rem; font-size:0.8rem; margin-right:0.5rem;">Edit</button>
+                        <button onclick="adminDeleteAsset(${a.id})" style="background:var(--danger); color:white; padding:0.4rem 0.8rem; font-size:0.8rem;">Hapus</button>
+                    </td>
+                </tr>
+            `;
+        });
+    } catch(e) { console.error(e); }
+}
+
+window.adminEditAsset = async function(id, oldBranch, oldRoom, oldType) {
+    let newBranch = prompt("Update Cabang:", oldBranch);
+    if (newBranch === null) return;
+    let newRoom = prompt("Update Ruangan:", oldRoom);
+    if (newRoom === null) return;
+    let newType = prompt("Update Tipe AC:", oldType);
+    if (newType === null) return;
+    
+    try {
+        let res = await fetch(`${API_BASE}/assets/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({branch: newBranch, room: newRoom, ac_type: newType, details: "Updated by Admin"})
+        });
+        if(res.ok) {
+            alert("Aset berhasil diupdate!");
+            loadAdminAssets();
+        }
+    } catch(e) { alert("Error edit!"); }
+}
+
+window.adminDeleteAsset = async function(id) {
+    if(!confirm("Yakin hapus aset ini?")) return;
+    try {
+        let res = await fetch(`${API_BASE}/assets/${id}`, { method: 'DELETE' });
+        if(res.ok) {
+            loadAdminAssets();
+        }
+    } catch(e) { alert("Error hapus!"); }
 }
 
 window.adminCreateSPK = async function() {
@@ -347,6 +409,8 @@ window.handleAvatarUpload = async function(event) {
 }
 
 // --- AD-HOC JOB FORM (Original Style) ---
+let allAssetsForAdHoc = [];
+
 window.openJobForm = async function(type) {
     document.getElementById('job-form-title').innerText = `Tugas: ${type}`;
     document.getElementById('job-title').value = "";
@@ -366,6 +430,22 @@ window.openJobForm = async function(type) {
     let acFields = document.getElementById('cuci-ac-fields');
     if (acFields) {
         acFields.style.display = isAC ? 'block' : 'none';
+        if (isAC) {
+            // Load branches to dropdown
+            try {
+                let res = await fetch(`${API_BASE}/assets`);
+                let data = await res.json();
+                allAssetsForAdHoc = data.data;
+                
+                let branchSelect = document.getElementById('job-branch');
+                let branches = [...new Set(allAssetsForAdHoc.map(a => a.branch))];
+                branchSelect.innerHTML = '<option value="">Pilih Cabang...</option>';
+                branches.forEach(b => {
+                    branchSelect.innerHTML += `<option value="${b}">${b}</option>`;
+                });
+                document.getElementById('job-room').innerHTML = '<option value="">Pilih Ruangan...</option>';
+            } catch(e) { console.error("Gagal load assets"); }
+        }
     }
     
     // Auto-fill tanggal dan jatuh tempo
@@ -450,8 +530,23 @@ window.handlePhoto = function(event, type) {
     reader.readAsDataURL(file);
 }
 
+window.loadRoomsForAdHoc = function() {
+    let branch = document.getElementById('job-branch').value;
+    let roomSelect = document.getElementById('job-room');
+    roomSelect.innerHTML = '<option value="">Pilih Ruangan...</option>';
+    
+    if (branch) {
+        let rooms = allAssetsForAdHoc.filter(a => a.branch === branch);
+        rooms.forEach(r => {
+            roomSelect.innerHTML += `<option value="${r.room}">${r.room} (${r.ac_type})</option>`;
+        });
+    }
+}
+
 window.submitAdHocJob = async function() {
     let title = document.getElementById('job-title').value;
+    let branch = document.getElementById('job-branch') ? document.getElementById('job-branch').value : "";
+    let room = document.getElementById('job-room') ? document.getElementById('job-room').value : "";
     let bFile = document.getElementById('cam-before').files[0];
     let aFile = document.getElementById('cam-after').files[0];
     let notes = document.getElementById('job-notes').value;
@@ -462,7 +557,7 @@ window.submitAdHocJob = async function() {
         let res = await fetch(`${API_BASE}/jobs`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({title: title, branch: "Ad-Hoc", assigned_to: currentUser.id})
+            body: JSON.stringify({title: title, branch: branch || "Ad-Hoc", assigned_to: currentUser.id})
         });
         let data = await res.json();
         

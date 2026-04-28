@@ -10,38 +10,40 @@
 <body>
     
     <!-- LOGIN PAGE -->
-    <div id="login-container" style="display:flex; height:100vh; align-items:center; justify-content:center; flex-direction:column; background:var(--bg-color);">
-        <div class="glass-panel" style="width:90%; max-width:400px; text-align:center;">
-            <h1 style="color:var(--primary); margin-bottom:1.5rem; font-weight:800;">🛠️ Home-Service</h1>
+    <div id="login-container" style="display:flex; height:100vh; align-items:center; justify-content:center; flex-direction:column; background: linear-gradient(135deg, #f0f4f8, #d9e2ec);">
+        <div class="glass-panel" style="width:90%; max-width:420px; text-align:center; padding: 3rem 2rem; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);">
+            <img src="https://drive.google.com/uc?export=view&id=16nOG3tA2bQSq-UoXBFIw8sv8vV-LPaSt" alt="Home-Service Logo" style="width: 120px; height: 120px; object-fit: contain; margin-bottom: 1rem; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
+            <h1 style="color:var(--text-main); margin-bottom:0.5rem; font-weight:800; font-size:1.8rem; letter-spacing:-0.5px;">Home-Service</h1>
+            <p style="color:var(--text-muted); margin-bottom:2rem; font-size:0.95rem;">Sistem Manajemen Aset & SPK</p>
             
             <div id="login-form">
                 <div class="form-group" style="text-align:left;">
-                    <label>Email</label>
-                    <input type="email" id="login-email" placeholder="admin@homeservice.com" class="form-control">
+                    <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">Email Address</label>
+                    <input type="email" id="login-email" placeholder="admin@homeservice.com" class="form-control" style="background:#f8fafc; border:2px solid transparent; transition:0.3s; padding:1.2rem; border-radius:12px;">
                 </div>
-                <div class="form-group" style="text-align:left;">
-                    <label>Password</label>
-                    <input type="password" id="login-password" placeholder="admin123" class="form-control">
+                <div class="form-group" style="text-align:left; margin-top:1.5rem;">
+                    <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" class="form-control" style="background:#f8fafc; border:2px solid transparent; transition:0.3s; padding:1.2rem; border-radius:12px;">
                 </div>
-                <button class="btn-primary" style="width:100%; margin-top:1rem;" onclick="doLogin()">Masuk</button>
-                <p style="margin-top:1rem; font-size:0.9rem; color:var(--text-muted); cursor:pointer;" onclick="toggleAuthMode()">Belum punya akun? Daftar</p>
+                <button class="btn-primary" style="width:100%; margin-top:2rem; padding:1.2rem; border-radius:12px; font-weight:700; font-size:1rem; box-shadow: 0 10px 20px rgba(37,99,235,0.2);" onclick="doLogin()">Sign In</button>
+                <p style="margin-top:1.5rem; font-size:0.95rem; color:var(--text-muted); cursor:pointer; font-weight:500;" onclick="toggleAuthMode()">Belum punya akun? <span style="color:var(--primary);">Daftar di sini</span></p>
             </div>
             
             <div id="register-form" style="display:none;">
                 <div class="form-group" style="text-align:left;">
-                    <label>Nama Lengkap</label>
-                    <input type="text" id="reg-name" placeholder="John Doe" class="form-control">
+                    <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">Nama Lengkap</label>
+                    <input type="text" id="reg-name" placeholder="John Doe" class="form-control" style="background:#f8fafc; border:2px solid transparent; transition:0.3s; padding:1.2rem; border-radius:12px;">
                 </div>
-                <div class="form-group" style="text-align:left;">
-                    <label>Email</label>
-                    <input type="email" id="reg-email" placeholder="user@homeservice.com" class="form-control">
+                <div class="form-group" style="text-align:left; margin-top:1.5rem;">
+                    <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">Email Address</label>
+                    <input type="email" id="reg-email" placeholder="user@homeservice.com" class="form-control" style="background:#f8fafc; border:2px solid transparent; transition:0.3s; padding:1.2rem; border-radius:12px;">
                 </div>
-                <div class="form-group" style="text-align:left;">
-                    <label>Password</label>
-                    <input type="password" id="reg-password" placeholder="*****" class="form-control">
+                <div class="form-group" style="text-align:left; margin-top:1.5rem;">
+                    <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">Password</label>
+                    <input type="password" id="reg-password" placeholder="••••••••" class="form-control" style="background:#f8fafc; border:2px solid transparent; transition:0.3s; padding:1.2rem; border-radius:12px;">
                 </div>
-                <button class="btn-primary" style="width:100%; margin-top:1rem;" onclick="doRegister()">Daftar</button>
-                <p style="margin-top:1rem; font-size:0.9rem; color:var(--text-muted); cursor:pointer;" onclick="toggleAuthMode()">Sudah punya akun? Masuk</p>
+                <button class="btn-primary" style="width:100%; margin-top:2rem; padding:1.2rem; border-radius:12px; font-weight:700; font-size:1rem; box-shadow: 0 10px 20px rgba(37,99,235,0.2);" onclick="doRegister()">Create Account</button>
+                <p style="margin-top:1.5rem; font-size:0.95rem; color:var(--text-muted); cursor:pointer; font-weight:500;" onclick="toggleAuthMode()">Sudah punya akun? <span style="color:var(--primary);">Masuk</span></p>
             </div>
         </div>
     </div>
@@ -159,12 +161,16 @@
                             
                             <div class="form-group">
                                 <label>Lokasi Kantor / Branch</label>
-                                <input type="text" id="job-branch" placeholder="Contoh: Cabang Pusat, Lt 2" class="form-control">
+                                <select id="job-branch" class="form-control" onchange="loadRoomsForAdHoc()">
+                                    <option value="">Pilih Cabang...</option>
+                                </select>
                             </div>
                             
                             <div class="form-group">
                                 <label>Letak Posisi AC (Ruangan)</label>
-                                <input type="text" id="job-room" placeholder="Contoh: Ruang Meeting A" class="form-control">
+                                <select id="job-room" class="form-control">
+                                    <option value="">Pilih Ruangan...</option>
+                                </select>
                             </div>
                             
                             <div class="form-group">
@@ -295,21 +301,45 @@
                         <button class="btn-primary" onclick="adminCreateSPK()">Buat SPK Baru</button>
                     </div>
                     
+                    <div class="glass-panel" style="margin-bottom:2rem;">
+                        <h3>2. Tambah Master Data Aset AC Baru</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Cabang</label>
+                                <input type="text" id="asset-branch" placeholder="Cabang Sudirman" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Ruangan</label>
+                                <input type="text" id="asset-room" placeholder="Ruang Meeting Utama" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Tipe AC</label>
+                                <input type="text" id="asset-type" placeholder="Daikin Split 1 PK" class="form-control">
+                            </div>
+                            <div class="form-group" style="display:flex; align-items:flex-end;">
+                                <button class="btn-primary" style="width:100%; height: 50px;" onclick="adminCreateAsset()">Tambahkan Aset</button>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="glass-panel">
-                        <h3>2. Master Data Aset AC</h3>
-                        <div class="form-group">
-                            <label>Cabang</label>
-                            <input type="text" id="asset-branch" placeholder="Cabang Sudirman" class="form-control">
+                        <h3>3. Daftar Aset AC Tersimpan</h3>
+                        <div style="overflow-x: auto; margin-top: 1rem;">
+                            <table style="width:100%; border-collapse: collapse; min-width: 600px;">
+                                <thead style="background: var(--border-color); text-align: left;">
+                                    <tr>
+                                        <th style="padding: 1rem;">ID</th>
+                                        <th style="padding: 1rem;">Cabang</th>
+                                        <th style="padding: 1rem;">Ruangan</th>
+                                        <th style="padding: 1rem;">Tipe AC</th>
+                                        <th style="padding: 1rem;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-assets-table-body">
+                                    <tr><td colspan="5" style="padding: 1rem; text-align: center;">Memuat aset...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="form-group">
-                            <label>Ruangan</label>
-                            <input type="text" id="asset-room" placeholder="Ruang Meeting Utama" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>Tipe AC</label>
-                            <input type="text" id="asset-type" placeholder="Daikin Split 1 PK" class="form-control">
-                        </div>
-                        <button class="btn-secondary" onclick="adminCreateAsset()">Tambahkan Aset</button>
                     </div>
                 </div>
 
