@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tim Home-Service</title>
+    <link rel="stylesheet" href="/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <!-- Top Header -->
+    <header class="app-header">
+        <div class="logo-area">
+            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            <h1>🛠️ Home-Service</h1>
+        </div>
+        
+        <div class="profile-area">
+            <button class="profile-btn" onclick="toggleProfile()">
+                <div class="profile-info">
+                    <span class="profile-name" id="user-name-display">John Doe</span>
+                    <span class="profile-role" id="user-role-display">Teknisi Utama</span>
+                </div>
+                <div class="profile-avatar" id="header-avatar-container">
+                    <span id="header-avatar-initials">JD</span>
+                    <img id="header-avatar-img" style="display:none; width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                </div>
+            </button>
+            
+            <div class="profile-dropdown" id="profile-menu">
+                <h3>Profil Pengguna</h3>
+                <div class="form-group" style="margin-top: 1rem; text-align: center;">
+                     <div class="avatar-edit" onclick="document.getElementById('avatar-upload').click()">
+                         <img id="edit-avatar-preview" style="display:none; width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto; cursor:pointer;" title="Klik untuk ganti foto">
+                         <div id="edit-avatar-initials" style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--secondary)); color:white; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:1.5rem; font-weight:bold; cursor:pointer;" title="Klik untuk ganti foto">JD</div>
+                     </div>
+                     <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                     <small style="color:var(--primary); cursor:pointer; display:block; margin-top:0.5rem;" onclick="document.getElementById('avatar-upload').click()">Ubah Foto</small>
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="edit-name" value="John Doe" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Role / Tipe Login</label>
+                    <input type="text" id="edit-role" value="Teknisi Utama" class="form-control" readonly style="background:#f1f5f9; color:var(--text-muted);">
+                </div>
+                <button class="btn-primary" style="width: 100%; padding: 0.6rem;" onclick="saveProfile()">Simpan Perubahan</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Layout Wrapper -->
+    <div class="app-wrapper">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="app-sidebar">
+            <a href="#" class="nav-item active" onclick="switchView('home', this)">
+                <span class="nav-icon">🏠</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" onclick="switchView('history', this)">
+                <span class="nav-icon">📋</span>
+                <span>Riwayat Tugas</span>
+            </a>
+            <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                <div id="connection-status" class="status-badge" style="display: inline-block;">Online</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main id="app-content" class="main-content">
+            
+            <!-- View: Home -->
+            <div id="view-home" class="view active">
+                <h2>Dashboard Menu</h2>
+                <div class="task-grid">
+                    <div class="task-card" onclick="openJobForm('Cuci AC')">
+                        <span class="icon">❄️</span>
+                        <h3>Cuci AC</h3>
+                    </div>
+                    <div class="task-card" onclick="openJobForm('Maintenance Server')">
+                        <span class="icon">🖥️</span>
+                        <h3>Server</h3>
+                    </div>
+                    <div class="task-card" onclick="openJobForm('Cek KWH')">
+                        <span class="icon">⚡</span>
+                        <h3>KWH Meter</h3>
+                    </div>
+                    <div class="task-card" onclick="openJobForm('Cek APAR')">
+                        <span class="icon">🧯</span>
+                        <h3>APAR</h3>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 2.5rem;">Tugas Aktif (Hari Ini)</h3>
+                <ul id="active-jobs-list" class="job-list">
+                    <li style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">Belum ada tugas.</li>
+                </ul>
+            </div>
+
+            <!-- View: Job Form -->
+            <div id="view-job-form" class="view hidden">
+                <button class="back-btn" onclick="switchView('home')">← Kembali ke Dashboard</button>
+                <h2 id="job-form-title">Laporan Tugas</h2>
+                
+                <div class="glass-panel">
+                    <div class="form-group">
+                        <label>Judul Pekerjaan / Keterangan Unit</label>
+                        <input type="text" id="job-title" placeholder="Contoh: AC Daikin 1/2 PK - R. Meeting">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📍 Lokasi Pekerjaan</label>
+                        <div style="display:flex; gap:0.8rem;">
+                            <input type="text" id="job-location" readonly placeholder="Klik Ambil GPS..." style="flex:1; background:#f1f5f9;">
+                            <button class="btn-secondary" onclick="getLocation()">Ambil GPS</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>📷 Dokumentasi</label>
+                        <div class="photo-grid">
+                            <div class="photo-box" id="box-before" onclick="triggerCamera('before')">
+                                <span id="label-before">Ambil Foto<br><b>BEFORE</b></span>
+                                <img id="img-before" class="hidden">
+                            </div>
+                            <div class="photo-box" id="box-after" onclick="triggerCamera('after')">
+                                <span id="label-after">Ambil Foto<br><b>AFTER</b></span>
+                                <img id="img-after" class="hidden">
+                            </div>
+                        </div>
+                        <!-- Hidden file inputs -->
+                        <input type="file" accept="image/*" capture="environment" id="cam-before" class="hidden" onchange="handlePhoto(event, 'before')">
+                        <input type="file" accept="image/*" capture="environment" id="cam-after" class="hidden" onchange="handlePhoto(event, 'after')">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Catatan Tambahan (Kendala)</label>
+                        <textarea id="job-notes" placeholder="Tulis jika ada kendala atau temuan khusus..."></textarea>
+                    </div>
+                    
+                    <button class="btn-primary" onclick="submitJob()" style="width: 100%; margin-top: 1rem;">🚀 Simpan & Kirim Laporan</button>
+                </div>
+            </div>
+            
+            <!-- View: History -->
+            <div id="view-history" class="view hidden">
+                <h2>Riwayat Pekerjaan</h2>
+                <ul id="history-list" class="job-list">
+                    <li style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">Memuat riwayat...</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+</body>
+</html>
