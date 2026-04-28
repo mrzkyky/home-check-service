@@ -42,6 +42,7 @@ class JobReport(BaseModel):
 
 class UserProfileUpdate(BaseModel):
     name: str
+    role: str
 
 @app.get("/api/jobs")
 async def get_jobs():
@@ -95,7 +96,7 @@ async def update_user_profile(user_id: int, payload: UserProfileUpdate):
     user = database.get_user(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    database.update_user_profile(user_id, payload.name)
+    database.update_user_profile(user_id, payload.name, payload.role)
     return {"status": "success", "message": "Profile updated"}
 
 @app.post("/api/user/{user_id}/avatar")

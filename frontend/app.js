@@ -1,4 +1,4 @@
-const API_BASE = `http://${window.location.hostname}:8087/api`;
+const API_BASE = `http://${window.location.hostname}:8083/api`;
 let currentJobId = null;
 let currentLat = 0.0;
 let currentLng = 0.0;
@@ -321,8 +321,9 @@ window.toggleSidebar = function() {
 
 window.saveProfile = async function() {
     let newName = document.getElementById('edit-name').value;
-    if (newName.trim() === "") {
-        alert("Nama tidak boleh kosong.");
+    let newRole = document.getElementById('edit-role').value;
+    if (newName.trim() === "" || newRole.trim() === "") {
+        alert("Nama dan Role tidak boleh kosong.");
         return;
     }
     
@@ -330,12 +331,14 @@ window.saveProfile = async function() {
         let res = await fetch(`${API_BASE}/user/${CURRENT_USER_ID}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ name: newName })
+            body: JSON.stringify({ name: newName, role: newRole })
         });
         
         if (res.ok) {
             alert("Profil berhasil diperbarui!");
             document.getElementById('user-name-display').innerText = newName;
+            document.getElementById('user-role-display').innerText = newRole;
+            currentUserRole = newRole;
             
             // Re-update UI in case there's no photo and initials need to change
             let headerImg = document.getElementById('header-avatar-img');

@@ -160,10 +160,10 @@ def get_user(user_id: int):
         return {"id": r[0], "username": r[1], "name": r[2], "role": r[3], "avatar_filename": r[4]}
     return None
 
-def update_user_profile(user_id: int, name: str):
+def update_user_profile(user_id: int, name: str, role: str):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("UPDATE users SET name=? WHERE id=?", (name, user_id))
+    cursor.execute("UPDATE users SET name=?, role=? WHERE id=?", (name, role, user_id))
     conn.commit()
     conn.close()
     return True
