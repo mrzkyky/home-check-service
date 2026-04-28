@@ -244,6 +244,14 @@ def submit_progress(job_id: int, asset_id: int, before_photo: str, after_photo: 
     conn.commit()
     conn.close()
     return True
+def delete_job(job_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM jobs WHERE id=?", (job_id,))
+    cursor.execute("DELETE FROM job_progress WHERE job_id=?", (job_id,))
+    conn.commit()
+    conn.close()
+    return True
 
 # Inisialisasi otomatis
 init_db()

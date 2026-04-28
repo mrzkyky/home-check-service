@@ -23,6 +23,27 @@ function checkAuth() {
         document.getElementById('edit-name').value = currentUser.name;
         document.getElementById('edit-role').value = currentUser.role;
         
+        let avatarFilename = currentUser.avatar_filename;
+        let avatarImgHeader = document.getElementById('header-avatar-img');
+        let avatarInitialsHeader = document.getElementById('header-avatar-initials');
+        let editAvatarPreview = document.getElementById('edit-avatar-preview');
+        let editAvatarInitials = document.getElementById('edit-avatar-initials');
+        
+        if (avatarFilename && avatarFilename.trim() !== '') {
+            let avatarUrl = `${API_BASE.replace('/api', '')}/uploads/${avatarFilename}`;
+            avatarImgHeader.src = avatarUrl;
+            avatarImgHeader.style.display = 'block';
+            avatarInitialsHeader.style.display = 'none';
+            editAvatarPreview.src = avatarUrl;
+            editAvatarPreview.style.display = 'block';
+            editAvatarInitials.style.display = 'none';
+        } else {
+            avatarImgHeader.style.display = 'none';
+            avatarInitialsHeader.style.display = 'flex';
+            editAvatarPreview.style.display = 'none';
+            editAvatarInitials.style.display = 'flex';
+        }
+        
         if (currentUser.role === 'Superadmin') {
             document.getElementById('nav-admin').style.display = 'flex';
         }
@@ -142,18 +163,37 @@ async function loadJobs(isHistory) {
         filtered.forEach(j => {
             let progressStr = `${j.completed_qty}/${j.target_qty}`;
             let bg = isHistory ? '#10b981' : 'var(--primary)';
+            
+            let deleteBtn = '';
+            if (currentUser.role === 'Superadmin') {
+                deleteBtn = `<button onclick="event.stopPropagation(); adminDeleteJob(${j.id})" style="background:var(--danger); color:white; border:none; padding:0.3rem 0.6rem; font-size:0.8rem; border-radius:6px; margin-left:0.5rem;">Hapus</button>`;
+            }
+            
             ul.innerHTML += `
                 <li style="cursor:pointer;" onclick="openChecklist(${j.id})">
                     <div style="flex:1;">
                         <b style="font-size:1.1rem; color:var(--text-main);">${j.title}</b>
                         <div style="font-size:0.85rem; color:var(--text-muted); margin-top:0.3rem;">📍 ${j.branch}</div>
                     </div>
-                    <div style="text-align:right;">
+                    <div style="text-align:right; display:flex; align-items:center;">
                         <span class="status-badge" style="background:${bg}; color:white; border:none; padding:0.4rem 0.8rem; font-size:0.85rem;">${progressStr} Selesai</span>
+                        ${deleteBtn}
                     </div>
                 </li>`;
         });
     } catch(e) { console.error(e); }
+}
+
+window.adminDeleteJob = async function(id) {
+    if(!confirm("Yakin hapus SPK ini? Semua progress akan ikut terhapus.")) return;
+    try {
+        let res = await fetch(`${API_BASE}/jobs/${id}`, { method: 'DELETE' });
+        if(res.ok) {
+            switchView('home'); // Reload list
+        } else {
+            alert("Gagal menghapus SPK.");
+        }
+    } catch(e) { alert("Error koneksi!"); }
 }
 
 // --- CHECKLIST SPK ---
@@ -402,8 +442,12 @@ window.handleAvatarUpload = async function(event) {
             method: 'POST',
             body: formData
         });
+        let data = await res.json();
         if (res.ok) {
-            alert("Foto berhasil diunggah! Silakan refresh.");
+            currentUser.avatar_filename = data.filename;
+            localStorage.setItem('hs_user', JSON.stringify(currentUser));
+            checkAuth(); // Update UI langsung
+            alert("Foto berhasil diunggah!");
         }
     } catch(e) { alert("Error upload foto"); }
 }

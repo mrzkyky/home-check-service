@@ -54,7 +54,7 @@ async def login(payload: LoginRequest):
     user = database.get_user_by_email(payload.email)
     if not user or user["password"] != payload.password:
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    return {"status": "success", "user": {"id": user["id"], "name": user["name"], "role": user["role"], "email": user["email"]}}
+    return {"status": "success", "user": {"id": user["id"], "name": user["name"], "role": user["role"], "email": user["email"], "avatar_filename": user.get("avatar_filename", "")}}
 
 @app.post("/api/auth/register")
 async def register(payload: RegisterRequest):
@@ -111,6 +111,11 @@ async def delete_asset(asset_id: int):
 async def create_job(payload: JobCreate):
     job_id = database.create_job(payload.title, payload.branch, payload.assigned_to)
     return {"status": "success", "job_id": job_id}
+
+@app.delete("/api/jobs/{job_id}")
+async def delete_job(job_id: int):
+    database.delete_job(job_id)
+    return {"status": "success"}
 
 @app.get("/api/jobs")
 async def get_jobs(user_id: Optional[int] = None, role: Optional[str] = None):
