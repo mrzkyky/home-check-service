@@ -2,6 +2,7 @@ const API_BASE = `http://${window.location.hostname}:8087/api`;
 let currentJobId = null;
 let currentLat = 0.0;
 let currentLng = 0.0;
+let currentUserRole = "";
 
 // Switch View Logic
 window.switchView = function(viewId, navElement = null) {
@@ -43,6 +44,40 @@ window.openJobForm = async function(type) {
             document.getElementById(`img-${t}`).classList.add('hidden');
             document.getElementById(`label-${t}`).classList.remove('hidden');
         });
+        
+        // Tampilkan field khusus AC jika tipenya tentang AC
+        let isAC = type.toLowerCase().includes('ac');
+        let acFields = document.getElementById('cuci-ac-fields');
+        if (acFields) {
+            acFields.style.display = isAC ? 'block' : 'none';
+        }
+        
+        // Auto-fill tanggal dan jatuh tempo
+        let now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        let nowStr = now.toISOString().slice(0, 16);
+        let dateInput = document.getElementById('job-date');
+        if (dateInput) {
+            dateInput.value = nowStr;
+            window.calculateDueDate();
+        }
+        
+        // Logic Role Teknisi
+        let techInput = document.getElementById('job-technician');
+        let techNotice = document.getElementById('tech-role-notice');
+        if (techInput) {
+            if (currentUserRole !== 'Superadmin') {
+                techInput.value = document.getElementById('user-name-display').innerText;
+                techInput.setAttribute('readonly', true);
+                techInput.style.backgroundColor = 'var(--border-color)';
+                techNotice.style.display = 'block';
+            } else {
+                techInput.value = "";
+                techInput.removeAttribute('readonly');
+                techInput.style.backgroundColor = '';
+                techNotice.style.display = 'none';
+            }
+        }
         
         switchView('job-form');
     } catch(e) {
@@ -106,10 +141,34 @@ window.handlePhoto = async function(event, type) {
     }
 }
 
+// Fitur Auto Hitung Jatuh Tempo AC (3 Bulan)
+window.calculateDueDate = function() {
+    let dateInput = document.getElementById('job-date');
+    let dueDateInput = document.getElementById('job-due-date');
+    if (!dateInput || !dueDateInput) return;
+    
+    let jobDate = new Date(dateInput.value);
+    if (isNaN(jobDate.getTime())) return;
+    
+    // Tambah 3 Bulan
+    jobDate.setMonth(jobDate.getMonth() + 3);
+    
+    // Format kembali ke datetime-local
+    jobDate.setMinutes(jobDate.getMinutes() - jobDate.getTimezoneOffset());
+    dueDateInput.value = jobDate.toISOString().slice(0, 16);
+}
+
 // Submit Laporan
 window.submitJob = async function() {
     let title = document.getElementById('job-title').value;
     let notes = document.getElementById('job-notes').value;
+    
+    let branch = document.getElementById('job-branch') ? document.getElementById('job-branch').value : "";
+    let room = document.getElementById('job-room') ? document.getElementById('job-room').value : "";
+    let agenda = document.getElementById('job-agenda') ? document.getElementById('job-agenda').value : "";
+    let jobDate = document.getElementById('job-date') ? document.getElementById('job-date').value : "";
+    let dueDate = document.getElementById('job-due-date') ? document.getElementById('job-due-date').value : "";
+    let technician = document.getElementById('job-technician') ? document.getElementById('job-technician').value : "";
     
     if (!title) {
         alert("Harap isi Keterangan Unit / Pekerjaan!");
@@ -125,7 +184,13 @@ window.submitJob = async function() {
                 status: 'completed',
                 notes: notes + `\n(Title: ${title})`,
                 lat: currentLat,
-                lng: currentLng
+                lng: currentLng,
+                branch: branch,
+                room: room,
+                agenda: agenda,
+                job_date: jobDate,
+                due_date: dueDate,
+                technician_name: technician
             })
         });
         
@@ -204,6 +269,7 @@ async function loadProfile() {
         
         if (data.status === 'success') {
             let user = data.data;
+            currentUserRole = user.role;
             document.getElementById('user-name-display').innerText = user.name;
             document.getElementById('user-role-display').innerText = user.role;
             document.getElementById('edit-name').value = user.name;

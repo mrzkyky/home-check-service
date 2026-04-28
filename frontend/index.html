@@ -107,11 +107,51 @@
                 
                 <div class="glass-panel">
                     <div class="form-group">
-                        <label>Judul Pekerjaan / Keterangan Unit</label>
-                        <input type="text" id="job-title" placeholder="Contoh: AC Daikin 1/2 PK - R. Meeting">
-                    </div>
-                    
-                    <div class="form-group">
+                <label>Keterangan Unit / Pekerjaan</label>
+                <input type="text" id="job-title" placeholder="Contoh: AC Bocor, Kulkas Mati" class="form-control">
+            </div>
+
+            <!-- Khusus Cuci AC -->
+            <div id="cuci-ac-fields" style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
+                <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Cuci / Maintenance AC</h4>
+                
+                <div class="form-group">
+                    <label>Lokasi Kantor / Branch</label>
+                    <input type="text" id="job-branch" placeholder="Contoh: Cabang Pusat, Lt 2" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Letak Posisi AC (Ruangan)</label>
+                    <input type="text" id="job-room" placeholder="Contoh: Ruang Meeting A" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label>Agenda</label>
+                    <select id="job-agenda" class="form-control">
+                        <option value="Cuci">Cuci AC</option>
+                        <option value="Maintenance">Maintenance Berkala</option>
+                        <option value="Perbaikan">Perbaikan Kerusakan</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Tgl & Waktu Pengerjaan</label>
+                    <input type="datetime-local" id="job-date" class="form-control" onchange="calculateDueDate()">
+                </div>
+                
+                <div class="form-group">
+                    <label>Jatuh Tempo (Otomatis +3 Bulan)</label>
+                    <input type="datetime-local" id="job-due-date" class="form-control" readonly style="background-color: var(--border-color);">
+                </div>
+                
+                <div class="form-group">
+                    <label>Tim / Teknisi Bertugas</label>
+                    <input type="text" id="job-technician" class="form-control" placeholder="Nama Teknisi / Vendor">
+                    <small id="tech-role-notice" style="color: var(--primary); display: none; margin-top: 5px;">*Diisi otomatis sesuai akun Anda.</small>
+                </div>
+            </div>
+            
+            <div class="form-group">
                         <label>📍 Lokasi Pekerjaan</label>
                         <div style="display:flex; gap:0.8rem;">
                             <input type="text" id="job-location" readonly placeholder="Klik Ambil GPS..." style="flex:1; background:#f1f5f9;">

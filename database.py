@@ -3,7 +3,7 @@ import os
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 os.makedirs(DATA_DIR, exist_ok=True)
-DB_PATH = os.path.join(DATA_DIR, "homeservice.db")
+DB_PATH = os.path.join(DATA_DIR, "homeservice_v2.db")
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -19,6 +19,12 @@ def init_db():
             location_lat REAL,
             location_lng REAL,
             notes TEXT,
+            branch TEXT,
+            room TEXT,
+            agenda TEXT,
+            job_date TEXT,
+            due_date TEXT,
+            technician_name TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -72,7 +78,13 @@ def get_jobs():
             "location_lat": r[4],
             "location_lng": r[5],
             "notes": r[6],
-            "created_at": r[7]
+            "branch": r[7],
+            "room": r[8],
+            "agenda": r[9],
+            "job_date": r[10],
+            "due_date": r[11],
+            "technician_name": r[12],
+            "created_at": r[13]
         })
     return jobs
 
@@ -98,7 +110,13 @@ def get_job_by_id(job_id: int):
         "location_lat": r[4],
         "location_lng": r[5],
         "notes": r[6],
-        "created_at": r[7],
+        "branch": r[7],
+        "room": r[8],
+        "agenda": r[9],
+        "job_date": r[10],
+        "due_date": r[11],
+        "technician_name": r[12],
+        "created_at": r[13],
         "photos": [{"type": p[0], "filename": p[1]} for p in photos]
     }
 
@@ -111,11 +129,15 @@ def create_job(title: str, j_type: str):
     conn.close()
     return job_id
 
-def update_job_report(job_id: int, status: str, notes: str, lat: float, lng: float):
+def update_job_report(job_id: int, status: str, notes: str, lat: float, lng: float, branch: str, room: str, agenda: str, job_date: str, due_date: str, technician_name: str):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("UPDATE jobs SET status=?, notes=?, location_lat=?, location_lng=? WHERE id=?", 
-                   (status, notes, lat, lng, job_id))
+    cursor.execute('''
+        UPDATE jobs 
+        SET status=?, notes=?, location_lat=?, location_lng=?, 
+            branch=?, room=?, agenda=?, job_date=?, due_date=?, technician_name=? 
+        WHERE id=?
+    ''', (status, notes, lat, lng, branch, room, agenda, job_date, due_date, technician_name, job_id))
     conn.commit()
     conn.close()
     return True

@@ -33,6 +33,12 @@ class JobReport(BaseModel):
     notes: Optional[str] = ""
     lat: Optional[float] = 0.0
     lng: Optional[float] = 0.0
+    branch: Optional[str] = ""
+    room: Optional[str] = ""
+    agenda: Optional[str] = ""
+    job_date: Optional[str] = ""
+    due_date: Optional[str] = ""
+    technician_name: Optional[str] = ""
 
 class UserProfileUpdate(BaseModel):
     name: str
@@ -55,7 +61,10 @@ async def create_job(payload: JobCreate):
 
 @app.put("/api/jobs/{job_id}")
 async def update_job(job_id: int, payload: JobReport):
-    database.update_job_report(job_id, payload.status, payload.notes, payload.lat, payload.lng)
+    database.update_job_report(
+        job_id, payload.status, payload.notes, payload.lat, payload.lng,
+        payload.branch, payload.room, payload.agenda, payload.job_date, payload.due_date, payload.technician_name
+    )
     return {"status": "success", "message": "Job updated"}
 
 @app.post("/api/jobs/{job_id}/upload")
