@@ -1,4 +1,4 @@
-const API_BASE = `http://${window.location.hostname}:8083/api`;
+const API_BASE = '/api';
 
 let currentUser = null;
 let currentJobId = null;
