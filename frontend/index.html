@@ -10,40 +10,192 @@
 <body>
     
     <!-- LOGIN PAGE -->
-    <div id="login-container" style="display:flex; height:100vh; align-items:center; justify-content:center; flex-direction:column; background: linear-gradient(135deg, #f0f4f8, #d9e2ec);">
-        <div class="glass-panel" style="width:90%; max-width:420px; text-align:center; padding: 3rem 2rem; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); background: rgba(255,255,255,0.85); backdrop-filter: blur(20px);">
-            <img src="./logo.png" alt="Home-Service Logo" style="width: 120px; height: 120px; object-fit: contain; margin-bottom: 1rem; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
-            <h1 style="color:var(--text-main); margin-bottom:0.5rem; font-weight:800; font-size:1.8rem; letter-spacing:-0.5px;">Home-Service</h1>
-            <p style="color:var(--text-muted); margin-bottom:2rem; font-size:0.95rem;">Sistem Manajemen Aset & SPK</p>
-            
-            <div id="login-form">
-                <div class="form-group" style="text-align:left;">
-                    <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">Email Address</label>
-                    <input type="email" id="login-email" placeholder="admin@homeservice.com" class="form-control" style="background:#f8fafc; border:2px solid transparent; transition:0.3s; padding:1.2rem; border-radius:12px;">
+    <style>
+        /* Login Redesign Styles */
+        #login-container {
+            display: flex; 
+            height: 100vh; 
+            align-items: center; 
+            justify-content: center; 
+            background: #0f172a;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Animated Background Elements */
+        .login-bg-shape {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.6;
+            z-index: 0;
+            animation: float 10s infinite ease-in-out alternate;
+        }
+        .shape-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: #3b82f6; border-radius: 50%; }
+        .shape-2 { bottom: -10%; right: -10%; width: 600px; height: 600px; background: #8b5cf6; border-radius: 50%; animation-delay: -5s; }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, 50px) scale(1.1); }
+        }
+
+        .login-wrapper {
+            display: flex;
+            width: 900px;
+            max-width: 90%;
+            min-height: 550px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.1);
+            overflow: hidden;
+            z-index: 1;
+            position: relative;
+        }
+
+        .login-left {
+            flex: 1;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(139, 92, 246, 0.2));
+            border-right: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+
+        .login-right {
+            flex: 1;
+            padding: 4rem 3rem;
+            background: rgba(15, 23, 42, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        
+        .login-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+        
+        .login-label {
+            display: block;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+            margin-top: 1.5rem;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .switch-mode-text {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #94a3b8;
+            text-align: center;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .switch-mode-text span {
+            color: #60a5fa;
+            font-weight: 600;
+        }
+        .switch-mode-text:hover { color: white; }
+
+        @media (max-width: 768px) {
+            .login-wrapper { flex-direction: column; }
+            .login-left { padding: 2rem; flex: none; }
+            .login-right { padding: 2rem; }
+        }
+    </style>
+
+    <div id="login-container">
+        <!-- Background Animations -->
+        <div class="login-bg-shape shape-1"></div>
+        <div class="login-bg-shape shape-2"></div>
+
+        <div class="login-wrapper">
+            <!-- Left Branding Side -->
+            <div class="login-left">
+                <div>
+                    <img src="./logo.png" alt="Home-Service Logo" style="width: 80px; height: 80px; object-fit: contain; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
                 </div>
-                <div class="form-group" style="text-align:left; margin-top:1.5rem;">
-                    <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">Password</label>
-                    <input type="password" id="login-password" placeholder="••••••••" class="form-control" style="background:#f8fafc; border:2px solid transparent; transition:0.3s; padding:1.2rem; border-radius:12px;">
+                <div style="margin-top: 2rem;">
+                    <h1 style="color: white; font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem;">Sistem<br>Manajemen<br>Aset & SPK</h1>
+                    <p style="color: #cbd5e1; font-size: 1rem; line-height: 1.6; max-width: 280px;">Kelola jadwal maintenance dan pemantauan tugas secara real-time dengan efisien.</p>
                 </div>
-                <button class="btn-primary" style="width:100%; margin-top:2rem; padding:1.2rem; border-radius:12px; font-weight:700; font-size:1rem; box-shadow: 0 10px 20px rgba(37,99,235,0.2);" onclick="doLogin()">Sign In</button>
-                <p style="margin-top:1.5rem; font-size:0.95rem; color:var(--text-muted); cursor:pointer; font-weight:500;" onclick="toggleAuthMode()">Belum punya akun? <span style="color:var(--primary);">Daftar di sini</span></p>
             </div>
-            
-            <div id="register-form" style="display:none;">
-                <div class="form-group" style="text-align:left;">
-                    <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">Nama Lengkap</label>
-                    <input type="text" id="reg-name" placeholder="John Doe" class="form-control" style="background:#f8fafc; border:2px solid transparent; transition:0.3s; padding:1.2rem; border-radius:12px;">
+
+            <!-- Right Form Side -->
+            <div class="login-right">
+                <div style="margin-bottom: 2rem;">
+                    <h2 style="color: white; font-size: 1.8rem; font-weight: 700; margin-bottom: 0.5rem;">Selamat Datang! 👋</h2>
+                    <p style="color: #94a3b8; font-size: 0.95rem;">Silakan masuk ke akun Anda.</p>
                 </div>
-                <div class="form-group" style="text-align:left; margin-top:1.5rem;">
-                    <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">Email Address</label>
-                    <input type="email" id="reg-email" placeholder="user@homeservice.com" class="form-control" style="background:#f8fafc; border:2px solid transparent; transition:0.3s; padding:1.2rem; border-radius:12px;">
+                
+                <div id="login-form">
+                    <div style="margin-bottom: 1.2rem;">
+                        <label class="login-label">Email Address</label>
+                        <input type="email" id="login-email" placeholder="admin@homeservice.com" class="login-input">
+                    </div>
+                    <div>
+                        <label class="login-label">Password</label>
+                        <input type="password" id="login-password" placeholder="••••••••" class="login-input">
+                    </div>
+                    <button class="login-btn" onclick="doLogin()">Sign In</button>
+                    <p class="switch-mode-text" onclick="toggleAuthMode()">Belum punya akun? <span>Daftar di sini</span></p>
                 </div>
-                <div class="form-group" style="text-align:left; margin-top:1.5rem;">
-                    <label style="font-size:0.85rem; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">Password</label>
-                    <input type="password" id="reg-password" placeholder="••••••••" class="form-control" style="background:#f8fafc; border:2px solid transparent; transition:0.3s; padding:1.2rem; border-radius:12px;">
+                
+                <div id="register-form" style="display:none;">
+                    <div style="margin-bottom: 1.2rem;">
+                        <label class="login-label">Nama Lengkap</label>
+                        <input type="text" id="reg-name" placeholder="John Doe" class="login-input">
+                    </div>
+                    <div style="margin-bottom: 1.2rem;">
+                        <label class="login-label">Email Address</label>
+                        <input type="email" id="reg-email" placeholder="user@homeservice.com" class="login-input">
+                    </div>
+                    <div>
+                        <label class="login-label">Password</label>
+                        <input type="password" id="reg-password" placeholder="••••••••" class="login-input">
+                    </div>
+                    <button class="login-btn" onclick="doRegister()">Create Account</button>
+                    <p class="switch-mode-text" onclick="toggleAuthMode()">Sudah punya akun? <span>Masuk</span></p>
                 </div>
-                <button class="btn-primary" style="width:100%; margin-top:2rem; padding:1.2rem; border-radius:12px; font-weight:700; font-size:1rem; box-shadow: 0 10px 20px rgba(37,99,235,0.2);" onclick="doRegister()">Create Account</button>
-                <p style="margin-top:1.5rem; font-size:0.95rem; color:var(--text-muted); cursor:pointer; font-weight:500;" onclick="toggleAuthMode()">Sudah punya akun? <span style="color:var(--primary);">Masuk</span></p>
             </div>
         </div>
     </div>
