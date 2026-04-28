@@ -438,12 +438,18 @@ window.openJobForm = async function(type) {
                 allAssetsForAdHoc = data.data;
                 
                 let branchSelect = document.getElementById('job-branch');
-                let branches = [...new Set(allAssetsForAdHoc.map(a => a.branch))];
+                let branches = [...new Set(allAssetsForAdHoc.map(a => (a.branch || '').trim()))].filter(Boolean);
                 branchSelect.innerHTML = '<option value="">Pilih Cabang...</option>';
                 branches.forEach(b => {
                     branchSelect.innerHTML += `<option value="${b}">${b}</option>`;
                 });
                 document.getElementById('job-room').innerHTML = '<option value="">Pilih Ruangan...</option>';
+                
+                let lastBranch = localStorage.getItem('hs_last_branch');
+                if (lastBranch && branches.includes(lastBranch)) {
+                    branchSelect.value = lastBranch;
+                    window.loadRoomsForAdHoc();
+                }
             } catch(e) { console.error("Gagal load assets"); }
         }
     }
@@ -536,7 +542,8 @@ window.loadRoomsForAdHoc = function() {
     roomSelect.innerHTML = '<option value="">Pilih Ruangan...</option>';
     
     if (branch) {
-        let rooms = allAssetsForAdHoc.filter(a => a.branch === branch);
+        localStorage.setItem('hs_last_branch', branch);
+        let rooms = allAssetsForAdHoc.filter(a => (a.branch || '').trim() === branch);
         rooms.forEach(r => {
             roomSelect.innerHTML += `<option value="${r.room}">${r.room} (${r.ac_type})</option>`;
         });
