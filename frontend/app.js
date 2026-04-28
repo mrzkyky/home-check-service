@@ -1,10 +1,102 @@
 const API_BASE = `http://${window.location.hostname}:8083/api`;
-let currentJobId = null;
-let currentLat = 0.0;
-let currentLng = 0.0;
-let currentUserRole = "";
 
-// Switch View Logic
+let currentUser = null;
+let currentJobId = null;
+let currentAssetId = null;
+let currentAssetsCache = [];
+
+// --- BOOTSTRAP ---
+window.onload = () => {
+    checkAuth();
+};
+
+function checkAuth() {
+    let savedUser = localStorage.getItem('hs_user');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'flex';
+        
+        // Setup UI
+        document.getElementById('user-name-display').innerText = currentUser.name;
+        document.getElementById('user-role-display').innerText = currentUser.role;
+        document.getElementById('edit-name').value = currentUser.name;
+        document.getElementById('edit-role').value = currentUser.role;
+        
+        if (currentUser.role === 'Superadmin') {
+            document.getElementById('nav-admin').style.display = 'flex';
+        }
+        
+        // Mulai aplikasi
+        switchView('home');
+    } else {
+        document.getElementById('login-container').style.display = 'flex';
+        document.getElementById('app-container').style.display = 'none';
+    }
+}
+
+// --- AUTHENTICATION ---
+window.toggleAuthMode = function() {
+    let loginForm = document.getElementById('login-form');
+    let regForm = document.getElementById('register-form');
+    if (loginForm.style.display !== 'none') {
+        loginForm.style.display = 'none';
+        regForm.style.display = 'block';
+    } else {
+        loginForm.style.display = 'block';
+        regForm.style.display = 'none';
+    }
+}
+
+window.doLogin = async function() {
+    let email = document.getElementById('login-email').value;
+    let pass = document.getElementById('login-password').value;
+    if(!email || !pass) return alert("Isi email dan password!");
+    
+    try {
+        let res = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password: pass})
+        });
+        let data = await res.json();
+        if(res.ok && data.status === 'success') {
+            localStorage.setItem('hs_user', JSON.stringify(data.user));
+            checkAuth();
+        } else {
+            alert(data.detail || "Gagal login!");
+        }
+    } catch(e) { alert("Gagal koneksi server"); }
+}
+
+window.doRegister = async function() {
+    let name = document.getElementById('reg-name').value;
+    let email = document.getElementById('reg-email').value;
+    let pass = document.getElementById('reg-password').value;
+    if(!name || !email || !pass) return alert("Isi semua field!");
+    
+    try {
+        let res = await fetch(`${API_BASE}/auth/register`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, password: pass, name, role: 'Staff'})
+        });
+        let data = await res.json();
+        if(res.ok) {
+            alert("Pendaftaran berhasil! Silakan login.");
+            toggleAuthMode();
+        } else {
+            alert(data.detail || "Gagal daftar!");
+        }
+    } catch(e) { alert("Gagal koneksi server"); }
+}
+
+window.doLogout = function() {
+    localStorage.removeItem('hs_user');
+    window.location.reload();
+}
+
+// --- UI NAVIGATION ---
 window.switchView = function(viewId, navElement = null) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(`view-${viewId}`).classList.add('active');
@@ -14,387 +106,242 @@ window.switchView = function(viewId, navElement = null) {
         navElement.classList.add('active');
     }
     
-    if (viewId === 'home') {
-        loadActiveJobs();
-    } else if (viewId === 'history') {
-        loadHistory();
-    }
+    if (viewId === 'home') loadJobs(false);
+    else if (viewId === 'history') loadJobs(true);
 }
 
-// Start New Job
-window.openJobForm = async function(type) {
-    // Buat job baru di backend sebagai draft (pending)
+window.toggleSidebar = function() { document.getElementById('app-sidebar').classList.toggle('open'); }
+window.toggleProfile = function() { document.getElementById('profile-menu').classList.toggle('active'); }
+
+document.addEventListener('click', function(event) {
+    let profileBtn = document.querySelector('.profile-btn');
+    let profileMenu = document.getElementById('profile-menu');
+    if (profileBtn && profileMenu && !profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
+        profileMenu.classList.remove('active');
+    }
+});
+
+// --- LOAD JOBS / SPK ---
+async function loadJobs(isHistory) {
+    try {
+        let url = `${API_BASE}/jobs?user_id=${currentUser.id}&role=${currentUser.role}`;
+        let res = await fetch(url);
+        let data = await res.json();
+        
+        let ul = document.getElementById(isHistory ? 'history-list' : 'active-jobs-list');
+        ul.innerHTML = "";
+        
+        let filtered = data.data.filter(j => isHistory ? j.status === 'completed' : j.status === 'pending');
+        
+        if (filtered.length === 0) {
+            ul.innerHTML = `<li style='justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);'>Belum ada SPK.</li>`;
+            return;
+        }
+        
+        filtered.forEach(j => {
+            let progressStr = `${j.completed_qty}/${j.target_qty}`;
+            let bg = isHistory ? '#10b981' : 'var(--primary)';
+            ul.innerHTML += `
+                <li style="cursor:pointer;" onclick="openChecklist(${j.id})">
+                    <div style="flex:1;">
+                        <b style="font-size:1.1rem; color:var(--text-main);">${j.title}</b>
+                        <div style="font-size:0.85rem; color:var(--text-muted); margin-top:0.3rem;">📍 ${j.branch}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <span class="status-badge" style="background:${bg}; color:white; border:none; padding:0.4rem 0.8rem; font-size:0.85rem;">${progressStr} Selesai</span>
+                    </div>
+                </li>`;
+        });
+    } catch(e) { console.error(e); }
+}
+
+// --- CHECKLIST SPK ---
+window.openChecklist = async function(jobId) {
+    currentJobId = jobId;
+    switchView('checklist');
+    document.getElementById('asset-list').innerHTML = "Memuat...";
+    
+    try {
+        let res = await fetch(`${API_BASE}/jobs/${jobId}`);
+        let data = await res.json();
+        let job = data.data.job;
+        let progress = data.data.progress;
+        
+        document.getElementById('checklist-title').innerText = job.title;
+        document.getElementById('checklist-branch').innerText = job.branch;
+        document.getElementById('checklist-progress').innerText = `${job.completed_qty}/${job.target_qty} Selesai`;
+        
+        // Fetch Master Assets for this branch
+        let aRes = await fetch(`${API_BASE}/assets?branch=${encodeURIComponent(job.branch)}`);
+        let aData = await aRes.json();
+        currentAssetsCache = aData.data;
+        
+        let ul = document.getElementById('asset-list');
+        ul.innerHTML = "";
+        
+        if(currentAssetsCache.length === 0) {
+            ul.innerHTML = `<li><div style="color:var(--danger);">Aset AC untuk cabang ini belum diisi oleh Admin!</div></li>`;
+            return;
+        }
+        
+        currentAssetsCache.forEach(asset => {
+            let isDone = progress[asset.id] !== undefined;
+            let icon = isDone ? '✅' : '⏳';
+            let color = isDone ? 'var(--success)' : 'var(--text-main)';
+            
+            ul.innerHTML += `
+                <li style="cursor:pointer; border-left-color:${isDone ? 'var(--success)' : 'var(--primary)'}" onclick="openProgressForm(${asset.id}, '${asset.room}')">
+                    <div style="flex:1;">
+                        <b style="color:${color};">${icon} ${asset.room}</b>
+                        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">${asset.ac_type} - ${asset.details}</div>
+                    </div>
+                    <div style="font-size:1.2rem; color:var(--text-muted);">›</div>
+                </li>`;
+        });
+        
+    } catch(e) { console.error(e); }
+}
+
+// --- PROGRESS FORM (PER AC) ---
+window.openProgressForm = function(assetId, roomName) {
+    currentAssetId = assetId;
+    document.getElementById('progress-title').innerText = `Update: ${roomName}`;
+    document.getElementById('prog-asset-id').value = assetId;
+    
+    // Reset inputs
+    document.getElementById('prog-notes').value = "";
+    document.getElementById('cam-prog-before').value = "";
+    document.getElementById('cam-prog-after').value = "";
+    document.getElementById('img-prog-before').src = "";
+    document.getElementById('img-prog-after').src = "";
+    document.getElementById('img-prog-before').classList.add('hidden');
+    document.getElementById('img-prog-after').classList.add('hidden');
+    document.getElementById('lbl-prog-before').classList.remove('hidden');
+    document.getElementById('lbl-prog-after').classList.remove('hidden');
+    
+    switchView('progress-form');
+}
+
+window.previewProgressPhoto = function(event, type) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        let img = document.getElementById(`img-prog-${type}`);
+        img.src = e.target.result;
+        img.classList.remove('hidden');
+        document.getElementById(`lbl-prog-${type}`).classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+window.submitProgress = async function() {
+    let bFile = document.getElementById('cam-prog-before').files[0];
+    let aFile = document.getElementById('cam-prog-after').files[0];
+    let notes = document.getElementById('prog-notes').value;
+    
+    if(!bFile && !aFile && !notes) {
+        return alert("Harap isi setidaknya satu foto atau catatan.");
+    }
+    
+    let formData = new FormData();
+    formData.append("asset_id", currentAssetId);
+    formData.append("notes", notes);
+    if(bFile) formData.append("before_photo", bFile);
+    if(aFile) formData.append("after_photo", aFile);
+    
+    try {
+        let res = await fetch(`${API_BASE}/jobs/${currentJobId}/progress`, {
+            method: 'POST',
+            body: formData
+        });
+        let data = await res.json();
+        if(res.ok) {
+            alert("Laporan AC ini tersimpan!");
+            openChecklist(currentJobId); // Kembali ke list dan update counter
+        } else {
+            alert("Gagal simpan progress.");
+        }
+    } catch(e) { alert("Gagal koneksi!"); }
+}
+
+// --- ADMIN PANEL ---
+window.adminCreateAsset = async function() {
+    let branch = document.getElementById('asset-branch').value;
+    let room = document.getElementById('asset-room').value;
+    let type = document.getElementById('asset-type').value;
+    if(!branch || !room || !type) return alert("Isi semua data aset!");
+    
+    try {
+        let res = await fetch(`${API_BASE}/assets`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({branch, room, ac_type: type, details: "Input by Admin"})
+        });
+        if(res.ok) {
+            alert("Aset berhasil ditambah!");
+            document.getElementById('asset-room').value = "";
+        }
+    } catch(e) { alert("Error!"); }
+}
+
+window.adminCreateSPK = async function() {
+    let title = document.getElementById('spk-title').value;
+    let branch = document.getElementById('spk-branch').value;
+    let tech_id = parseInt(document.getElementById('spk-tech-id').value);
+    
+    if(!title || !branch || isNaN(tech_id)) return alert("Isi semua data SPK!");
+    
     try {
         let res = await fetch(`${API_BASE}/jobs`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ title: `Draft: ${type}`, type: type })
+            body: JSON.stringify({title, branch, assigned_to: tech_id})
         });
-        let data = await res.json();
-        
-        currentJobId = data.job_id;
-        document.getElementById('job-form-title').innerText = `Tugas: ${type}`;
-        document.getElementById('job-title').value = "";
-        document.getElementById('job-location').value = "";
-        document.getElementById('job-notes').value = "";
-        
-        // Reset foto
-        ['before', 'after'].forEach(t => {
-            document.getElementById(`img-${t}`).src = "";
-            document.getElementById(`img-${t}`).classList.add('hidden');
-            document.getElementById(`label-${t}`).classList.remove('hidden');
-        });
-        
-        // Tampilkan field khusus AC jika tipenya tentang AC
-        let isAC = type.toLowerCase().includes('ac');
-        let acFields = document.getElementById('cuci-ac-fields');
-        if (acFields) {
-            acFields.style.display = isAC ? 'block' : 'none';
+        if(res.ok) {
+            alert("SPK Berhasil Dibuat!");
+            document.getElementById('spk-title').value = "";
+            switchView('home');
         }
-        
-        // Auto-fill tanggal dan jatuh tempo
-        let now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        let nowStr = now.toISOString().slice(0, 16);
-        let dateInput = document.getElementById('job-date');
-        if (dateInput) {
-            dateInput.value = nowStr;
-            window.calculateDueDate();
-        }
-        
-        // Logic Role Teknisi
-        let techInput = document.getElementById('job-technician');
-        let techNotice = document.getElementById('tech-role-notice');
-        if (techInput) {
-            if (currentUserRole !== 'Superadmin') {
-                techInput.value = document.getElementById('user-name-display').innerText;
-                techInput.setAttribute('readonly', true);
-                techInput.style.backgroundColor = 'var(--border-color)';
-                techNotice.style.display = 'block';
-            } else {
-                techInput.value = "";
-                techInput.removeAttribute('readonly');
-                techInput.style.backgroundColor = '';
-                techNotice.style.display = 'none';
-            }
-        }
-        
-        switchView('job-form');
-    } catch(e) {
-        alert("Gagal koneksi ke server!");
-    }
+    } catch(e) { alert("Error!"); }
 }
 
-// Geolocation
-window.getLocation = function() {
-    let locInput = document.getElementById('job-location');
-    locInput.value = "Mencari GPS...";
-    
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                currentLat = pos.coords.latitude;
-                currentLng = pos.coords.longitude;
-                locInput.value = `${currentLat.toFixed(5)}, ${currentLng.toFixed(5)}`;
-            },
-            (err) => {
-                alert("Gagal dapat GPS. Pastikan Location aktif.");
-                locInput.value = "";
-            },
-            { enableHighAccuracy: true, timeout: 10000 }
-        );
-    } else {
-        alert("Browser tidak mendukung GPS.");
-    }
-}
-
-// Camera / Upload
-window.triggerCamera = function(type) {
-    document.getElementById(`cam-${type}`).click();
-}
-
-window.handlePhoto = async function(event, type) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    // Preview gambar di kotak
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        document.getElementById(`img-${type}`).src = e.target.result;
-        document.getElementById(`img-${type}`).classList.remove('hidden');
-        document.getElementById(`label-${type}`).classList.add('hidden');
-    };
-    reader.readAsDataURL(file);
-    
-    // Langsung upload background
-    let formData = new FormData();
-    formData.append("type", type);
-    formData.append("file", file);
-    
-    try {
-        await fetch(`${API_BASE}/jobs/${currentJobId}/upload`, {
-            method: 'POST',
-            body: formData
-        });
-    } catch(e) {
-        alert(`Gagal upload foto ${type}`);
-    }
-}
-
-// Fitur Auto Hitung Jatuh Tempo AC (3 Bulan)
-window.calculateDueDate = function() {
-    let dateInput = document.getElementById('job-date');
-    let dueDateInput = document.getElementById('job-due-date');
-    if (!dateInput || !dueDateInput) return;
-    
-    let jobDate = new Date(dateInput.value);
-    if (isNaN(jobDate.getTime())) return;
-    
-    // Tambah 3 Bulan
-    jobDate.setMonth(jobDate.getMonth() + 3);
-    
-    // Format kembali ke datetime-local
-    jobDate.setMinutes(jobDate.getMinutes() - jobDate.getTimezoneOffset());
-    dueDateInput.value = jobDate.toISOString().slice(0, 16);
-}
-
-// Submit Laporan
-window.submitJob = async function() {
-    let title = document.getElementById('job-title').value;
-    let notes = document.getElementById('job-notes').value;
-    
-    let branch = document.getElementById('job-branch') ? document.getElementById('job-branch').value : "";
-    let room = document.getElementById('job-room') ? document.getElementById('job-room').value : "";
-    let agenda = document.getElementById('job-agenda') ? document.getElementById('job-agenda').value : "";
-    let jobDate = document.getElementById('job-date') ? document.getElementById('job-date').value : "";
-    let dueDate = document.getElementById('job-due-date') ? document.getElementById('job-due-date').value : "";
-    let technician = document.getElementById('job-technician') ? document.getElementById('job-technician').value : "";
-    
-    if (!title) {
-        alert("Harap isi Keterangan Unit / Pekerjaan!");
-        return;
-    }
-    
-    try {
-        // Update job
-        await fetch(`${API_BASE}/jobs/${currentJobId}`, {
-            method: 'PUT',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                status: 'completed',
-                notes: notes + `\n(Title: ${title})`,
-                lat: currentLat,
-                lng: currentLng,
-                branch: branch,
-                room: room,
-                agenda: agenda,
-                job_date: jobDate,
-                due_date: dueDate,
-                technician_name: technician
-            })
-        });
-        
-        alert("Laporan Berhasil Disimpan!");
-        switchView('home');
-        
-    } catch(e) {
-        alert("Gagal menyimpan laporan!");
-    }
-}
-
-// Load List
-async function loadActiveJobs() {
-    // Disini bisa filter job yang status=pending (kalau di-fetch semua)
-    try {
-        let res = await fetch(`${API_BASE}/jobs`);
-        let data = await res.json();
-        
-        let ul = document.getElementById('active-jobs-list');
-        ul.innerHTML = "";
-        
-        let pending = data.data.filter(j => j.status === 'pending');
-        if (pending.length === 0) {
-            ul.innerHTML = "<li style='justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);'>Belum ada tugas draft aktif.</li>";
-            return;
-        }
-        
-        pending.forEach(j => {
-            ul.innerHTML += `<li><b>${j.type}</b> <br> Draft ID: #${j.id}</li>`;
-        });
-    } catch(e) {
-        console.log(e);
-    }
-}
-
-async function loadHistory() {
-    try {
-        let res = await fetch(`${API_BASE}/jobs`);
-        let data = await res.json();
-        
-        let ul = document.getElementById('history-list');
-        ul.innerHTML = "";
-        
-        let completed = data.data.filter(j => j.status === 'completed');
-        if (completed.length === 0) {
-            ul.innerHTML = "<li style='justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);'>Belum ada riwayat.</li>";
-            return;
-        }
-        
-        completed.forEach(j => {
-            let noteStr = j.notes.split('\n')[0] || "Selesai";
-            ul.innerHTML += `
-                <li>
-                    <div><b>${j.type}</b> (ID #${j.id})<br><small style="color:#10b981;">Selesai</small></div>
-                    <div style="font-size:0.8rem; color:var(--text-muted);">${noteStr}</div>
-                </li>`;
-        });
-    } catch(e) {
-        ul.innerHTML = "<li style='justify-content:center; color: var(--danger); background: transparent; box-shadow: none; border: 1px dashed var(--danger);'>Gagal memuat riwayat.</li>";
-    }
-}
-
-// Init
-window.onload = () => {
-    loadActiveJobs();
-    loadProfile();
-};
-
-// Profile Integration
-const CURRENT_USER_ID = 1; // Dummy user ID
-
-async function loadProfile() {
-    try {
-        let res = await fetch(`${API_BASE}/user/${CURRENT_USER_ID}`);
-        let data = await res.json();
-        
-        if (data.status === 'success') {
-            let user = data.data;
-            currentUserRole = user.role;
-            document.getElementById('user-name-display').innerText = user.name;
-            document.getElementById('user-role-display').innerText = user.role;
-            document.getElementById('edit-name').value = user.name;
-            document.getElementById('edit-role').value = user.role;
-            
-            updateAvatarUI(user.name, user.avatar_filename);
-        }
-    } catch(e) {
-        console.error("Gagal load profile:", e);
-    }
-}
-
-function updateAvatarUI(name, filename) {
-    let initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-    
-    let headerInitials = document.getElementById('header-avatar-initials');
-    let headerImg = document.getElementById('header-avatar-img');
-    let editInitials = document.getElementById('edit-avatar-initials');
-    let editImg = document.getElementById('edit-avatar-preview');
-    
-    if (filename) {
-        let imgUrl = `http://localhost:8000/uploads/${filename}`;
-        headerImg.src = imgUrl;
-        headerImg.style.display = 'block';
-        headerInitials.style.display = 'none';
-        
-        editImg.src = imgUrl;
-        editImg.style.display = 'block';
-        editInitials.style.display = 'none';
-    } else {
-        headerInitials.innerText = initials;
-        headerImg.style.display = 'none';
-        headerInitials.style.display = 'inline';
-        
-        editInitials.innerText = initials;
-        editImg.style.display = 'none';
-        editInitials.style.display = 'flex';
-    }
-}
-
-// UI Toggles
-window.toggleProfile = function() {
-    document.getElementById('profile-menu').classList.toggle('active');
-}
-
-window.toggleSidebar = function() {
-    document.getElementById('app-sidebar').classList.toggle('open');
-}
-
+// --- PROFILE EDITING ---
 window.saveProfile = async function() {
     let newName = document.getElementById('edit-name').value;
     let newRole = document.getElementById('edit-role').value;
-    if (newName.trim() === "" || newRole.trim() === "") {
-        alert("Nama dan Role tidak boleh kosong.");
-        return;
-    }
+    if (!newName) return alert("Nama tidak boleh kosong!");
     
     try {
-        let res = await fetch(`${API_BASE}/user/${CURRENT_USER_ID}`, {
+        let res = await fetch(`${API_BASE}/user/${currentUser.id}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ name: newName, role: newRole })
         });
-        
         if (res.ok) {
-            alert("Profil berhasil diperbarui!");
-            document.getElementById('user-name-display').innerText = newName;
-            document.getElementById('user-role-display').innerText = newRole;
-            currentUserRole = newRole;
-            
-            // Re-update UI in case there's no photo and initials need to change
-            let headerImg = document.getElementById('header-avatar-img');
-            if (headerImg.style.display === 'none') {
-                 updateAvatarUI(newName, null);
-            }
-            toggleProfile();
-        } else {
-            alert("Gagal update profil!");
+            currentUser.name = newName;
+            currentUser.role = newRole;
+            localStorage.setItem('hs_user', JSON.stringify(currentUser));
+            alert("Profil diperbarui!");
+            window.location.reload();
         }
-    } catch(e) {
-        alert("Terjadi kesalahan koneksi saat update profil.");
-    }
+    } catch(e) { alert("Error update profil"); }
 }
 
 window.handleAvatarUpload = async function(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    // Tampilkan preview lokal dulu
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        let editImg = document.getElementById('edit-avatar-preview');
-        editImg.src = e.target.result;
-        editImg.style.display = 'block';
-        document.getElementById('edit-avatar-initials').style.display = 'none';
-    };
-    reader.readAsDataURL(file);
-    
-    // Langsung upload
     let formData = new FormData();
     formData.append("file", file);
     
     try {
-        let res = await fetch(`${API_BASE}/user/${CURRENT_USER_ID}/avatar`, {
+        let res = await fetch(`${API_BASE}/user/${currentUser.id}/avatar`, {
             method: 'POST',
             body: formData
         });
-        let data = await res.json();
-        if (data.status === 'success') {
-            alert("Foto berhasil diunggah!");
-            updateAvatarUI(document.getElementById('user-name-display').innerText, data.filename);
-        } else {
-            alert("Gagal mengunggah foto.");
+        if (res.ok) {
+            alert("Foto berhasil diunggah! Silakan refresh.");
         }
-    } catch(e) {
-        alert("Terjadi kesalahan saat mengunggah foto.");
-    }
+    } catch(e) { alert("Error upload foto"); }
 }
-
-// Close dropdowns when clicking outside
-document.addEventListener('click', function(event) {
-    let profileBtn = document.querySelector('.profile-btn');
-    let profileMenu = document.getElementById('profile-menu');
-    
-    if (!profileBtn.contains(event.target) && !profileMenu.contains(event.target)) {
-        profileMenu.classList.remove('active');
-    }
-});

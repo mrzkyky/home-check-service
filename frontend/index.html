@@ -9,190 +9,216 @@
 </head>
 <body>
     
-    <!-- Top Header -->
-    <header class="app-header">
-        <div class="logo-area">
-            <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-            <h1>🛠️ Home-Service</h1>
-        </div>
-        
-        <div class="profile-area">
-            <button class="profile-btn" onclick="toggleProfile()">
-                <div class="profile-info">
-                    <span class="profile-name" id="user-name-display">John Doe</span>
-                    <span class="profile-role" id="user-role-display">Teknisi Utama</span>
-                </div>
-                <div class="profile-avatar" id="header-avatar-container">
-                    <span id="header-avatar-initials">JD</span>
-                    <img id="header-avatar-img" style="display:none; width:100%; height:100%; border-radius:50%; object-fit:cover;">
-                </div>
-            </button>
+    <!-- LOGIN PAGE -->
+    <div id="login-container" style="display:flex; height:100vh; align-items:center; justify-content:center; flex-direction:column; background:var(--bg-color);">
+        <div class="glass-panel" style="width:90%; max-width:400px; text-align:center;">
+            <h1 style="color:var(--primary); margin-bottom:1.5rem; font-weight:800;">🛠️ Home-Service</h1>
             
-            <div class="profile-dropdown" id="profile-menu">
-                <h3>Profil Pengguna</h3>
-                <div class="form-group" style="margin-top: 1rem; text-align: center;">
-                     <div class="avatar-edit" onclick="document.getElementById('avatar-upload').click()">
-                         <img id="edit-avatar-preview" style="display:none; width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto; cursor:pointer;" title="Klik untuk ganti foto">
-                         <div id="edit-avatar-initials" style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--secondary)); color:white; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:1.5rem; font-weight:bold; cursor:pointer;" title="Klik untuk ganti foto">JD</div>
-                     </div>
-                     <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
-                     <small style="color:var(--primary); cursor:pointer; display:block; margin-top:0.5rem;" onclick="document.getElementById('avatar-upload').click()">Ubah Foto</small>
+            <div id="login-form">
+                <div class="form-group" style="text-align:left;">
+                    <label>Email</label>
+                    <input type="email" id="login-email" placeholder="admin@homeservice.com" class="form-control">
                 </div>
-                <div class="form-group" style="margin-top: 1rem;">
+                <div class="form-group" style="text-align:left;">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="admin123" class="form-control">
+                </div>
+                <button class="btn-primary" style="width:100%; margin-top:1rem;" onclick="doLogin()">Masuk</button>
+                <p style="margin-top:1rem; font-size:0.9rem; color:var(--text-muted); cursor:pointer;" onclick="toggleAuthMode()">Belum punya akun? Daftar</p>
+            </div>
+            
+            <div id="register-form" style="display:none;">
+                <div class="form-group" style="text-align:left;">
                     <label>Nama Lengkap</label>
-                    <input type="text" id="edit-name" value="John Doe" class="form-control">
+                    <input type="text" id="reg-name" placeholder="John Doe" class="form-control">
                 </div>
-                <div class="form-group">
-                    <label>Role / Tipe Login</label>
-                    <input type="text" id="edit-role" value="Teknisi Utama" class="form-control">
+                <div class="form-group" style="text-align:left;">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" placeholder="user@homeservice.com" class="form-control">
                 </div>
-                <button class="btn-primary" style="width: 100%; padding: 0.6rem;" onclick="saveProfile()">Simpan Perubahan</button>
+                <div class="form-group" style="text-align:left;">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" placeholder="*****" class="form-control">
+                </div>
+                <button class="btn-primary" style="width:100%; margin-top:1rem;" onclick="doRegister()">Daftar</button>
+                <p style="margin-top:1rem; font-size:0.9rem; color:var(--text-muted); cursor:pointer;" onclick="toggleAuthMode()">Sudah punya akun? Masuk</p>
             </div>
         </div>
-    </header>
+    </div>
 
-    <!-- Layout Wrapper -->
-    <div class="app-wrapper">
+    <!-- MAIN APP PAGE -->
+    <div id="app-container" style="display:none; height:100vh; flex-direction:column;">
         
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar" id="app-sidebar">
-            <a href="#" class="nav-item active" onclick="switchView('home', this)">
-                <span class="nav-icon">🏠</span>
-                <span>Dashboard</span>
-            </a>
-            <a href="#" class="nav-item" onclick="switchView('history', this)">
-                <span class="nav-icon">📋</span>
-                <span>Riwayat Tugas</span>
-            </a>
-            <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border-color);">
-                <div id="connection-status" class="status-badge" style="display: inline-block;">Online</div>
-            </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main id="app-content" class="main-content">
-            
-            <!-- View: Home -->
-            <div id="view-home" class="view active">
-                <h2>Dashboard Menu</h2>
-                <div class="task-grid">
-                    <div class="task-card" onclick="openJobForm('Cuci AC')">
-                        <span class="icon">❄️</span>
-                        <h3>Cuci AC</h3>
-                    </div>
-                    <div class="task-card" onclick="openJobForm('Maintenance Server')">
-                        <span class="icon">🖥️</span>
-                        <h3>Server</h3>
-                    </div>
-                    <div class="task-card" onclick="openJobForm('Cek KWH')">
-                        <span class="icon">⚡</span>
-                        <h3>KWH Meter</h3>
-                    </div>
-                    <div class="task-card" onclick="openJobForm('Cek APAR')">
-                        <span class="icon">🧯</span>
-                        <h3>APAR</h3>
-                    </div>
-                </div>
-                
-                <h3 style="margin-top: 2.5rem;">Tugas Aktif (Hari Ini)</h3>
-                <ul id="active-jobs-list" class="job-list">
-                    <li style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">Belum ada tugas.</li>
-                </ul>
-            </div>
-
-            <!-- View: Job Form -->
-            <div id="view-job-form" class="view">
-                <button class="back-btn" onclick="switchView('home')">← Kembali ke Dashboard</button>
-                <h2 id="job-form-title">Laporan Tugas</h2>
-                
-                <div class="glass-panel">
-                    <div class="form-group">
-                <label>Keterangan Unit / Pekerjaan</label>
-                <input type="text" id="job-title" placeholder="Contoh: AC Bocor, Kulkas Mati" class="form-control">
-            </div>
-
-            <!-- Khusus Cuci AC -->
-            <div id="cuci-ac-fields" style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
-                <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Cuci / Maintenance AC</h4>
-                
-                <div class="form-group">
-                    <label>Lokasi Kantor / Branch</label>
-                    <input type="text" id="job-branch" placeholder="Contoh: Cabang Pusat, Lt 2" class="form-control">
-                </div>
-                
-                <div class="form-group">
-                    <label>Letak Posisi AC (Ruangan)</label>
-                    <input type="text" id="job-room" placeholder="Contoh: Ruang Meeting A" class="form-control">
-                </div>
-                
-                <div class="form-group">
-                    <label>Agenda</label>
-                    <select id="job-agenda" class="form-control">
-                        <option value="Cuci">Cuci AC</option>
-                        <option value="Maintenance">Maintenance Berkala</option>
-                        <option value="Perbaikan">Perbaikan Kerusakan</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Tgl & Waktu Pengerjaan</label>
-                    <input type="datetime-local" id="job-date" class="form-control" onchange="calculateDueDate()">
-                </div>
-                
-                <div class="form-group">
-                    <label>Jatuh Tempo (Otomatis +3 Bulan)</label>
-                    <input type="datetime-local" id="job-due-date" class="form-control" readonly style="background-color: var(--border-color);">
-                </div>
-                
-                <div class="form-group">
-                    <label>Tim / Teknisi Bertugas</label>
-                    <input type="text" id="job-technician" class="form-control" placeholder="Nama Teknisi / Vendor">
-                    <small id="tech-role-notice" style="color: var(--primary); display: none; margin-top: 5px;">*Diisi otomatis sesuai akun Anda.</small>
-                </div>
+        <!-- Top Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <h1>🛠️ Home-Service</h1>
             </div>
             
-            <div class="form-group">
-                        <label>📍 Lokasi Pekerjaan</label>
-                        <div style="display:flex; gap:0.8rem;">
-                            <input type="text" id="job-location" readonly placeholder="Klik Ambil GPS..." style="flex:1; background:#f1f5f9;">
-                            <button class="btn-secondary" onclick="getLocation()">Ambil GPS</button>
-                        </div>
+            <div class="profile-area">
+                <button class="profile-btn" onclick="toggleProfile()">
+                    <div class="profile-info">
+                        <span class="profile-name" id="user-name-display">...</span>
+                        <span class="profile-role" id="user-role-display">...</span>
                     </div>
-
-                    <div class="form-group">
-                        <label>📷 Dokumentasi</label>
-                        <div class="photo-grid">
-                            <div class="photo-box" id="box-before" onclick="triggerCamera('before')">
-                                <span id="label-before">Ambil Foto<br><b>BEFORE</b></span>
-                                <img id="img-before" class="hidden">
-                            </div>
-                            <div class="photo-box" id="box-after" onclick="triggerCamera('after')">
-                                <span id="label-after">Ambil Foto<br><b>AFTER</b></span>
-                                <img id="img-after" class="hidden">
-                            </div>
-                        </div>
-                        <!-- Hidden file inputs -->
-                        <input type="file" accept="image/*" capture="environment" id="cam-before" class="hidden" onchange="handlePhoto(event, 'before')">
-                        <input type="file" accept="image/*" capture="environment" id="cam-after" class="hidden" onchange="handlePhoto(event, 'after')">
+                    <div class="profile-avatar" id="header-avatar-container">
+                        <span id="header-avatar-initials">--</span>
+                        <img id="header-avatar-img" style="display:none; width:100%; height:100%; border-radius:50%; object-fit:cover;">
                     </div>
-
+                </button>
+                
+                <div class="profile-dropdown" id="profile-menu">
+                    <h3>Profil Pengguna</h3>
+                    <div class="form-group" style="margin-top: 1rem; text-align: center;">
+                         <div class="avatar-edit" onclick="document.getElementById('avatar-upload').click()">
+                             <img id="edit-avatar-preview" style="display:none; width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto; cursor:pointer;">
+                             <div id="edit-avatar-initials" style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--secondary)); color:white; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:1.5rem; font-weight:bold; cursor:pointer;">--</div>
+                         </div>
+                         <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
+                         <small style="color:var(--primary); cursor:pointer; display:block; margin-top:0.5rem;" onclick="document.getElementById('avatar-upload').click()">Ubah Foto</small>
+                    </div>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="edit-name" class="form-control">
+                    </div>
                     <div class="form-group">
-                        <label>Catatan Tambahan (Kendala)</label>
-                        <textarea id="job-notes" placeholder="Tulis jika ada kendala atau temuan khusus..."></textarea>
+                        <label>Role</label>
+                        <input type="text" id="edit-role" class="form-control" readonly style="background:#f1f5f9; color:var(--text-muted);">
+                    </div>
+                    <button class="btn-primary" style="width: 100%; padding: 0.6rem; margin-bottom:0.5rem;" onclick="saveProfile()">Simpan Perubahan</button>
+                    <button class="btn-secondary" style="width: 100%; padding: 0.6rem; color:var(--danger); border-color:var(--danger);" onclick="doLogout()">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Layout Wrapper -->
+        <div class="app-wrapper">
+            
+            <!-- Sidebar Navigation -->
+            <aside class="sidebar" id="app-sidebar">
+                <a href="#" class="nav-item active" onclick="switchView('home', this)">
+                    <span class="nav-icon">🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" onclick="switchView('history', this)">
+                    <span class="nav-icon">📋</span>
+                    <span>Riwayat SPK</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-admin" style="display:none;" onclick="switchView('admin', this)">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Admin Panel</span>
+                </a>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main id="app-content" class="main-content">
+                
+                <!-- View: Home -->
+                <div id="view-home" class="view active">
+                    <h2>Tugas Aktif Anda</h2>
+                    <ul id="active-jobs-list" class="job-list">
+                        <li style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">Memuat tugas...</li>
+                    </ul>
+                </div>
+
+                <!-- View: Checklist (Job Details) -->
+                <div id="view-checklist" class="view">
+                    <button class="back-btn" onclick="switchView('home')">← Kembali ke Dashboard</button>
+                    <h2 id="checklist-title">Detail SPK</h2>
+                    <div class="glass-panel" style="margin-bottom:1.5rem;">
+                        <p><strong>Cabang:</strong> <span id="checklist-branch"></span></p>
+                        <p><strong>Progress:</strong> <span id="checklist-progress">0/0 Selesai</span></p>
+                        
+                        <h3 style="margin-top:1.5rem;">Daftar Aset AC</h3>
+                        <ul id="asset-list" class="job-list">
+                            <!-- Injected dynamically -->
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- View: Progress Form (Upload Photo per AC) -->
+                <div id="view-progress-form" class="view">
+                    <button class="back-btn" onclick="switchView('checklist')">← Kembali ke Checklist</button>
+                    <h2 id="progress-title">Update AC</h2>
+                    <div class="glass-panel">
+                        <input type="hidden" id="prog-asset-id">
+                        
+                        <div class="form-group">
+                            <label>📷 Dokumentasi (Before & After)</label>
+                            <div class="photo-grid">
+                                <div class="photo-box" id="box-prog-before" onclick="document.getElementById('cam-prog-before').click()">
+                                    <span id="lbl-prog-before">Ambil Foto<br><b>BEFORE</b></span>
+                                    <img id="img-prog-before" class="hidden">
+                                </div>
+                                <div class="photo-box" id="box-prog-after" onclick="document.getElementById('cam-prog-after').click()">
+                                    <span id="lbl-prog-after">Ambil Foto<br><b>AFTER</b></span>
+                                    <img id="img-prog-after" class="hidden">
+                                </div>
+                            </div>
+                            <input type="file" accept="image/*" capture="environment" id="cam-prog-before" class="hidden" onchange="previewProgressPhoto(event, 'before')">
+                            <input type="file" accept="image/*" capture="environment" id="cam-prog-after" class="hidden" onchange="previewProgressPhoto(event, 'after')">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Catatan Pengerjaan (Opsional)</label>
+                            <textarea id="prog-notes" placeholder="Ada kendala atau part yang diganti?"></textarea>
+                        </div>
+                        
+                        <button class="btn-primary" style="width:100%;" onclick="submitProgress()">Simpan Laporan AC Ini</button>
+                    </div>
+                </div>
+
+                <!-- View: Admin Panel -->
+                <div id="view-admin" class="view">
+                    <h2>Admin Panel</h2>
+                    
+                    <div class="glass-panel" style="margin-bottom:2rem;">
+                        <h3>1. Buat Surat Perintah Kerja (SPK)</h3>
+                        <div class="form-group">
+                            <label>Judul Tugas</label>
+                            <input type="text" id="spk-title" placeholder="Misal: Maintenance Rutin Q1" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Cabang / Lokasi</label>
+                            <input type="text" id="spk-branch" placeholder="Misal: Cabang Sudirman" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Pilih Teknisi (User ID)</label>
+                            <input type="number" id="spk-tech-id" placeholder="ID Teknisi (misal: 2)" class="form-control">
+                            <small style="color:var(--text-muted);">*Cari ID Teknisi di database sementara ini</small>
+                        </div>
+                        <button class="btn-primary" onclick="adminCreateSPK()">Buat SPK Baru</button>
                     </div>
                     
-                    <button class="btn-primary" onclick="submitJob()" style="width: 100%; margin-top: 1rem;">🚀 Simpan & Kirim Laporan</button>
+                    <div class="glass-panel">
+                        <h3>2. Master Data Aset AC</h3>
+                        <div class="form-group">
+                            <label>Cabang</label>
+                            <input type="text" id="asset-branch" placeholder="Cabang Sudirman" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Ruangan</label>
+                            <input type="text" id="asset-room" placeholder="Ruang Meeting Utama" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipe AC</label>
+                            <input type="text" id="asset-type" placeholder="Daikin Split 1 PK" class="form-control">
+                        </div>
+                        <button class="btn-secondary" onclick="adminCreateAsset()">Tambahkan Aset</button>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- View: History -->
-            <div id="view-history" class="view">
-                <h2>Riwayat Pekerjaan</h2>
-                <ul id="history-list" class="job-list">
-                    <li style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">Memuat riwayat...</li>
-                </ul>
-            </div>
-        </main>
+
+                <!-- View: History -->
+                <div id="view-history" class="view">
+                    <h2>Riwayat SPK Selesai</h2>
+                    <ul id="history-list" class="job-list">
+                        <li style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">Memuat riwayat...</li>
+                    </ul>
+                </div>
+                
+            </main>
+        </div>
     </div>
 
     <script type="module" src="/app.js"></script>
