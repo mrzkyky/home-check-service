@@ -239,7 +239,7 @@ async def send_kwh_email(
     # Setup dummy/central credentials here
     SMTP_SERVER = "smtp.gmail.com"
     SMTP_PORT = 465
-    SMTP_USER = "morizkynurfadil8@gmail.com" # USER SHOULD CHANGE THIS
+    SMTP_USER = "mohrizkynurfadil8@gmail.com"
     SMTP_PASS = "***REMOVED***"   # App Password tanpa spasi
     
     # Save photo temporarily to attach
