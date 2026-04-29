@@ -39,7 +39,7 @@
             left: -5%;
             width: 400px;
             height: 400px;
-            background: rgba(59, 130, 246, 0.3);
+            background: rgba(20, 20, 184, 0.3);
             border-radius: 50%;
         }
 
@@ -87,7 +87,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            background: linear-gradient(135deg, #1414b8, #2d2dd4);
             position: relative;
         }
 
@@ -114,8 +114,8 @@
 
         .login-input:focus {
             background: #ffffff;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            border-color: #1414b8;
+            box-shadow: 0 0 0 4px rgba(20, 20, 184, 0.1);
         }
 
         .login-label {
@@ -132,21 +132,21 @@
             width: 100%;
             padding: 0.9rem;
             border-radius: 12px;
-            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            background: linear-gradient(135deg, #1414b8, #2d2dd4);
             color: white;
             font-weight: 700;
             font-size: 1rem;
             border: none;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 15px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 8px 15px rgba(20, 20, 184, 0.2);
             margin-top: 1.5rem;
         }
 
         .login-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 20px rgba(37, 99, 235, 0.3);
-            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            box-shadow: 0 12px 20px rgba(20, 20, 184, 0.3);
+            background: linear-gradient(135deg, #0e0e9e, #1414b8);
         }
 
         .switch-mode-text {
@@ -159,7 +159,7 @@
         }
 
         .switch-mode-text span {
-            color: #2563eb;
+            color: #1414b8;
             font-weight: 700;
         }
 
@@ -454,45 +454,72 @@
                         <div id="apar-fields"
                             style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
                             <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Cek APAR</h4>
-                            <div class="form-group">
-                                <label>Lokasi Kantor / Branch</label>
-                                <select id="job-apar-branch" class="form-control" onchange="loadAparLocations()">
-                                    <option value="">Pilih Cabang...</option>
-                                </select>
+                            
+                            <!-- Pilih dari lokasi yang sudah ada -->
+                            <div id="apar-existing-section">
+                                <div class="form-group">
+                                    <label>Cabang</label>
+                                    <select id="job-apar-branch" class="form-control" onchange="loadAparLocations()">
+                                        <option value="">Pilih Cabang...</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Pilih Lokasi APAR</label>
+                                    <select id="job-apar-location" class="form-control" onchange="showAparDates()">
+                                        <option value="">Pilih Lokasi...</option>
+                                    </select>
+                                </div>
+                                <div id="apar-dates-info"
+                                    style="display:none; padding:10px; background:#e2e8f0; border-radius:6px; margin-top:-0.5rem; margin-bottom:1rem;">
+                                    <p style="margin:0; font-size:0.9rem;"><strong>Tgl Pengisian:</strong> <span id="lbl-apar-fill">-</span></p>
+                                    <p style="margin:0; font-size:0.9rem;"><strong>Tgl Expired Sebelumnya:</strong> <span id="lbl-apar-expiry">-</span></p>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Pilih Lokasi APAR</label>
-                                <select id="job-apar-location" class="form-control" onchange="showAparDates()">
-                                    <option value="">Pilih Lokasi...</option>
-                                </select>
+
+                            <!-- Atau tambah lokasi baru di sini -->
+                            <div style="margin-bottom:1rem;">
+                                <button type="button" onclick="toggleNewAparForm()" style="background: transparent; border: 1px dashed var(--primary); color: var(--primary); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer;">➕ Lokasi ini belum ada? Tambah baru di sini</button>
                             </div>
-                            <div id="apar-dates-info"
-                                style="display:none; padding:10px; background:#e2e8f0; border-radius:6px; margin-top:10px;">
-                                <p style="margin:0; font-size:0.9rem;"><strong>Tgl Pengisian:</strong> <span
-                                        id="lbl-apar-fill">-</span></p>
-                                <p style="margin:0; font-size:0.9rem;"><strong>Tgl Expired Sebelumnya:</strong> <span
-                                        id="lbl-apar-expiry">-</span></p>
+                            <div id="apar-new-form" style="display:none; background:#f8fafc; border:1px solid var(--border-color); border-radius:8px; padding:1rem; margin-bottom:1rem;">
+                                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.8rem;">📍 Isi data APAR baru — akan otomatis tersimpan saat laporan dikirim.</p>
+                                <div class="form-group">
+                                    <label>Cabang Baru</label>
+                                    <input type="text" id="apar-new-branch" placeholder="Contoh: Cabang Sudirman" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Lokasi / Posisi APAR</label>
+                                    <input type="text" id="apar-new-location" placeholder="Contoh: Lorong Lantai 2" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label>Tanggal Pengisian</label>
+                                    <input type="date" id="apar-new-fill" class="form-control">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Tanggal Kadaluarsa (Expired)</label>
+                                    <input type="date" id="apar-new-expiry-init" class="form-control">
+                                </div>
                             </div>
-                            <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border-color);">
+
+                            <hr style="margin: 1rem 0; border: 0; border-top: 1px solid var(--border-color);">
                             <div class="form-group">
                                 <label>Kondisi Segel</label>
                                 <select id="job-apar-segel" class="form-control">
-                                    <option value="Aman">Aman</option>
-                                    <option value="Rusak">Rusak</option>
+                                    <option value="Aman">✅ Aman</option>
+                                    <option value="Rusak">❌ Rusak</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Kondisi Bar (Tekanan)</label>
                                 <select id="job-apar-bar" class="form-control"
-                                    style="background:#f1f5f9; cursor:not-allowed;"
+                                    style="background:#f1f5f9;"
                                     onchange="if(this.value!=='Normal'){alert('Bar APAR harus Normal!'); this.value='Normal';}">
-                                    <option value="Normal">Normal</option>
-                                    <option value="Tidak Normal" disabled>Tidak Normal</option>
+                                    <option value="Normal">✅ Normal</option>
+                                    <option value="Tidak Normal" disabled>⚠️ Tidak Normal</option>
                                 </select>
-                                <small style="color:var(--text-muted);">*Kondisi Bar harus Normal</small>
+                                <small style="color:var(--text-muted);">*Kondisi Bar harus Normal untuk laporan valid</small>
                             </div>
                             <div class="form-group">
-                                <label>Update Tanggal Expired (Jika diganti/diisi ulang)</label>
+                                <label>Update Tanggal Expired (Jika tabung diisi ulang hari ini)</label>
                                 <input type="date" id="job-apar-new-expiry" class="form-control">
                             </div>
                         </div>
@@ -501,8 +528,10 @@
                         <div id="kwh-fields"
                             style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
                             <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Pengajuan Pulsa KWH</h4>
+                            
+                            <!-- Pilih dari lokasi yang sudah ada -->
                             <div class="form-group">
-                                <label>Lokasi Kantor / Branch</label>
+                                <label>Cabang</label>
                                 <select id="job-kwh-branch" class="form-control" onchange="loadKwhLocations()">
                                     <option value="">Pilih Cabang...</option>
                                 </select>
@@ -513,6 +542,23 @@
                                     <option value="">Pilih Lokasi...</option>
                                 </select>
                             </div>
+
+                            <!-- Atau tambah lokasi baru -->
+                            <div style="margin-bottom:1rem;">
+                                <button type="button" onclick="toggleNewKwhForm()" style="background: transparent; border: 1px dashed var(--primary); color: var(--primary); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; cursor: pointer;">➕ Lokasi ini belum ada? Tambah baru di sini</button>
+                            </div>
+                            <div id="kwh-new-form" style="display:none; background:#f8fafc; border:1px solid var(--border-color); border-radius:8px; padding:1rem; margin-bottom:1rem;">
+                                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.8rem;">📍 Isi data KWH baru — akan otomatis tersimpan saat laporan dikirim.</p>
+                                <div class="form-group">
+                                    <label>Cabang Baru</label>
+                                    <input type="text" id="kwh-new-branch" placeholder="Contoh: Cabang Sudirman" class="form-control">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Lokasi KWH</label>
+                                    <input type="text" id="kwh-new-location" placeholder="Contoh: Panel Listrik Utama" class="form-control">
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <label>Kirim Email Ke (Penerima)</label>
                                 <input type="email" id="kwh-recipient-email" class="form-control"

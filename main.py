@@ -239,8 +239,8 @@ async def send_kwh_email(
     # Setup dummy/central credentials here
     SMTP_SERVER = "smtp.gmail.com"
     SMTP_PORT = 587
-    SMTP_USER = "bot@homecheck.my.id" # USER SHOULD CHANGE THIS
-    SMTP_PASS = "APP_PASSWORD_HERE"   # USER SHOULD CHANGE THIS
+    SMTP_USER = "morizkynurfadil8@gmail.com" # USER SHOULD CHANGE THIS
+    SMTP_PASS = "dhgx wjcy toqs suwk"   # USER SHOULD CHANGE THIS
     
     # Save photo temporarily to attach
     ext = photo.filename.split('.')[-1]

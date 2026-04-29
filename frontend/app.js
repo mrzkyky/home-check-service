@@ -731,6 +731,28 @@ window.loadKwhLocations = function() {
     if(branch) allAdhocData.kwh.filter(a => a.branch === branch).forEach(a => select.innerHTML += `<option value="${a.kwh_location}">${a.kwh_location}</option>`);
 }
 
+window.toggleNewAparForm = function() {
+    let f = document.getElementById('apar-new-form');
+    let isOpen = f.style.display !== 'none';
+    f.style.display = isOpen ? 'none' : 'block';
+    // Kalau buka form baru, clear dropdown pilihan lama
+    if (!isOpen) {
+        document.getElementById('job-apar-branch').value = '';
+        document.getElementById('job-apar-location').innerHTML = '<option value="">Pilih Lokasi...</option>';
+        document.getElementById('apar-dates-info').style.display = 'none';
+    }
+}
+
+window.toggleNewKwhForm = function() {
+    let f = document.getElementById('kwh-new-form');
+    let isOpen = f.style.display !== 'none';
+    f.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) {
+        document.getElementById('job-kwh-branch').value = '';
+        document.getElementById('job-kwh-location').innerHTML = '<option value="">Pilih Lokasi...</option>';
+    }
+}
+
 window.loadRoomsForAdHoc = function() {
     let branch = document.getElementById('job-branch').value;
     let roomSelect = document.getElementById('job-room');
@@ -767,8 +789,29 @@ window.submitAdHocJob = async function() {
         branch = document.getElementById('job-server-branch').value; 
         locationDetail = document.getElementById('job-server-location').value;
     } else if (isApar) {
-        branch = document.getElementById('job-apar-branch').value; 
-        locationDetail = document.getElementById('job-apar-location').value;
+        let isNewApar = document.getElementById('apar-new-form').style.display !== 'none';
+        
+        if (isNewApar) {
+            // Simpan lokasi APAR baru ke database dulu
+            let newBranch = document.getElementById('apar-new-branch').value;
+            let newLoc = document.getElementById('apar-new-location').value;
+            let newFill = document.getElementById('apar-new-fill').value;
+            let newExpInit = document.getElementById('apar-new-expiry-init').value;
+            if (!newBranch || !newLoc) return alert('Isi Cabang dan Lokasi APAR baru!');
+            try {
+                let r = await fetch(`${API_BASE}/apar_assets`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({branch: newBranch, apar_location: newLoc, fill_date: newFill, expiry_date: newExpInit})
+                });
+                if (!r.ok) return alert('Gagal simpan lokasi APAR baru!');
+            } catch(e) { return alert('Error simpan APAR baru'); }
+            branch = newBranch;
+            locationDetail = newLoc;
+        } else {
+            branch = document.getElementById('job-apar-branch').value;
+            locationDetail = document.getElementById('job-apar-location').value;
+        }
         
         let segel = document.getElementById('job-apar-segel').value;
         let bar = document.getElementById('job-apar-bar').value;
@@ -776,11 +819,10 @@ window.submitAdHocJob = async function() {
         
         notes += `\n[Laporan APAR] Segel: ${segel}, Bar: ${bar}`;
         
-        if (newExpiry) {
+        if (newExpiry && !isNewApar) {
             notes += `, Expired Diupdate: ${newExpiry}`;
             let aparObj = allAdhocData.apar.find(a => a.apar_location === locationDetail);
             if (aparObj) {
-                // Background update
                 fetch(`${API_BASE}/apar_assets/${aparObj.id}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
@@ -790,8 +832,27 @@ window.submitAdHocJob = async function() {
         }
         
     } else if (isKwh) {
-        branch = document.getElementById('job-kwh-branch').value; 
-        locationDetail = document.getElementById('job-kwh-location').value;
+        let isNewKwh = document.getElementById('kwh-new-form').style.display !== 'none';
+        
+        if (isNewKwh) {
+            // Simpan lokasi KWH baru ke database dulu
+            let newBranch = document.getElementById('kwh-new-branch').value;
+            let newLoc = document.getElementById('kwh-new-location').value;
+            if (!newBranch || !newLoc) return alert('Isi Cabang dan Lokasi KWH baru!');
+            try {
+                let r = await fetch(`${API_BASE}/kwh_assets`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({branch: newBranch, kwh_location: newLoc})
+                });
+                if (!r.ok) return alert('Gagal simpan lokasi KWH baru!');
+            } catch(e) { return alert('Error simpan KWH baru'); }
+            branch = newBranch;
+            locationDetail = newLoc;
+        } else {
+            branch = document.getElementById('job-kwh-branch').value;
+            locationDetail = document.getElementById('job-kwh-location').value;
+        }
         let recipient = document.getElementById('kwh-recipient-email').value;
         
         if (!bFile) return alert("Foto KWH Wajib dilampirkan!");
