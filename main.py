@@ -240,7 +240,7 @@ async def send_kwh_email(
     SMTP_SERVER = "smtp.gmail.com"
     SMTP_PORT = 587
     SMTP_USER = "morizkynurfadil8@gmail.com" # USER SHOULD CHANGE THIS
-    SMTP_PASS = "dpvvdypshvuefawv"   # App Password tanpa spasi
+    SMTP_PASS = "***REMOVED***"   # App Password tanpa spasi
     
     # Save photo temporarily to attach
     ext = photo.filename.split('.')[-1]
