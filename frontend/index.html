@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,22 +8,23 @@
     <link rel="stylesheet" href="/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
+
 <body>
-    
+
     <!-- LOGIN PAGE -->
     <style>
         /* Login Redesign Styles (Adjusted) */
         #login-container {
-            display: flex; 
-            height: 100vh; 
-            align-items: center; 
-            justify-content: center; 
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
             background: linear-gradient(135deg, #f0f4f8, #e2e8f0);
             position: relative;
             overflow: hidden;
             font-family: 'Inter', sans-serif;
         }
-        
+
         /* Animated Background Elements */
         .login-bg-shape {
             position: absolute;
@@ -31,24 +33,47 @@
             z-index: 0;
             animation: float 10s infinite ease-in-out alternate;
         }
-        .shape-1 { top: -5%; left: -5%; width: 400px; height: 400px; background: rgba(59, 130, 246, 0.3); border-radius: 50%; }
-        .shape-2 { bottom: -5%; right: -5%; width: 500px; height: 500px; background: rgba(99, 102, 241, 0.3); border-radius: 50%; animation-delay: -5s; }
-        
+
+        .shape-1 {
+            top: -5%;
+            left: -5%;
+            width: 400px;
+            height: 400px;
+            background: rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+        }
+
+        .shape-2 {
+            bottom: -5%;
+            right: -5%;
+            width: 500px;
+            height: 500px;
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            animation-delay: -5s;
+        }
+
         @keyframes float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(30px, 50px) scale(1.05); }
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(30px, 50px) scale(1.05);
+            }
         }
 
         .login-wrapper {
             display: flex;
-            width: 750px; /* Scaled down */
+            width: 750px;
+            /* Scaled down */
             max-width: 90%;
             min-height: 480px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(255,255,255,1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 1);
             overflow: hidden;
             z-index: 1;
             position: relative;
@@ -86,13 +111,13 @@
             font-size: 0.95rem;
             outline: none;
         }
-        
+
         .login-input:focus {
             background: #ffffff;
             border-color: #3b82f6;
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
-        
+
         .login-label {
             display: block;
             font-size: 0.75rem;
@@ -132,16 +157,30 @@
             cursor: pointer;
             transition: color 0.3s;
         }
+
         .switch-mode-text span {
             color: #2563eb;
             font-weight: 700;
         }
-        .switch-mode-text:hover { color: #1e293b; }
+
+        .switch-mode-text:hover {
+            color: #1e293b;
+        }
 
         @media (max-width: 768px) {
-            .login-wrapper { flex-direction: column; width: 90%; }
-            .login-left { padding: 2.5rem 1.5rem; flex: none; }
-            .login-right { padding: 2rem 1.5rem; }
+            .login-wrapper {
+                flex-direction: column;
+                width: 90%;
+            }
+
+            .login-left {
+                padding: 2.5rem 1.5rem;
+                flex: none;
+            }
+
+            .login-right {
+                padding: 2rem 1.5rem;
+            }
         }
     </style>
 
@@ -153,20 +192,26 @@
         <div class="login-wrapper">
             <!-- Left Branding Side -->
             <div class="login-left">
-                <img src="./logo.png" alt="Home-Service Logo" style="width: 110px; height: 110px; object-fit: contain; margin-bottom: 1.5rem;">
+                <img src="./logo.png" alt="Home-Service Logo"
+                    style="width: 110px; height: 110px; object-fit: contain; margin-bottom: 1.5rem;">
                 <div>
-                    <h1 style="color: white; font-size: 1.7rem; font-weight: 800; line-height: 1.3; margin-bottom: 0.5rem; letter-spacing: -0.5px;">Sistem Manajemen<br>Aset & SPK</h1>
-                    <p style="color: rgba(255,255,255,0.85); font-size: 0.95rem; line-height: 1.5; max-width: 250px; margin: 0 auto;">Sistem terpadu untuk pelaporan tugas dan maintenance.</p>
+                    <h1
+                        style="color: white; font-size: 1.7rem; font-weight: 800; line-height: 1.3; margin-bottom: 0.5rem; letter-spacing: -0.5px;">
+                        Sistem Manajemen<br>Aset & SPK</h1>
+                    <p
+                        style="color: rgba(255,255,255,0.85); font-size: 0.95rem; line-height: 1.5; max-width: 250px; margin: 0 auto;">
+                        Sistem terpadu untuk pelaporan tugas dan maintenance.</p>
                 </div>
             </div>
 
             <!-- Right Form Side -->
             <div class="login-right">
                 <div style="margin-bottom: 2rem;">
-                    <h2 style="color: #1e293b; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.4rem;">Selamat Datang! 👋</h2>
+                    <h2 style="color: #1e293b; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.4rem;">Selamat
+                        Datang! 👋</h2>
                     <p style="color: #64748b; font-size: 0.95rem;">Silakan masuk ke akun Anda.</p>
                 </div>
-                
+
                 <div id="login-form">
                     <div style="margin-bottom: 1.2rem;">
                         <label class="login-label">Email Address</label>
@@ -177,9 +222,10 @@
                         <input type="password" id="login-password" placeholder="••••••••" class="login-input">
                     </div>
                     <button class="login-btn" onclick="doLogin()">Sign In</button>
-                    <p class="switch-mode-text" onclick="toggleAuthMode()">Belum punya akun? <span>Daftar di sini</span></p>
+                    <p class="switch-mode-text" onclick="toggleAuthMode()">Belum punya akun? <span>Daftar di sini</span>
+                    </p>
                 </div>
-                
+
                 <div id="register-form" style="display:none;">
                     <div style="margin-bottom: 1.2rem;">
                         <label class="login-label">Nama Lengkap</label>
@@ -202,17 +248,17 @@
 
     <!-- MAIN APP PAGE -->
     <div id="app-container" style="display:none; height:100vh; flex-direction:column;">
-        
+
         <!-- Top Header -->
         <header class="app-header">
             <div class="logo-area">
                 <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="./logo.png" alt="Logo" style="height: 35px; width: 35px; object-fit: contain;">
+                    <img src="./logo-dashboard.png" alt="Logo" style="height: 35px; width: 35px; object-fit: contain;">
                     <h1>Home-Service</h1>
                 </div>
             </div>
-            
+
             <div class="profile-area">
                 <button class="profile-btn" onclick="toggleProfile()">
                     <div class="profile-info">
@@ -221,19 +267,25 @@
                     </div>
                     <div class="profile-avatar" id="header-avatar-container">
                         <span id="header-avatar-initials">--</span>
-                        <img id="header-avatar-img" style="display:none; width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                        <img id="header-avatar-img"
+                            style="display:none; width:100%; height:100%; border-radius:50%; object-fit:cover;">
                     </div>
                 </button>
-                
+
                 <div class="profile-dropdown" id="profile-menu">
                     <h3>Profil Pengguna</h3>
                     <div class="form-group" style="margin-top: 1rem; text-align: center;">
-                         <div class="avatar-edit" onclick="document.getElementById('avatar-upload').click()">
-                             <img id="edit-avatar-preview" style="display:none; width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto; cursor:pointer;">
-                             <div id="edit-avatar-initials" style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--secondary)); color:white; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:1.5rem; font-weight:bold; cursor:pointer;">--</div>
-                         </div>
-                         <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="handleAvatarUpload(event)">
-                         <small style="color:var(--primary); cursor:pointer; display:block; margin-top:0.5rem;" onclick="document.getElementById('avatar-upload').click()">Ubah Foto</small>
+                        <div class="avatar-edit" onclick="document.getElementById('avatar-upload').click()">
+                            <img id="edit-avatar-preview"
+                                style="display:none; width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto; cursor:pointer;">
+                            <div id="edit-avatar-initials"
+                                style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--secondary)); color:white; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:1.5rem; font-weight:bold; cursor:pointer;">
+                                --</div>
+                        </div>
+                        <input type="file" id="avatar-upload" accept="image/*" class="hidden"
+                            onchange="handleAvatarUpload(event)">
+                        <small style="color:var(--primary); cursor:pointer; display:block; margin-top:0.5rem;"
+                            onclick="document.getElementById('avatar-upload').click()">Ubah Foto</small>
                     </div>
                     <div class="form-group" style="margin-top: 1rem;">
                         <label>Nama Lengkap</label>
@@ -241,21 +293,26 @@
                     </div>
                     <div class="form-group">
                         <label>Role</label>
-                        <input type="text" id="edit-role" class="form-control" readonly style="background:#f1f5f9; color:var(--text-muted);">
+                        <input type="text" id="edit-role" class="form-control" readonly
+                            style="background:#f1f5f9; color:var(--text-muted);">
                     </div>
                     <div class="form-group">
                         <label>Ganti Password (Opsional)</label>
-                        <input type="password" id="edit-password" class="form-control" placeholder="Kosongkan jika tak diubah">
+                        <input type="password" id="edit-password" class="form-control"
+                            placeholder="Kosongkan jika tak diubah">
                     </div>
-                    <button class="btn-primary" style="width: 100%; padding: 0.6rem; margin-bottom:0.5rem;" onclick="saveProfile()">Simpan Perubahan</button>
-                    <button class="btn-secondary" style="width: 100%; padding: 0.6rem; color:var(--danger); border-color:var(--danger);" onclick="doLogout()">Logout</button>
+                    <button class="btn-primary" style="width: 100%; padding: 0.6rem; margin-bottom:0.5rem;"
+                        onclick="saveProfile()">Simpan Perubahan</button>
+                    <button class="btn-secondary"
+                        style="width: 100%; padding: 0.6rem; color:var(--danger); border-color:var(--danger);"
+                        onclick="doLogout()">Logout</button>
                 </div>
             </div>
         </header>
 
         <!-- Layout Wrapper -->
         <div class="app-wrapper">
-            
+
             <!-- Sidebar Navigation -->
             <aside class="sidebar" id="app-sidebar">
                 <a href="#" class="nav-item active" onclick="switchView('home', this)">
@@ -274,7 +331,7 @@
 
             <!-- Main Content Area -->
             <main id="app-content" class="main-content">
-                
+
                 <!-- View: Home -->
                 <div id="view-home" class="view active">
                     <h2>Dashboard Menu</h2>
@@ -299,86 +356,189 @@
 
                     <h2>Tugas Aktif (SPK)</h2>
                     <ul id="active-jobs-list" class="job-list">
-                        <li style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">Memuat tugas...</li>
+                        <li
+                            style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">
+                            Memuat tugas...</li>
                     </ul>
+
+                    <h2 style="margin-top: 2rem;">Manajemen Data (User)</h2>
+                    <div class="task-grid" style="margin-bottom: 2.5rem;">
+                        <div class="task-card" onclick="openAddMaster('apar')"
+                            style="background: linear-gradient(135deg, #f8fafc, #f1f5f9);">
+                            <span class="icon">➕</span>
+                            <h3>Tambah Lokasi APAR</h3>
+                        </div>
+                        <div class="task-card" onclick="openAddMaster('kwh')"
+                            style="background: linear-gradient(135deg, #f8fafc, #f1f5f9);">
+                            <span class="icon">➕</span>
+                            <h3>Tambah Lokasi KWH</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View: Add Master Data (User) -->
+                <div id="view-add-master" class="view">
+                    <button class="back-btn" onclick="switchView('home')">← Kembali ke Dashboard</button>
+                    <h2 id="add-master-title">Tambah Data</h2>
+
+                    <div class="glass-panel" id="add-master-apar" style="display:none;">
+                        <h3>Tambah Lokasi APAR Baru</h3>
+                        <div class="form-group">
+                            <label>Cabang</label>
+                            <input type="text" id="user-apar-branch" placeholder="Contoh: Cabang Sudirman"
+                                class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Lokasi / Posisi APAR</label>
+                            <input type="text" id="user-apar-location" placeholder="Contoh: Lorong Lantai 2"
+                                class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal Pengisian Terakhir</label>
+                            <input type="date" id="user-apar-fill" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal Kadaluarsa (Expired)</label>
+                            <input type="date" id="user-apar-expiry" class="form-control">
+                        </div>
+                        <button class="btn-primary" onclick="userSubmitApar()">Simpan APAR Baru</button>
+                    </div>
+
+                    <div class="glass-panel" id="add-master-kwh" style="display:none;">
+                        <h3>Tambah Lokasi KWH Meter Baru</h3>
+                        <div class="form-group">
+                            <label>Cabang</label>
+                            <input type="text" id="user-kwh-branch" placeholder="Contoh: Cabang Sudirman"
+                                class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Lokasi KWH</label>
+                            <input type="text" id="user-kwh-location" placeholder="Contoh: Panel Listrik Utama"
+                                class="form-control">
+                        </div>
+                        <button class="btn-primary" onclick="userSubmitKwh()">Simpan KWH Baru</button>
+                    </div>
                 </div>
 
                 <!-- View: Job Form (Laporan Biasa) -->
                 <div id="view-job-form" class="view">
                     <button class="back-btn" onclick="switchView('home')">← Kembali ke Dashboard</button>
                     <h2 id="job-form-title">Laporan Tugas</h2>
-                    
+
                     <div class="glass-panel" style="margin-bottom: 2rem;">
                         <div class="form-group">
                             <label>Keterangan Unit / Pekerjaan</label>
-                            <input type="text" id="job-title" placeholder="Contoh: AC Bocor, Kulkas Mati" class="form-control">
+                            <input type="text" id="job-title" placeholder="Contoh: AC Bocor, Kulkas Mati"
+                                class="form-control">
                         </div>
 
                         <!-- Khusus Server -->
-                        <div id="server-fields" style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
+                        <div id="server-fields"
+                            style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
                             <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Maintenance Server</h4>
                             <div class="form-group">
                                 <label>Lokasi Kantor / Branch</label>
-                                <select id="job-server-branch" class="form-control" onchange="loadServerLocations()"><option value="">Pilih Cabang...</option></select>
+                                <select id="job-server-branch" class="form-control" onchange="loadServerLocations()">
+                                    <option value="">Pilih Cabang...</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Pilih Lokasi Server</label>
-                                <select id="job-server-location" class="form-control"><option value="">Pilih Lokasi...</option></select>
+                                <select id="job-server-location" class="form-control">
+                                    <option value="">Pilih Lokasi...</option>
+                                </select>
                             </div>
                         </div>
 
                         <!-- Khusus APAR -->
-                        <div id="apar-fields" style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
+                        <div id="apar-fields"
+                            style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
                             <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Cek APAR</h4>
                             <div class="form-group">
                                 <label>Lokasi Kantor / Branch</label>
-                                <select id="job-apar-branch" class="form-control" onchange="loadAparLocations()"><option value="">Pilih Cabang...</option></select>
+                                <select id="job-apar-branch" class="form-control" onchange="loadAparLocations()">
+                                    <option value="">Pilih Cabang...</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Pilih Lokasi APAR</label>
-                                <select id="job-apar-location" class="form-control" onchange="showAparDates()"><option value="">Pilih Lokasi...</option></select>
+                                <select id="job-apar-location" class="form-control" onchange="showAparDates()">
+                                    <option value="">Pilih Lokasi...</option>
+                                </select>
                             </div>
-                            <div id="apar-dates-info" style="display:none; padding:10px; background:#e2e8f0; border-radius:6px; margin-top:10px;">
-                                <p style="margin:0; font-size:0.9rem;"><strong>Tgl Pengisian:</strong> <span id="lbl-apar-fill">-</span></p>
-                                <p style="margin:0; font-size:0.9rem;"><strong>Tgl Expired:</strong> <span id="lbl-apar-expiry">-</span></p>
+                            <div id="apar-dates-info"
+                                style="display:none; padding:10px; background:#e2e8f0; border-radius:6px; margin-top:10px;">
+                                <p style="margin:0; font-size:0.9rem;"><strong>Tgl Pengisian:</strong> <span
+                                        id="lbl-apar-fill">-</span></p>
+                                <p style="margin:0; font-size:0.9rem;"><strong>Tgl Expired Sebelumnya:</strong> <span
+                                        id="lbl-apar-expiry">-</span></p>
+                            </div>
+                            <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border-color);">
+                            <div class="form-group">
+                                <label>Kondisi Segel</label>
+                                <select id="job-apar-segel" class="form-control">
+                                    <option value="Aman">Aman</option>
+                                    <option value="Rusak">Rusak</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Kondisi Bar (Tekanan)</label>
+                                <select id="job-apar-bar" class="form-control"
+                                    style="background:#f1f5f9; cursor:not-allowed;"
+                                    onchange="if(this.value!=='Normal'){alert('Bar APAR harus Normal!'); this.value='Normal';}">
+                                    <option value="Normal">Normal</option>
+                                    <option value="Tidak Normal" disabled>Tidak Normal</option>
+                                </select>
+                                <small style="color:var(--text-muted);">*Kondisi Bar harus Normal</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Update Tanggal Expired (Jika diganti/diisi ulang)</label>
+                                <input type="date" id="job-apar-new-expiry" class="form-control">
                             </div>
                         </div>
 
                         <!-- Khusus KWH -->
-                        <div id="kwh-fields" style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
+                        <div id="kwh-fields"
+                            style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
                             <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Pengajuan Pulsa KWH</h4>
                             <div class="form-group">
                                 <label>Lokasi Kantor / Branch</label>
-                                <select id="job-kwh-branch" class="form-control" onchange="loadKwhLocations()"><option value="">Pilih Cabang...</option></select>
+                                <select id="job-kwh-branch" class="form-control" onchange="loadKwhLocations()">
+                                    <option value="">Pilih Cabang...</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Pilih Lokasi KWH</label>
-                                <select id="job-kwh-location" class="form-control"><option value="">Pilih Lokasi...</option></select>
+                                <select id="job-kwh-location" class="form-control">
+                                    <option value="">Pilih Lokasi...</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Kirim Email Ke (Penerima)</label>
-                                <input type="email" id="kwh-recipient-email" class="form-control" placeholder="finance@homeservice.com">
+                                <input type="email" id="kwh-recipient-email" class="form-control"
+                                    placeholder="finance@homeservice.com">
                             </div>
                         </div>
 
                         <!-- Khusus Cuci AC -->
-                        <div id="cuci-ac-fields" style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
+                        <div id="cuci-ac-fields"
+                            style="display: none; padding: 1rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 1.5rem;">
                             <h4 style="margin-bottom: 1rem; color: var(--primary);">Detail Cuci / Maintenance AC</h4>
-                            
+
                             <div class="form-group">
                                 <label>Lokasi Kantor / Branch</label>
                                 <select id="job-branch" class="form-control" onchange="loadRoomsForAdHoc()">
                                     <option value="">Pilih Cabang...</option>
                                 </select>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label>Letak Posisi AC (Ruangan)</label>
                                 <select id="job-room" class="form-control">
                                     <option value="">Pilih Ruangan...</option>
                                 </select>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label>Agenda</label>
                                 <select id="job-agenda" class="form-control">
@@ -387,28 +547,34 @@
                                     <option value="Perbaikan">Perbaikan Kerusakan</option>
                                 </select>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label>Tgl & Waktu Pengerjaan</label>
-                                <input type="datetime-local" id="job-date" class="form-control" onchange="calculateDueDate()">
+                                <input type="datetime-local" id="job-date" class="form-control"
+                                    onchange="calculateDueDate()">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label>Jatuh Tempo (Otomatis +3 Bulan)</label>
-                                <input type="datetime-local" id="job-due-date" class="form-control" readonly style="background-color: var(--border-color);">
+                                <input type="datetime-local" id="job-due-date" class="form-control" readonly
+                                    style="background-color: var(--border-color);">
                             </div>
-                            
+
                             <div class="form-group">
                                 <label>Tim / Teknisi Bertugas</label>
-                                <input type="text" id="job-technician" class="form-control" placeholder="Nama Teknisi / Vendor">
-                                <small id="tech-role-notice" style="color: var(--primary); display: none; margin-top: 5px;">*Diisi otomatis sesuai akun Anda.</small>
+                                <input type="text" id="job-technician" class="form-control"
+                                    placeholder="Nama Teknisi / Vendor">
+                                <small id="tech-role-notice"
+                                    style="color: var(--primary); display: none; margin-top: 5px;">*Diisi otomatis
+                                    sesuai akun Anda.</small>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label>📍 Lokasi Pekerjaan</label>
                             <div style="display:flex; gap:0.8rem;">
-                                <input type="text" id="job-location" readonly placeholder="Klik Ambil GPS..." style="flex:1; background:#f1f5f9;" class="form-control">
+                                <input type="text" id="job-location" readonly placeholder="Klik Ambil GPS..."
+                                    style="flex:1; background:#f1f5f9;" class="form-control">
                                 <button class="btn-secondary" onclick="getLocation()">Ambil GPS</button>
                             </div>
                         </div>
@@ -425,16 +591,20 @@
                                     <img id="img-after" class="hidden">
                                 </div>
                             </div>
-                            <input type="file" accept="image/*" capture="environment" id="cam-before" class="hidden" onchange="handlePhoto(event, 'before')">
-                            <input type="file" accept="image/*" capture="environment" id="cam-after" class="hidden" onchange="handlePhoto(event, 'after')">
+                            <input type="file" accept="image/*" capture="environment" id="cam-before" class="hidden"
+                                onchange="handlePhoto(event, 'before')">
+                            <input type="file" accept="image/*" capture="environment" id="cam-after" class="hidden"
+                                onchange="handlePhoto(event, 'after')">
                         </div>
 
                         <div class="form-group">
                             <label>Catatan Tambahan (Kendala)</label>
-                            <textarea id="job-notes" placeholder="Tulis jika ada kendala atau temuan khusus..." class="form-control"></textarea>
+                            <textarea id="job-notes" placeholder="Tulis jika ada kendala atau temuan khusus..."
+                                class="form-control"></textarea>
                         </div>
-                        
-                        <button class="btn-primary" onclick="submitAdHocJob()" style="width: 100%; margin-top: 1rem;">🚀 Simpan & Kirim Laporan</button>
+
+                        <button class="btn-primary" onclick="submitAdHocJob()" style="width: 100%; margin-top: 1rem;">🚀
+                            Simpan & Kirim Laporan</button>
                     </div>
                 </div>
 
@@ -445,68 +615,76 @@
                     <div class="glass-panel" style="margin-bottom:1.5rem;">
                         <p><strong>Cabang:</strong> <span id="checklist-branch"></span></p>
                         <p><strong>Progress:</strong> <span id="checklist-progress">0/0 Selesai</span></p>
-                        
+
                         <h3 style="margin-top:1.5rem;">Daftar Aset AC</h3>
                         <ul id="asset-list" class="job-list">
                             <!-- Injected dynamically -->
                         </ul>
                     </div>
                 </div>
-                
+
                 <!-- View: Progress Form (Upload Photo per AC) -->
                 <div id="view-progress-form" class="view">
                     <button class="back-btn" onclick="switchView('checklist')">← Kembali ke Checklist</button>
                     <h2 id="progress-title">Update AC</h2>
                     <div class="glass-panel">
                         <input type="hidden" id="prog-asset-id">
-                        
+
                         <div class="form-group">
                             <label>📷 Dokumentasi (Before & After)</label>
                             <div class="photo-grid">
-                                <div class="photo-box" id="box-prog-before" onclick="document.getElementById('cam-prog-before').click()">
+                                <div class="photo-box" id="box-prog-before"
+                                    onclick="document.getElementById('cam-prog-before').click()">
                                     <span id="lbl-prog-before">Ambil Foto<br><b>BEFORE</b></span>
                                     <img id="img-prog-before" class="hidden">
                                 </div>
-                                <div class="photo-box" id="box-prog-after" onclick="document.getElementById('cam-prog-after').click()">
+                                <div class="photo-box" id="box-prog-after"
+                                    onclick="document.getElementById('cam-prog-after').click()">
                                     <span id="lbl-prog-after">Ambil Foto<br><b>AFTER</b></span>
                                     <img id="img-prog-after" class="hidden">
                                 </div>
                             </div>
-                            <input type="file" accept="image/*" capture="environment" id="cam-prog-before" class="hidden" onchange="previewProgressPhoto(event, 'before')">
-                            <input type="file" accept="image/*" capture="environment" id="cam-prog-after" class="hidden" onchange="previewProgressPhoto(event, 'after')">
+                            <input type="file" accept="image/*" capture="environment" id="cam-prog-before"
+                                class="hidden" onchange="previewProgressPhoto(event, 'before')">
+                            <input type="file" accept="image/*" capture="environment" id="cam-prog-after" class="hidden"
+                                onchange="previewProgressPhoto(event, 'after')">
                         </div>
 
                         <div class="form-group">
                             <label>Catatan Pengerjaan (Opsional)</label>
                             <textarea id="prog-notes" placeholder="Ada kendala atau part yang diganti?"></textarea>
                         </div>
-                        
-                        <button class="btn-primary" style="width:100%;" onclick="submitProgress()">Simpan Laporan AC Ini</button>
+
+                        <button class="btn-primary" style="width:100%;" onclick="submitProgress()">Simpan Laporan AC
+                            Ini</button>
                     </div>
                 </div>
 
                 <!-- View: Admin Panel -->
                 <div id="view-admin" class="view">
                     <h2>Admin Panel</h2>
-                    
+
                     <div class="glass-panel" style="margin-bottom:2rem;">
                         <h3>1. Buat Surat Perintah Kerja (SPK)</h3>
                         <div class="form-group">
                             <label>Judul Tugas</label>
-                            <input type="text" id="spk-title" placeholder="Misal: Maintenance Rutin Q1" class="form-control">
+                            <input type="text" id="spk-title" placeholder="Misal: Maintenance Rutin Q1"
+                                class="form-control">
                         </div>
                         <div class="form-group">
                             <label>Cabang / Lokasi</label>
-                            <input type="text" id="spk-branch" placeholder="Misal: Cabang Sudirman" class="form-control">
+                            <input type="text" id="spk-branch" placeholder="Misal: Cabang Sudirman"
+                                class="form-control">
                         </div>
                         <div class="form-group">
                             <label>Pilih Teknisi (User ID)</label>
-                            <input type="number" id="spk-tech-id" placeholder="ID Teknisi (misal: 2)" class="form-control">
+                            <input type="number" id="spk-tech-id" placeholder="ID Teknisi (misal: 2)"
+                                class="form-control">
                             <small style="color:var(--text-muted);">*Cari ID Teknisi di database sementara ini</small>
                         </div>
                         <button class="btn-primary" onclick="adminCreateSPK()">Buat SPK Baru</button>
                     </div>
-                    
+
                     <div class="glass-panel" style="margin-bottom:2rem;">
                         <h3>2. Master Data: AC</h3>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -516,23 +694,33 @@
                             </div>
                             <div class="form-group">
                                 <label>Ruangan</label>
-                                <input type="text" id="asset-room" placeholder="Ruang Meeting Utama" class="form-control">
+                                <input type="text" id="asset-room" placeholder="Ruang Meeting Utama"
+                                    class="form-control">
                             </div>
                             <div class="form-group">
                                 <label>Tipe AC</label>
                                 <input type="text" id="asset-type" placeholder="Daikin Split 1 PK" class="form-control">
                             </div>
                             <div class="form-group" style="display:flex; align-items:flex-end;">
-                                <button class="btn-primary" style="width:100%; height: 50px;" onclick="adminCreateAsset()">Tambahkan Aset</button>
+                                <button class="btn-primary" style="width:100%; height: 50px;"
+                                    onclick="adminCreateAsset()">Tambahkan Aset</button>
                             </div>
                         </div>
                         <div style="overflow-x: auto; margin-top: 1rem;">
                             <table style="width:100%; border-collapse: collapse; min-width: 600px;">
                                 <thead style="background: var(--border-color); text-align: left;">
-                                    <tr><th>ID</th><th>Cabang</th><th>Ruangan</th><th>Tipe AC</th><th>Aksi</th></tr>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Cabang</th>
+                                        <th>Ruangan</th>
+                                        <th>Tipe AC</th>
+                                        <th>Aksi</th>
+                                    </tr>
                                 </thead>
                                 <tbody id="admin-assets-table-body">
-                                    <tr><td colspan="5" style="padding: 1rem; text-align: center;">Memuat aset...</td></tr>
+                                    <tr>
+                                        <td colspan="5" style="padding: 1rem; text-align: center;">Memuat aset...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -541,14 +729,21 @@
                     <div class="glass-panel" style="margin-bottom:2rem;">
                         <h3>3. Master Data: Server</h3>
                         <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                            <input type="text" id="server-branch" placeholder="Cabang" class="form-control" style="flex:1;">
-                            <input type="text" id="server-location" placeholder="Lokasi Server (Misal: Ruang IT)" class="form-control" style="flex:2;">
+                            <input type="text" id="server-branch" placeholder="Cabang" class="form-control"
+                                style="flex:1;">
+                            <input type="text" id="server-location" placeholder="Lokasi Server (Misal: Ruang IT)"
+                                class="form-control" style="flex:2;">
                             <button class="btn-primary" onclick="adminCreateServer()">Tambah</button>
                         </div>
                         <div style="overflow-x: auto;">
                             <table style="width:100%; border-collapse: collapse;">
                                 <thead style="background: var(--border-color); text-align: left;">
-                                    <tr><th>ID</th><th>Cabang</th><th>Lokasi Server</th><th>Aksi</th></tr>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Cabang</th>
+                                        <th>Lokasi Server</th>
+                                        <th>Aksi</th>
+                                    </tr>
                                 </thead>
                                 <tbody id="admin-server-table-body"></tbody>
                             </table>
@@ -557,17 +752,30 @@
 
                     <div class="glass-panel" style="margin-bottom:2rem;">
                         <h3>4. Master Data: APAR</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 1rem; margin-bottom: 1rem;">
-                            <div><small>Cabang</small><input type="text" id="apar-branch" placeholder="Cabang" class="form-control"></div>
-                            <div><small>Lokasi APAR</small><input type="text" id="apar-location" placeholder="Lokasi" class="form-control"></div>
-                            <div><small>Tgl Pengisian</small><input type="date" id="apar-fill" class="form-control"></div>
-                            <div><small>Tgl Kadaluarsa</small><input type="date" id="apar-expiry" class="form-control"></div>
-                            <button class="btn-primary" onclick="adminCreateApar()" style="margin-top:auto;">Tambah</button>
+                        <div
+                            style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 1rem; margin-bottom: 1rem;">
+                            <div><small>Cabang</small><input type="text" id="apar-branch" placeholder="Cabang"
+                                    class="form-control"></div>
+                            <div><small>Lokasi APAR</small><input type="text" id="apar-location" placeholder="Lokasi"
+                                    class="form-control"></div>
+                            <div><small>Tgl Pengisian</small><input type="date" id="apar-fill" class="form-control">
+                            </div>
+                            <div><small>Tgl Kadaluarsa</small><input type="date" id="apar-expiry" class="form-control">
+                            </div>
+                            <button class="btn-primary" onclick="adminCreateApar()"
+                                style="margin-top:auto;">Tambah</button>
                         </div>
                         <div style="overflow-x: auto;">
                             <table style="width:100%; border-collapse: collapse;">
                                 <thead style="background: var(--border-color); text-align: left;">
-                                    <tr><th>ID</th><th>Cabang</th><th>Lokasi APAR</th><th>Tgl Isi</th><th>Tgl Expired</th><th>Aksi</th></tr>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Cabang</th>
+                                        <th>Lokasi APAR</th>
+                                        <th>Tgl Isi</th>
+                                        <th>Tgl Expired</th>
+                                        <th>Aksi</th>
+                                    </tr>
                                 </thead>
                                 <tbody id="admin-apar-table-body"></tbody>
                             </table>
@@ -577,14 +785,21 @@
                     <div class="glass-panel" style="margin-bottom:2rem;">
                         <h3>5. Master Data: KWH Meter</h3>
                         <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                            <input type="text" id="kwh-branch" placeholder="Cabang" class="form-control" style="flex:1;">
-                            <input type="text" id="kwh-location" placeholder="Lokasi KWH (Misal: KWH Gedung A)" class="form-control" style="flex:2;">
+                            <input type="text" id="kwh-branch" placeholder="Cabang" class="form-control"
+                                style="flex:1;">
+                            <input type="text" id="kwh-location" placeholder="Lokasi KWH (Misal: KWH Gedung A)"
+                                class="form-control" style="flex:2;">
                             <button class="btn-primary" onclick="adminCreateKwh()">Tambah</button>
                         </div>
                         <div style="overflow-x: auto;">
                             <table style="width:100%; border-collapse: collapse;">
                                 <thead style="background: var(--border-color); text-align: left;">
-                                    <tr><th>ID</th><th>Cabang</th><th>Lokasi KWH</th><th>Aksi</th></tr>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Cabang</th>
+                                        <th>Lokasi KWH</th>
+                                        <th>Aksi</th>
+                                    </tr>
                                 </thead>
                                 <tbody id="admin-kwh-table-body"></tbody>
                             </table>
@@ -596,14 +811,17 @@
                 <div id="view-history" class="view">
                     <h2>Riwayat SPK Selesai</h2>
                     <ul id="history-list" class="job-list">
-                        <li style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">Memuat riwayat...</li>
+                        <li
+                            style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">
+                            Memuat riwayat...</li>
                     </ul>
                 </div>
-                
+
             </main>
         </div>
     </div>
 
     <script type="module" src="/app.js"></script>
 </body>
+
 </html>

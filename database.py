@@ -254,6 +254,16 @@ def delete_apar_asset(asset_id: int):
     conn.close()
     return True
 
+def update_apar_asset(asset_id: int, fill_date: str, expiry_date: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE apar_assets SET fill_date=?, expiry_date=? WHERE id=?", 
+                   (fill_date, expiry_date, asset_id))
+    conn.commit()
+    conn.close()
+    return True
+
+
 # --- KWH ASSETS ---
 def create_kwh_asset(branch: str, kwh_location: str):
     conn = sqlite3.connect(DB_PATH)

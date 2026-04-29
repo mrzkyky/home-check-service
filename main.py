@@ -158,6 +158,16 @@ async def delete_apar_asset(asset_id: int):
     database.delete_apar_asset(asset_id)
     return {"status": "success"}
 
+class AparAssetUpdate(BaseModel):
+    fill_date: str
+    expiry_date: str
+
+@app.put("/api/apar_assets/{asset_id}")
+async def update_apar_asset(asset_id: int, payload: AparAssetUpdate):
+    database.update_apar_asset(asset_id, payload.fill_date, payload.expiry_date)
+    return {"status": "success"}
+
+
 # --- KWH ASSET API ---
 @app.post("/api/kwh_assets")
 async def create_kwh_asset(payload: KwhAssetCreate):
@@ -263,13 +273,12 @@ Tim Home-Service
     msg.add_attachment(img_data, maintype='image', subtype=ext, filename=photo.filename)
     
     try:
-        # PENTING: Uncomment baris di bawah kalau SMTP credential sudah benar
-        # server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        # server.starttls()
-        # server.login(SMTP_USER, SMTP_PASS)
-        # server.send_message(msg)
-        # server.quit()
-        return {"status": "success", "detail": "Email (SIMULASI) berhasil dibuat. Silakan konfigurasi SMTP di backend untuk pengiriman asli."}
+        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server.starttls()
+        server.login(SMTP_USER, SMTP_PASS)
+        server.send_message(msg)
+        server.quit()
+        return {"status": "success", "detail": "Email berhasil dikirim!"}
     except Exception as e:
         return {"status": "error", "detail": str(e)}
 

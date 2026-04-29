@@ -604,6 +604,38 @@ window.openJobForm = async function(type) {
     switchView('job-form');
 }
 
+window.openAddMaster = function(type) {
+    document.getElementById('add-master-apar').style.display = 'none';
+    document.getElementById('add-master-kwh').style.display = 'none';
+    if(type === 'apar') document.getElementById('add-master-apar').style.display = 'block';
+    if(type === 'kwh') document.getElementById('add-master-kwh').style.display = 'block';
+    switchView('add-master');
+}
+
+window.userSubmitApar = async function() {
+    let branch = document.getElementById('user-apar-branch').value;
+    let apar_location = document.getElementById('user-apar-location').value;
+    let fill_date = document.getElementById('user-apar-fill').value;
+    let expiry_date = document.getElementById('user-apar-expiry').value;
+    if(!branch || !apar_location) return alert("Isi Cabang dan Lokasi APAR!");
+    let res = await fetch(`${API_BASE}/apar_assets`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({branch, apar_location, fill_date, expiry_date}) });
+    if(res.ok) { 
+        alert("Lokasi APAR berhasil ditambah!"); 
+        switchView('home'); 
+    }
+}
+
+window.userSubmitKwh = async function() {
+    let branch = document.getElementById('user-kwh-branch').value;
+    let kwh_location = document.getElementById('user-kwh-location').value;
+    if(!branch || !kwh_location) return alert("Isi Cabang dan Lokasi KWH!");
+    let res = await fetch(`${API_BASE}/kwh_assets`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({branch, kwh_location}) });
+    if(res.ok) { 
+        alert("Lokasi KWH berhasil ditambah!"); 
+        switchView('home'); 
+    }
+}
+
 window.calculateDueDate = function() {
     let dateInput = document.getElementById('job-date');
     let dueDateInput = document.getElementById('job-due-date');
@@ -737,6 +769,26 @@ window.submitAdHocJob = async function() {
     } else if (isApar) {
         branch = document.getElementById('job-apar-branch').value; 
         locationDetail = document.getElementById('job-apar-location').value;
+        
+        let segel = document.getElementById('job-apar-segel').value;
+        let bar = document.getElementById('job-apar-bar').value;
+        let newExpiry = document.getElementById('job-apar-new-expiry').value;
+        
+        notes += `\n[Laporan APAR] Segel: ${segel}, Bar: ${bar}`;
+        
+        if (newExpiry) {
+            notes += `, Expired Diupdate: ${newExpiry}`;
+            let aparObj = allAdhocData.apar.find(a => a.apar_location === locationDetail);
+            if (aparObj) {
+                // Background update
+                fetch(`${API_BASE}/apar_assets/${aparObj.id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({fill_date: new Date().toISOString().split('T')[0], expiry_date: newExpiry})
+                });
+            }
+        }
+        
     } else if (isKwh) {
         branch = document.getElementById('job-kwh-branch').value; 
         locationDetail = document.getElementById('job-kwh-location').value;
