@@ -867,14 +867,15 @@ window.submitAdHocJob = async function() {
         
         try {
             let res = await fetch(`${API_BASE}/kwh-email`, { method: 'POST', body: formData });
-            if(res.ok) { 
-                alert("Email Pengajuan KWH Berhasil Dikirim!"); 
+            let result = await res.json();
+            if(res.ok && result.status === 'success') { 
+                alert("✅ Email Pengajuan KWH Berhasil Dikirim!"); 
                 switchView('home'); 
                 return; 
             } else { 
-                return alert("Gagal kirim email KWH."); 
+                return alert(`❌ Gagal kirim email KWH.\n\nDetail: ${result.detail || 'Unknown error'}`);
             }
-        } catch(e) { return alert("Koneksi Error"); }
+        } catch(e) { return alert("Koneksi Error: " + e.message); }
     }
 
     try {
