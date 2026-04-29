@@ -238,7 +238,7 @@ async def send_kwh_email(
 ):
     # Setup dummy/central credentials here
     SMTP_SERVER = "smtp.gmail.com"
-    SMTP_PORT = 587
+    SMTP_PORT = 465
     SMTP_USER = "morizkynurfadil8@gmail.com" # USER SHOULD CHANGE THIS
     SMTP_PASS = "***REMOVED***"   # App Password tanpa spasi
     
@@ -273,11 +273,11 @@ Tim Home-Service
     msg.add_attachment(img_data, maintype='image', subtype=ext, filename=photo.filename)
     
     try:
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASS)
-        server.send_message(msg)
-        server.quit()
+        import ssl
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+            server.login(SMTP_USER, SMTP_PASS)
+            server.send_message(msg)
         return {"status": "success", "detail": "Email berhasil dikirim!"}
     except Exception as e:
         return {"status": "error", "detail": str(e)}
