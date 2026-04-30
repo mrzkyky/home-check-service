@@ -96,7 +96,7 @@ class JobCreate(BaseModel):
 @app.post("/api/auth/login")
 async def login(payload: LoginRequest):
     user = database.get_user_by_email(payload.email)
-    if not user or user["password"] != payload.password:
+    if not user or not database.check_password(payload.password, user["password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     
     user_data = {

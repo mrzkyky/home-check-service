@@ -1,5 +1,36 @@
 import sqlite3
 import os
+import bcrypt
+from cryptography.fernet import Fernet
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# --- ENCRYPTION HELPERS ---
+_fernet_key = os.getenv("FIELD_ENCRYPT_KEY", "").encode()
+_fernet = Fernet(_fernet_key) if _fernet_key else None
+
+def encrypt(text: str) -> str:
+    if not _fernet or not text:
+        return text
+    return _fernet.encrypt(text.encode()).decode()
+
+def decrypt(text: str) -> str:
+    if not _fernet or not text:
+        return text
+    try:
+        return _fernet.decrypt(text.encode()).decode()
+    except Exception:
+        return text  # Data lama yang belum dienkripsi, kembalikan apa adanya
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+
+def check_password(plain: str, hashed: str) -> bool:
+    try:
+        return bcrypt.checkpw(plain.encode(), hashed.encode())
+    except Exception:
+        return plain == hashed  # Fallback untuk data lama (plaintext)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -113,14 +144,24 @@ def get_user_by_email(email: str):
     r = cursor.fetchone()
     conn.close()
     if r:
-        return {"id": r[0], "email": r[1], "password": r[2], "name": r[3], "role": r[4], "avatar_filename": r[5]}
+        return {
+            "id": r[0],
+            "email": r[1],
+            "password": r[2],
+            "name": decrypt(r[3]),   # Dekripsi nama saat dibaca
+            "role": r[4],
+            "avatar_filename": r[5]
+        }
     return None
 
 def create_user(email, password, name, role):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", (email, password, name, role))
+        hashed_pw = hash_password(password)   # Hash password
+        enc_name  = encrypt(name)             # Enkripsi nama
+        cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)",
+                       (email, hashed_pw, enc_name, role))
         conn.commit()
         user_id = cursor.lastrowid
         conn.close()
@@ -136,13 +177,20 @@ def get_user(user_id: int):
     r = cursor.fetchone()
     conn.close()
     if r:
-        return {"id": r[0], "email": r[1], "name": r[2], "role": r[3], "avatar_filename": r[4]}
+        return {
+            "id": r[0],
+            "email": r[1],
+            "name": decrypt(r[2]),   # Dekripsi nama saat dibaca
+            "role": r[3],
+            "avatar_filename": r[4]
+        }
     return None
 
 def update_user_profile(user_id: int, name: str, role: str):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("UPDATE users SET name=?, role=? WHERE id=?", (name, role, user_id))
+    enc_name = encrypt(name)    # Enkripsi nama sebelum simpan
+    cursor.execute("UPDATE users SET name=?, role=? WHERE id=?", (enc_name, role, user_id))
     conn.commit()
     conn.close()
     return True
@@ -150,7 +198,8 @@ def update_user_profile(user_id: int, name: str, role: str):
 def update_user_password(user_id: int, new_password: str):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("UPDATE users SET password=? WHERE id=?", (new_password, user_id))
+    hashed = hash_password(new_password)    # Hash password sebelum simpan
+    cursor.execute("UPDATE users SET password=? WHERE id=?", (hashed, user_id))
     conn.commit()
     conn.close()
     return True
