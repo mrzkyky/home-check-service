@@ -344,8 +344,16 @@ def create_job(title: str, branch: str, assigned_to: int):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Hitung target qty dari branch
-    cursor.execute("SELECT COUNT(*) FROM ac_assets WHERE branch=?", (branch,))
+    # Hitung target qty dari tabel aset yang sesuai berdasarkan judul SPK
+    title_lower = title.lower()
+    if 'server' in title_lower:
+        cursor.execute("SELECT COUNT(*) FROM server_assets WHERE branch=?", (branch,))
+    elif 'apar' in title_lower:
+        cursor.execute("SELECT COUNT(*) FROM apar_assets WHERE branch=?", (branch,))
+    elif 'kwh' in title_lower or 'listrik' in title_lower:
+        cursor.execute("SELECT COUNT(*) FROM kwh_assets WHERE branch=?", (branch,))
+    else:
+        cursor.execute("SELECT COUNT(*) FROM ac_assets WHERE branch=?", (branch,))
     target_qty = cursor.fetchone()[0]
     
     cursor.execute("INSERT INTO jobs (title, branch, assigned_to, target_qty, completed_qty, status) VALUES (?, ?, ?, ?, ?, ?)", 
