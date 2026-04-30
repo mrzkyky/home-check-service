@@ -20,6 +20,9 @@ services:
     container_name: homeservice-frontend
     ports:
       - "3001:80"
+      - "3443:443"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
     depends_on:
       - backend
     restart: unless-stopped

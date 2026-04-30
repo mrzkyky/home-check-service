@@ -18,4 +18,8 @@ homeservice.db
 .DS_Store
 .vscode/
 
+# Folder .env
 .env
+
+# SSL Certificate
+certs/
