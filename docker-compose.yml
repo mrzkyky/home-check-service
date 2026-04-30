@@ -29,7 +29,7 @@ services:
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: homeservice-tunnel
-    command: tunnel --no-autoupdate run --token MASUKAN_TOKEN_CLOUDFLARE_LU_DISINI
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}
     restart: unless-stopped
     depends_on:
       - frontend
