@@ -37,7 +37,9 @@ function checkAuth() {
     // Cek apakah token sudah expired (8 jam = 28800000 ms)
     const EXPIRE_MS = 8 * 60 * 60 * 1000;
     if (savedUser && savedToken && (Date.now() - loginTime < EXPIRE_MS)) {
-
+        currentUser = JSON.parse(savedUser);
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'flex';
 
         // Setup UI
         document.getElementById('user-name-display').innerText = currentUser.name;
