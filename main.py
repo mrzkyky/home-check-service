@@ -1,12 +1,39 @@
 import os
 import shutil
+from datetime import datetime, timedelta
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from typing import Optional, List
+from jose import JWTError, jwt
+from dotenv import load_dotenv
 import database
 import uuid
+
+load_dotenv()
+
+JWT_SECRET    = os.getenv("JWT_SECRET_KEY", "fallback-secret")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_EXPIRE_H  = int(os.getenv("JWT_EXPIRE_HOURS", "8"))
+
+security = HTTPBearer()
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(hours=JWT_EXPIRE_H)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token tidak valid atau sudah expired")
+
 
 app = FastAPI()
 
@@ -71,7 +98,16 @@ async def login(payload: LoginRequest):
     user = database.get_user_by_email(payload.email)
     if not user or user["password"] != payload.password:
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    return {"status": "success", "user": {"id": user["id"], "name": user["name"], "role": user["role"], "email": user["email"], "avatar_filename": user.get("avatar_filename", "")}}
+    
+    user_data = {
+        "id": user["id"],
+        "name": user["name"],
+        "role": user["role"],
+        "email": user["email"],
+        "avatar_filename": user.get("avatar_filename", "")
+    }
+    token = create_access_token(user_data)
+    return {"status": "success", "access_token": token, "user": user_data}
 
 @app.post("/api/auth/register")
 async def register(payload: RegisterRequest):
