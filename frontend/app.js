@@ -248,16 +248,44 @@ window.openChecklist = async function (jobId) {
         document.getElementById('checklist-branch').innerText = job.branch;
         document.getElementById('checklist-progress').innerText = `${job.completed_qty}/${job.target_qty} Selesai`;
 
-        // Fetch Master Assets for this branch
-        let aRes = await fetch(`${API_BASE}/assets?branch=${encodeURIComponent(job.branch)}`);
+        // Deteksi tipe SPK dari judul untuk label & fetch aset yang sesuai
+        let titleLower = job.title.toLowerCase();
+        let isServer = titleLower.includes('server');
+        let isApar   = titleLower.includes('apar');
+        let isKwh    = titleLower.includes('kwh') || titleLower.includes('listrik');
+
+        let sectionTitle = 'Daftar Aset AC';
+        let assetEndpoint = `${API_BASE}/assets?branch=${encodeURIComponent(job.branch)}`;
+
+        if (isServer) {
+            sectionTitle = 'Daftar Aset Server';
+            assetEndpoint = `${API_BASE}/server_assets`;
+        } else if (isApar) {
+            sectionTitle = 'Daftar Aset APAR';
+            assetEndpoint = `${API_BASE}/apar_assets`;
+        } else if (isKwh) {
+            sectionTitle = 'Daftar Aset KWH';
+            assetEndpoint = `${API_BASE}/kwh_assets`;
+        }
+
+        document.getElementById('checklist-section-title').innerText = sectionTitle;
+
+        // Fetch aset sesuai tipe
+        let aRes = await fetch(assetEndpoint);
         let aData = await aRes.json();
-        currentAssetsCache = aData.data;
+
+        // Filter by branch jika bukan AC (server/apar/kwh tidak filter by branch di endpoint)
+        let allAssets = aData.data;
+        if (isServer || isApar || isKwh) {
+            allAssets = allAssets.filter(a => a.branch === job.branch);
+        }
+        currentAssetsCache = allAssets;
 
         let ul = document.getElementById('asset-list');
         ul.innerHTML = "";
 
         if (currentAssetsCache.length === 0) {
-            ul.innerHTML = `<li><div style="color:var(--danger);">Aset AC untuk cabang ini belum diisi oleh Admin!</div></li>`;
+            ul.innerHTML = `<li><div style="color:var(--danger);">Aset untuk cabang ini belum ada. Tambah lewat Admin Panel atau Form Laporan!</div></li>`;
             return;
         }
 
@@ -265,12 +293,16 @@ window.openChecklist = async function (jobId) {
             let isDone = progress[asset.id] !== undefined;
             let icon = isDone ? '✅' : '⏳';
             let color = isDone ? 'var(--success)' : 'var(--text-main)';
+            // Nama lokasi dinamis sesuai tipe aset
+            let locationName = asset.room || asset.server_location || asset.apar_location || asset.kwh_location || '-';
+            let subInfo = asset.ac_type ? `${asset.ac_type} - ${asset.details}` :
+                          asset.fill_date ? `Isi: ${asset.fill_date} | Exp: ${asset.expiry_date}` : '';
 
             ul.innerHTML += `
-                <li style="cursor:pointer; border-left-color:${isDone ? 'var(--success)' : 'var(--primary)'}" onclick="openProgressForm(${asset.id}, '${asset.room}')">
+                <li style="cursor:pointer; border-left-color:${isDone ? 'var(--success)' : 'var(--primary)'}" onclick="openProgressForm(${asset.id}, '${locationName}')">
                     <div style="flex:1;">
-                        <b style="color:${color};">${icon} ${asset.room}</b>
-                        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">${asset.ac_type} - ${asset.details}</div>
+                        <b style="color:${color};">${icon} ${locationName}</b>
+                        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">${subInfo}</div>
                     </div>
                     <div style="font-size:1.2rem; color:var(--text-muted);">›</div>
                 </li>`;
