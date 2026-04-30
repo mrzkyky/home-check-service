@@ -118,23 +118,52 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    
+
+    # Table Audit Log
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS audit_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            user_name TEXT,
+            action TEXT,
+            detail TEXT,
+            ip TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
     # Init Superadmin jika belum ada
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] == 0:
-        cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", 
-                       ('superadminhcs@homeservice.com', 'admin123', 'Bos Superadmin', 'Superadmin'))
-        cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", 
-                       ('teknisi@homeservice.com', 'teknisi123', 'Agus Teknisi', 'Staff'))
+        cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)",
+                       ('superadminhcs@homeservice.com', hash_password('admin123'), encrypt('Bos Superadmin'), 'Superadmin'))
+        cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)",
+                       ('teknisi@homeservice.com', hash_password('teknisi123'), encrypt('Agus Teknisi'), 'Staff'))
     else:
-        # Cek apakah superadmin baru sudah ada, kalau belum tambahkan
         cursor.execute("SELECT COUNT(*) FROM users WHERE email='superadminhcs@homeservice.com'")
         if cursor.fetchone()[0] == 0:
-             cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)", 
-                           ('superadminhcs@homeservice.com', 'admin123', 'Bos Superadmin', 'Superadmin'))
-        
+            cursor.execute("INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)",
+                           ('superadminhcs@homeservice.com', hash_password('admin123'), encrypt('Bos Superadmin'), 'Superadmin'))
+
     conn.commit()
-    conn.close()    
+    conn.close()
+
+# --- AUDIT LOG ---
+def log_action(user_id: int, user_name: str, action: str, detail: str, ip: str = ""):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO audit_log (user_id, user_name, action, detail, ip) VALUES (?, ?, ?, ?, ?)",
+                   (user_id, user_name, action, detail, ip))
+    conn.commit()
+    conn.close()
+
+def get_audit_log(limit: int = 200):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, user_id, user_name, action, detail, ip, created_at FROM audit_log ORDER BY id DESC LIMIT ?", (limit,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "user_id": r[1], "user_name": r[2], "action": r[3], "detail": r[4], "ip": r[5], "created_at": r[6]} for r in rows]
 
 # --- USER AUTHENTICATION & PROFILE ---
 def get_user_by_email(email: str):

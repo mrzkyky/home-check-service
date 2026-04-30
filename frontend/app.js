@@ -1,22 +1,48 @@
 const API_BASE = '/api';
 
-// Helper: fetch dengan JWT token otomatis + auto-logout kalau 401
-async function apiFetch(url, options = {}) {
-    const token = localStorage.getItem('hs_token');
-    if (token) {
-        options.headers = options.headers || {};
-        options.headers['Authorization'] = `Bearer ${token}`;
-    }
-    const res = await fetch(url, options);
-    if (res.status === 401) {
-        // Token expired atau invalid → paksa logout
-        localStorage.removeItem('hs_token');
-        localStorage.removeItem('hs_user');
-        alert('⏰ Sesi kamu sudah habis. Silakan login ulang.');
-        window.location.reload();
-        return null;
-    }
-    return res;
+// ─── Global: Auto-inject JWT ke semua /api/ call + handle 401 ───────────────
+(function () {
+    const _orig = window.fetch.bind(window);
+    window.fetch = async function (url, opts = {}) {
+        const sUrl = typeof url === 'string' ? url : url.toString();
+        if (sUrl.startsWith('/api/') && !sUrl.includes('/auth/')) {
+            const token = localStorage.getItem('hs_token');
+            if (token) {
+                opts = { ...opts, headers: { ...(opts.headers || {}), 'Authorization': `Bearer ${token}` } };
+            }
+        }
+        const res = await _orig(url, opts);
+        if (res.status === 401 && sUrl.startsWith('/api/') && !sUrl.includes('/auth/')) {
+            localStorage.removeItem('hs_token');
+            localStorage.removeItem('hs_user');
+            localStorage.removeItem('hs_login_time');
+            alert('⏰ Sesi kamu sudah habis. Silakan login ulang.');
+            window.location.reload();
+        }
+        return res;
+    };
+})();
+
+// ─── Kompres gambar sebelum upload (max 1280px, 75% quality) ─────────────────
+async function compressImage(file, maxWidth = 1280, quality = 0.75) {
+    return new Promise((resolve) => {
+        if (!file || !file.type.startsWith('image/')) { resolve(file); return; }
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            let w = img.width, h = img.height;
+            if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            canvas.toBlob(
+                blob => resolve(new File([blob], file.name, { type: 'image/jpeg' })),
+                'image/jpeg', quality
+            );
+        };
+        img.src = url;
+    });
 }
 
 let currentUser = null;
@@ -356,8 +382,8 @@ window.submitProgress = async function () {
     let formData = new FormData();
     formData.append("asset_id", currentAssetId);
     formData.append("notes", notes);
-    if (bFile) formData.append("before_photo", bFile);
-    if (aFile) formData.append("after_photo", aFile);
+    if (bFile) formData.append("before_photo", await compressImage(bFile));
+    if (aFile) formData.append("after_photo", await compressImage(aFile));
 
     try {
         let res = await fetch(`${API_BASE}/jobs/${currentJobId}/progress`, {
@@ -926,7 +952,7 @@ window.submitAdHocJob = async function () {
         formData.append("sender_email", currentUser.email);
         formData.append("kwh_location", locationDetail || "Tanpa Lokasi Spesifik");
         formData.append("recipient_email", recipient);
-        formData.append("photo", bFile);
+        formData.append("photo", await compressImage(bFile));
 
         try {
             let res = await fetch(`${API_BASE}/kwh-email`, { method: 'POST', body: formData });

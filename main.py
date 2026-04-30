@@ -1,7 +1,8 @@
 import os
 import shutil
 from datetime import datetime, timedelta
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
+from collections import defaultdict
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -19,6 +20,23 @@ JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 JWT_EXPIRE_H  = int(os.getenv("JWT_EXPIRE_HOURS", "8"))
 
 security = HTTPBearer()
+
+# Rate limiting: maks 5 login gagal per 15 menit per IP
+_login_attempts: dict = defaultdict(list)
+
+def get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+def check_rate_limit(ip: str) -> bool:
+    now = datetime.utcnow()
+    _login_attempts[ip] = [t for t in _login_attempts[ip] if (now - t).total_seconds() < 900]
+    if len(_login_attempts[ip]) >= 5:
+        return False
+    _login_attempts[ip].append(now)
+    return True
 
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -94,11 +112,16 @@ class JobCreate(BaseModel):
 
 # --- AUTH API ---
 @app.post("/api/auth/login")
-async def login(payload: LoginRequest):
+async def login(payload: LoginRequest, request: Request):
+    ip = get_client_ip(request)
+    if not check_rate_limit(ip):
+        raise HTTPException(status_code=429, detail="Terlalu banyak percobaan login. Coba lagi dalam 15 menit.")
+
     user = database.get_user_by_email(payload.email)
     if not user or not database.check_password(payload.password, user["password"]):
+        database.log_action(0, payload.email, "LOGIN_FAILED", f"Percobaan login gagal dari {ip}", ip)
         raise HTTPException(status_code=401, detail="Invalid email or password")
-    
+
     user_data = {
         "id": user["id"],
         "name": user["name"],
@@ -107,6 +130,7 @@ async def login(payload: LoginRequest):
         "avatar_filename": user.get("avatar_filename", "")
     }
     token = create_access_token(user_data)
+    database.log_action(user["id"], user["name"], "LOGIN", f"Login berhasil", ip)
     return {"status": "success", "access_token": token, "user": user_data}
 
 @app.post("/api/auth/register")
@@ -118,24 +142,24 @@ async def register(payload: RegisterRequest):
 
 # --- USER API ---
 @app.get("/api/user/{user_id}")
-async def get_user_profile(user_id: int):
+async def get_user_profile(user_id: int, _u: dict = Depends(get_current_user)):
     user = database.get_user(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"status": "success", "data": user}
 
 @app.put("/api/user/{user_id}")
-async def update_user_profile(user_id: int, payload: UserProfileUpdate):
+async def update_user_profile(user_id: int, payload: UserProfileUpdate, _u: dict = Depends(get_current_user)):
     database.update_user_profile(user_id, payload.name, payload.role)
     return {"status": "success"}
 
 @app.put("/api/user/{user_id}/password")
-async def update_user_password(user_id: int, payload: UserPasswordUpdate):
+async def update_user_password(user_id: int, payload: UserPasswordUpdate, _u: dict = Depends(get_current_user)):
     database.update_user_password(user_id, payload.password)
     return {"status": "success"}
 
 @app.post("/api/user/{user_id}/avatar")
-async def upload_avatar(user_id: int, file: UploadFile = File(...)):
+async def upload_avatar(user_id: int, file: UploadFile = File(...), _u: dict = Depends(get_current_user)):
     ext = file.filename.split('.')[-1]
     filename = f"avatar_{user_id}_{uuid.uuid4().hex[:8]}.{ext}"
     filepath = os.path.join(UPLOAD_DIR, filename)
@@ -146,51 +170,51 @@ async def upload_avatar(user_id: int, file: UploadFile = File(...)):
 
 # --- ASSET API ---
 @app.post("/api/assets")
-async def create_asset(payload: AssetCreate):
+async def create_asset(payload: AssetCreate, _u: dict = Depends(get_current_user)):
     asset_id = database.create_asset(payload.branch, payload.room, payload.ac_type, payload.details)
     return {"status": "success", "asset_id": asset_id}
 
 @app.get("/api/assets")
-async def get_assets(branch: Optional[str] = None):
+async def get_assets(branch: Optional[str] = None, _u: dict = Depends(get_current_user)):
     return {"status": "success", "data": database.get_assets_by_branch(branch)}
 
 @app.put("/api/assets/{asset_id}")
-async def update_asset(asset_id: int, payload: AssetCreate):
+async def update_asset(asset_id: int, payload: AssetCreate, _u: dict = Depends(get_current_user)):
     database.update_asset(asset_id, payload.branch, payload.room, payload.ac_type, payload.details)
     return {"status": "success"}
 
 @app.delete("/api/assets/{asset_id}")
-async def delete_asset(asset_id: int):
+async def delete_asset(asset_id: int, _u: dict = Depends(get_current_user)):
     database.delete_asset(asset_id)
     return {"status": "success"}
 
 # --- SERVER ASSET API ---
 @app.post("/api/server_assets")
-async def create_server_asset(payload: ServerAssetCreate):
+async def create_server_asset(payload: ServerAssetCreate, _u: dict = Depends(get_current_user)):
     asset_id = database.create_server_asset(payload.branch, payload.server_location)
     return {"status": "success", "asset_id": asset_id}
 
 @app.get("/api/server_assets")
-async def get_server_assets():
+async def get_server_assets(_u: dict = Depends(get_current_user)):
     return {"status": "success", "data": database.get_server_assets()}
 
 @app.delete("/api/server_assets/{asset_id}")
-async def delete_server_asset(asset_id: int):
+async def delete_server_asset(asset_id: int, _u: dict = Depends(get_current_user)):
     database.delete_server_asset(asset_id)
     return {"status": "success"}
 
 # --- APAR ASSET API ---
 @app.post("/api/apar_assets")
-async def create_apar_asset(payload: AparAssetCreate):
+async def create_apar_asset(payload: AparAssetCreate, _u: dict = Depends(get_current_user)):
     asset_id = database.create_apar_asset(payload.branch, payload.apar_location, payload.fill_date, payload.expiry_date)
     return {"status": "success", "asset_id": asset_id}
 
 @app.get("/api/apar_assets")
-async def get_apar_assets():
+async def get_apar_assets(_u: dict = Depends(get_current_user)):
     return {"status": "success", "data": database.get_apar_assets()}
 
 @app.delete("/api/apar_assets/{asset_id}")
-async def delete_apar_asset(asset_id: int):
+async def delete_apar_asset(asset_id: int, _u: dict = Depends(get_current_user)):
     database.delete_apar_asset(asset_id)
     return {"status": "success"}
 
@@ -199,50 +223,53 @@ class AparAssetUpdate(BaseModel):
     expiry_date: str
 
 @app.put("/api/apar_assets/{asset_id}")
-async def update_apar_asset(asset_id: int, payload: AparAssetUpdate):
+async def update_apar_asset(asset_id: int, payload: AparAssetUpdate, _u: dict = Depends(get_current_user)):
     database.update_apar_asset(asset_id, payload.fill_date, payload.expiry_date)
     return {"status": "success"}
 
-
 # --- KWH ASSET API ---
 @app.post("/api/kwh_assets")
-async def create_kwh_asset(payload: KwhAssetCreate):
+async def create_kwh_asset(payload: KwhAssetCreate, _u: dict = Depends(get_current_user)):
     asset_id = database.create_kwh_asset(payload.branch, payload.kwh_location)
     return {"status": "success", "asset_id": asset_id}
 
 @app.get("/api/kwh_assets")
-async def get_kwh_assets():
+async def get_kwh_assets(_u: dict = Depends(get_current_user)):
     return {"status": "success", "data": database.get_kwh_assets()}
 
 @app.delete("/api/kwh_assets/{asset_id}")
-async def delete_kwh_asset(asset_id: int):
+async def delete_kwh_asset(asset_id: int, _u: dict = Depends(get_current_user)):
     database.delete_kwh_asset(asset_id)
     return {"status": "success"}
 
 # --- JOBS API ---
 @app.post("/api/jobs")
-async def create_job(payload: JobCreate):
+async def create_job(payload: JobCreate, current_user: dict = Depends(get_current_user)):
     job_id = database.create_job(payload.title, payload.branch, payload.assigned_to)
+    database.log_action(current_user.get("id", 0), current_user.get("name", ""), "SPK_CREATED",
+                        f"SPK '{payload.title}' untuk cabang {payload.branch}")
     return {"status": "success", "job_id": job_id}
 
 @app.delete("/api/jobs/{job_id}")
-async def delete_job(job_id: int):
+async def delete_job(job_id: int, current_user: dict = Depends(get_current_user)):
+    database.log_action(current_user.get("id", 0), current_user.get("name", ""), "SPK_DELETED",
+                        f"SPK ID #{job_id} dihapus")
     database.delete_job(job_id)
     return {"status": "success"}
 
 @app.get("/api/jobs")
-async def get_jobs(user_id: Optional[int] = None, role: Optional[str] = None):
+async def get_jobs(user_id: Optional[int] = None, role: Optional[str] = None, _u: dict = Depends(get_current_user)):
     return {"status": "success", "data": database.get_jobs(user_id, role)}
 
 @app.get("/api/jobs/{job_id}")
-async def get_job_details(job_id: int):
+async def get_job_details(job_id: int, _u: dict = Depends(get_current_user)):
     data = database.get_job_details(job_id)
     if not data:
         raise HTTPException(status_code=404, detail="Job not found")
     return {"status": "success", "data": data}
 
 @app.post("/api/jobs/{job_id}/progress")
-async def submit_progress(job_id: int, asset_id: int = Form(...), notes: str = Form(""), before_photo: UploadFile = File(None), after_photo: UploadFile = File(None)):
+async def submit_progress(job_id: int, asset_id: int = Form(...), notes: str = Form(""), before_photo: UploadFile = File(None), after_photo: UploadFile = File(None), _u: dict = Depends(get_current_user)):
     b_filename = ""
     a_filename = ""
     
@@ -270,13 +297,13 @@ async def send_kwh_email(
     sender_email: str = Form(...),
     kwh_location: str = Form(...),
     recipient_email: str = Form(...),
-    photo: UploadFile = File(...)
+    photo: UploadFile = File(...),
+    _u: dict = Depends(get_current_user)
 ):
-    # Setup dummy/central credentials here
-    SMTP_SERVER = "smtp.gmail.com"
-    SMTP_PORT = 465
-    SMTP_USER = "mohrizkynurfadil8@gmail.com"
-    SMTP_PASS = "***REMOVED***"   # App Password tanpa spasi
+    SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    SMTP_PORT   = int(os.getenv("SMTP_PORT", "465"))
+    SMTP_USER   = os.getenv("SMTP_USER", "")
+    SMTP_PASS   = os.getenv("SMTP_PASS", "")
     
     # Save photo temporarily to attach
     ext = photo.filename.split('.')[-1]
@@ -317,6 +344,13 @@ Tim Home-Service
         return {"status": "success", "detail": "Email berhasil dikirim!"}
     except Exception as e:
         return {"status": "error", "detail": str(e)}
+
+# --- AUDIT LOG API (Superadmin Only) ---
+@app.get("/api/audit-log")
+async def get_audit_log(current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "Superadmin":
+        raise HTTPException(status_code=403, detail="Akses ditolak - Superadmin only")
+    return {"status": "success", "data": database.get_audit_log()}
 
 if __name__ == "__main__":
     import uvicorn
