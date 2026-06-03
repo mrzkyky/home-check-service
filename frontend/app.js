@@ -1355,18 +1355,26 @@ window.saveSettings = async function() {
     let token = document.getElementById('fonnte-token-input').value;
     let wa = document.getElementById('admin-wa-input').value;
     try {
-        await fetch(`${API_BASE}/admin/settings`, {
+        let r1 = await fetch(`${API_BASE}/admin/settings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ key: 'fonnte_token', value: token })
         });
-        await fetch(`${API_BASE}/admin/settings`, {
+        let r2 = await fetch(`${API_BASE}/admin/settings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ key: 'admin_whatsapp_number', value: wa })
         });
+        
+        if (!r1.ok || !r2.ok) {
+            let errText = await r1.text();
+            throw new Error(`Server Response Error: ${r1.status} ${errText}`);
+        }
+        
         alert('Pengaturan berhasil disimpan!');
-    } catch(e) { alert('Gagal simpan pengaturan'); }
+    } catch(e) { 
+        alert('Gagal simpan pengaturan. Detail Error: ' + e.message); 
+    }
 }
 
 window.togglePasswordVisibility = function(inputId, btn) {
