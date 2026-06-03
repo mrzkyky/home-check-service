@@ -1263,7 +1263,7 @@ window.submitAdHocJob = async function () {
 // --- USER MANAGEMENT (SUPERADMIN) ---
 window.loadAdminUsers = async function() {
     try {
-        let res = await fetch(`${API_BASE}/admin/users`, { headers: getHeaders() });
+        let res = await fetch(`${API_BASE}/admin/users`);
         let data = await res.json();
         let tbody = document.getElementById('admin-users-table-body');
         if (res.ok && data.status === 'success') {
@@ -1300,7 +1300,7 @@ window.updateUserRole = async function(userId, newRole) {
     try {
         let res = await fetch(`${API_BASE}/admin/users/${userId}/role`, {
             method: 'PUT',
-            headers: getHeaders(),
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ role: newRole })
         });
         if(res.ok) {
@@ -1313,7 +1313,7 @@ window.updateUserRole = async function(userId, newRole) {
 window.deleteUser = async function(userId) {
     if(!confirm("Yakin ingin menghapus user ini secara permanen?")) return;
     try {
-        let res = await fetch(`${API_BASE}/admin/users/${userId}`, { method: 'DELETE', headers: getHeaders() });
+        let res = await fetch(`${API_BASE}/admin/users/${userId}`, { method: 'DELETE' });
         if(res.ok) {
             alert('User dihapus!');
             loadAdminUsers();
@@ -1324,7 +1324,7 @@ window.deleteUser = async function(userId) {
 // --- SETTINGS & BACKUP (SUPERADMIN) ---
 window.downloadDatabaseBackup = async function() {
     try {
-        let res = await fetch(`${API_BASE}/admin/backup-db`, { headers: getHeaders() });
+        let res = await fetch(`${API_BASE}/admin/backup-db`);
         if(res.ok) {
             let blob = await res.blob();
             let url = window.URL.createObjectURL(blob);
@@ -1340,8 +1340,8 @@ window.downloadDatabaseBackup = async function() {
 
 window.loadSettings = async function() {
     try {
-        let resF = await fetch(`${API_BASE}/admin/settings/fonnte_token`, { headers: getHeaders() });
-        let resA = await fetch(`${API_BASE}/admin/settings/admin_whatsapp_number`, { headers: getHeaders() });
+        let resF = await fetch(`${API_BASE}/admin/settings/fonnte_token`);
+        let resA = await fetch(`${API_BASE}/admin/settings/admin_whatsapp_number`);
         
         let datF = await resF.json();
         let datA = await resA.json();
@@ -1357,12 +1357,12 @@ window.saveSettings = async function() {
     try {
         await fetch(`${API_BASE}/admin/settings`, {
             method: 'POST',
-            headers: getHeaders(),
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ key: 'fonnte_token', value: token })
         });
         await fetch(`${API_BASE}/admin/settings`, {
             method: 'POST',
-            headers: getHeaders(),
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ key: 'admin_whatsapp_number', value: wa })
         });
         alert('Pengaturan berhasil disimpan!');
