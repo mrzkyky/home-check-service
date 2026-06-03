@@ -149,9 +149,24 @@ def init_db():
             reviewed_by TEXT,
             reviewed_at TEXT,
             reject_reason TEXT,
+            whatsapp_number TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+
+    # Table Settings
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT
+        )
+    ''')
+
+    # Alter table untuk data lama (tambah whatsapp_number jika belum ada)
+    try:
+        cursor.execute("ALTER TABLE server_access_requests ADD COLUMN whatsapp_number TEXT")
+    except sqlite3.OperationalError:
+        pass  # Kolom sudah ada
 
     # Init Superadmin jika belum ada
     cursor.execute("SELECT COUNT(*) FROM users")
@@ -493,15 +508,15 @@ def delete_job(job_id: int):
 
 # --- SERVER ACCESS PERMIT ---
 def create_access_request(requester_name: str, jabatan: str, requester_email: str,
-                          server_id: int, server_info: str, purpose: str, access_date: str) -> dict:
+                          server_id: int, server_info: str, purpose: str, access_date: str, whatsapp_number: str = "") -> dict:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     token = uuid.uuid4().hex[:12].upper()
     cursor.execute(
         """INSERT INTO server_access_requests
-           (requester_name, jabatan, requester_email, server_id, server_info, purpose, access_date, token)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-        (requester_name, jabatan, requester_email, server_id, server_info, purpose, access_date, token)
+           (requester_name, jabatan, requester_email, server_id, server_info, purpose, access_date, token, whatsapp_number)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (requester_name, jabatan, requester_email, server_id, server_info, purpose, access_date, token, whatsapp_number)
     )
     conn.commit()
     req_id = cursor.lastrowid
@@ -511,13 +526,11 @@ def create_access_request(requester_name: str, jabatan: str, requester_email: st
 def get_all_access_requests(status_filter: str = None) -> list:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+    query = "SELECT id, requester_name, jabatan, requester_email, server_id, server_info, purpose, access_date, status, token, reviewed_by, reviewed_at, reject_reason, created_at, whatsapp_number FROM server_access_requests"
     if status_filter:
-        cursor.execute(
-            "SELECT * FROM server_access_requests WHERE status=? ORDER BY id DESC",
-            (status_filter,)
-        )
+        cursor.execute(f"{query} WHERE status=? ORDER BY id DESC", (status_filter,))
     else:
-        cursor.execute("SELECT * FROM server_access_requests ORDER BY id DESC")
+        cursor.execute(f"{query} ORDER BY id DESC")
     rows = cursor.fetchall()
     conn.close()
     return [_row_to_request(r) for r in rows]
@@ -525,7 +538,7 @@ def get_all_access_requests(status_filter: str = None) -> list:
 def get_request_by_token(token: str) -> dict:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM server_access_requests WHERE token=?", (token,))
+    cursor.execute("SELECT id, requester_name, jabatan, requester_email, server_id, server_info, purpose, access_date, status, token, reviewed_by, reviewed_at, reject_reason, created_at, whatsapp_number FROM server_access_requests WHERE token=?", (token,))
     r = cursor.fetchone()
     conn.close()
     return _row_to_request(r) if r else None
@@ -533,7 +546,7 @@ def get_request_by_token(token: str) -> dict:
 def get_request_by_id(req_id: int) -> dict:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM server_access_requests WHERE id=?", (req_id,))
+    cursor.execute("SELECT id, requester_name, jabatan, requester_email, server_id, server_info, purpose, access_date, status, token, reviewed_by, reviewed_at, reject_reason, created_at, whatsapp_number FROM server_access_requests WHERE id=?", (req_id,))
     r = cursor.fetchone()
     conn.close()
     return _row_to_request(r) if r else None
@@ -569,7 +582,49 @@ def _row_to_request(r) -> dict:
         "reviewed_at": r[11],
         "reject_reason": r[12],
         "created_at": r[13],
+        "whatsapp_number": r[14] if len(r) > 14 else ""
     }
+
+# --- USER MANAGEMENT & SETTINGS ---
+def get_all_users() -> list:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, email, name, role FROM users")
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "email": r[1], "name": decrypt(r[2]), "role": r[3]} for r in rows]
+
+def update_user_role(user_id: int, role: str) -> bool:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET role=? WHERE id=?", (role, user_id))
+    conn.commit()
+    conn.close()
+    return True
+
+def delete_user(user_id: int) -> bool:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE id=?", (user_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+def get_setting(key: str) -> str:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT value FROM settings WHERE key=?", (key,))
+    r = cursor.fetchone()
+    conn.close()
+    return r[0] if r else ""
+
+def set_setting(key: str, value: str) -> bool:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)", (key, value))
+    conn.commit()
+    conn.close()
+    return True
 
 # Inisialisasi otomatis
 init_db()

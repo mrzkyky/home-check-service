@@ -119,6 +119,8 @@ function checkAuth() {
 
         if (currentUser.role === 'Superadmin') {
             document.getElementById('nav-admin').style.display = 'flex';
+            document.getElementById('nav-users').style.display = 'flex';
+            document.getElementById('nav-settings').style.display = 'flex';
         }
         if (currentUser.role === 'Superadmin' || currentUser.role === 'Admin') {
             document.getElementById('nav-permit-admin').style.display = 'flex';
@@ -218,6 +220,9 @@ window.switchView = function (viewId, navElement = null) {
         loadAdminAparAssets();
         loadAdminKwhAssets();
     }
+    else if (viewId === 'permit-admin') loadAdminPermits('pending');
+    else if (viewId === 'users') loadAdminUsers();
+    else if (viewId === 'settings') loadSettings();
 }
 
 window.toggleSidebar = function () { document.getElementById('app-sidebar').classList.toggle('open'); }
@@ -470,6 +475,7 @@ window.submitPermitRequest = async function() {
     let name = document.getElementById('permit-req-name').value;
     let jabatan = document.getElementById('permit-req-jabatan').value;
     let email = document.getElementById('permit-req-email').value;
+    let wa = document.getElementById('permit-req-whatsapp').value;
     let serverEl = document.getElementById('permit-req-location');
     let server_id = serverEl.value;
     let server_info = serverEl.options[serverEl.selectedIndex]?.getAttribute('data-info') || '';
@@ -477,14 +483,14 @@ window.submitPermitRequest = async function() {
     let purpose = document.getElementById('permit-req-purpose').value;
     
     if (!name || !jabatan || !email || !server_id || !date || !purpose) {
-        return alert("Harap lengkapi semua field form.");
+        return alert("Harap lengkapi semua field form wajib.");
     }
     
     try {
         let res = await fetch(`${API_BASE}/server-access/request`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ requester_name: name, jabatan, requester_email: email, server_id: parseInt(server_id), server_info, purpose, access_date: date })
+            body: JSON.stringify({ requester_name: name, jabatan, requester_email: email, whatsapp_number: wa, server_id: parseInt(server_id), server_info, purpose, access_date: date })
         });
         let data = await res.json();
         if (res.ok) {
@@ -1252,4 +1258,124 @@ window.submitAdHocJob = async function () {
             alert("Gagal simpan.");
         }
     } catch (e) { alert("Gagal koneksi server"); }
+}
+
+// --- USER MANAGEMENT (SUPERADMIN) ---
+window.loadAdminUsers = async function() {
+    try {
+        let res = await fetch(`${API_BASE}/admin/users`, { headers: getHeaders() });
+        let data = await res.json();
+        let tbody = document.getElementById('admin-users-table-body');
+        if (res.ok && data.status === 'success') {
+            tbody.innerHTML = '';
+            data.data.forEach(u => {
+                let isMe = u.id === currentUser.id;
+                let roleSelect = isMe ? u.role : `
+                    <select class="form-control" style="width:auto; padding:0.2rem;" onchange="updateUserRole(${u.id}, this.value)">
+                        <option value="Superadmin" ${u.role==='Superadmin'?'selected':''}>Superadmin</option>
+                        <option value="Admin" ${u.role==='Admin'?'selected':''}>Admin</option>
+                        <option value="Staff" ${u.role==='Staff'?'selected':''}>Staff</option>
+                    </select>
+                `;
+                let delBtn = isMe ? '' : `<button class="btn-secondary" style="color:var(--danger); border-color:var(--danger); padding:0.3rem;" onclick="deleteUser(${u.id})">Hapus</button>`;
+                tbody.innerHTML += `
+                    <tr style="border-bottom:1px solid var(--border-color);">
+                        <td style="padding:10px;">${u.id}</td>
+                        <td style="padding:10px;">${u.name}</td>
+                        <td style="padding:10px;">${u.email}</td>
+                        <td style="padding:10px;">${roleSelect}</td>
+                        <td style="padding:10px;">${delBtn}</td>
+                    </tr>
+                `;
+            });
+        }
+    } catch (e) { console.error("Gagal load users", e); }
+}
+
+window.updateUserRole = async function(userId, newRole) {
+    if(!confirm(`Yakin ubah role user ini menjadi ${newRole}?`)) {
+        loadAdminUsers();
+        return;
+    }
+    try {
+        let res = await fetch(`${API_BASE}/admin/users/${userId}/role`, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: JSON.stringify({ role: newRole })
+        });
+        if(res.ok) {
+            alert('Role berhasil diubah!');
+            loadAdminUsers();
+        } else { alert('Gagal ubah role'); }
+    } catch(e){ alert('Error koneksi'); }
+}
+
+window.deleteUser = async function(userId) {
+    if(!confirm("Yakin ingin menghapus user ini secara permanen?")) return;
+    try {
+        let res = await fetch(`${API_BASE}/admin/users/${userId}`, { method: 'DELETE', headers: getHeaders() });
+        if(res.ok) {
+            alert('User dihapus!');
+            loadAdminUsers();
+        } else { alert('Gagal hapus user'); }
+    } catch(e){ alert('Error koneksi'); }
+}
+
+// --- SETTINGS & BACKUP (SUPERADMIN) ---
+window.downloadDatabaseBackup = async function() {
+    try {
+        let res = await fetch(`${API_BASE}/admin/backup-db`, { headers: getHeaders() });
+        if(res.ok) {
+            let blob = await res.blob();
+            let url = window.URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = "homeservice_backup.db";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } else { alert("Gagal download backup!"); }
+    } catch(e){ alert("Error download!"); }
+}
+
+window.loadSettings = async function() {
+    try {
+        let resF = await fetch(`${API_BASE}/admin/settings/fonnte_token`, { headers: getHeaders() });
+        let resA = await fetch(`${API_BASE}/admin/settings/admin_whatsapp_number`, { headers: getHeaders() });
+        
+        let datF = await resF.json();
+        let datA = await resA.json();
+        
+        if(resF.ok) document.getElementById('fonnte-token-input').value = datF.data || '';
+        if(resA.ok) document.getElementById('admin-wa-input').value = datA.data || '';
+    } catch(e) { console.error(e); }
+}
+
+window.saveSettings = async function() {
+    let token = document.getElementById('fonnte-token-input').value;
+    let wa = document.getElementById('admin-wa-input').value;
+    try {
+        await fetch(`${API_BASE}/admin/settings`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ key: 'fonnte_token', value: token })
+        });
+        await fetch(`${API_BASE}/admin/settings`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ key: 'admin_whatsapp_number', value: wa })
+        });
+        alert('Pengaturan berhasil disimpan!');
+    } catch(e) { alert('Gagal simpan pengaturan'); }
+}
+
+window.togglePasswordVisibility = function(inputId, btn) {
+    let inp = document.getElementById(inputId);
+    if(inp.type === "password") {
+        inp.type = "text";
+        btn.innerHTML = "🙈";
+    } else {
+        inp.type = "password";
+        btn.innerHTML = "👁️";
+    }
 }

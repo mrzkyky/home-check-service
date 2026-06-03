@@ -119,6 +119,7 @@ class ServerAccessRequestModel(BaseModel):
     requester_name: str
     jabatan: str
     requester_email: str
+    whatsapp_number: str = ""
     server_id: int
     server_info: str
     purpose: str
@@ -127,6 +128,13 @@ class ServerAccessRequestModel(BaseModel):
 class ServerAccessReviewModel(BaseModel):
     status: str
     reject_reason: str = ""
+
+class UpdateUserRoleModel(BaseModel):
+    role: str
+
+class SettingUpdateModel(BaseModel):
+    key: str
+    value: str
 
 # --- AUTH API ---
 @app.post("/api/auth/login")
@@ -342,6 +350,27 @@ def send_email_helper(to_email: str, subject: str, content: str, attachment_file
     except Exception as e:
         return False, str(e)
 
+import urllib.request
+import urllib.parse
+import json
+
+def send_wa_notification(target: str, message: str):
+    token = database.get_setting("fonnte_token")
+    if not token or not target:
+        return False, "Fonnte token or target missing"
+    
+    url = "https://api.fonnte.com/send"
+    data = urllib.parse.urlencode({"target": target, "message": message}).encode('utf-8')
+    req = urllib.request.Request(url, data=data)
+    req.add_header("Authorization", token)
+    
+    try:
+        with urllib.request.urlopen(req) as response:
+            res = response.read().decode('utf-8')
+            return True, res
+    except Exception as e:
+        return False, str(e)
+
 @app.post("/api/kwh-email")
 async def send_kwh_email(
     sender_name: str = Form(...),
@@ -382,7 +411,7 @@ async def request_server_access(payload: ServerAccessRequestModel):
     # Simpan ke DB
     res = database.create_access_request(
         payload.requester_name, payload.jabatan, payload.requester_email,
-        payload.server_id, payload.server_info, payload.purpose, payload.access_date
+        payload.server_id, payload.server_info, payload.purpose, payload.access_date, payload.whatsapp_number
     )
     token = res["token"]
     
@@ -409,6 +438,12 @@ async def request_server_access(payload: ServerAccessRequestModel):
         </body></html>
         """
         send_email_helper(admin_email, subj, html)
+        
+    # Optional: Send WA to Admin
+    admin_wa = database.get_setting("admin_whatsapp_number")
+    if admin_wa:
+        wa_msg = f"*Pengajuan Akses Server Baru*\n\nDari: {payload.requester_name}\nKeperluan: {payload.purpose}\nTanggal: {payload.access_date}\n\nMohon segera review di Admin Panel HCS."
+        send_wa_notification(admin_wa, wa_msg)
         
     return {"status": "success", "token": token}
 
@@ -448,8 +483,11 @@ async def review_server_access(req_id: int, payload: ServerAccessReviewModel, cu
     <p>Pengajuan izin akses server Anda telah direview oleh <b>{current_user.get('name')}</b>.</p>
     <p>Status: <b style="color:{status_color};">{payload.status.upper()}</b></p>
     """
+    wa_msg = f"*Update Status Izin Akses Server*\n\nHalo {req['requester_name']},\nPengajuan akses server Anda telah direview.\n\nStatus: *{payload.status.upper()}*"
+    
     if payload.status == "rejected":
         html += f"<p><b>Alasan Penolakan:</b> {payload.reject_reason}</p>"
+        wa_msg += f"\nAlasan: {payload.reject_reason}"
         
     html += """
     <p>Terima kasih,<br>Tim Home-Service</p>
@@ -457,6 +495,63 @@ async def review_server_access(req_id: int, payload: ServerAccessReviewModel, cu
     """
     send_email_helper(req['requester_email'], subj, html)
     
+    # WA Notification
+    if req.get('whatsapp_number'):
+        send_wa_notification(req['whatsapp_number'], wa_msg)
+    
+    return {"status": "success"}
+
+# --- ADMIN SETTINGS & USERS API ---
+from fastapi.responses import FileResponse
+
+@app.get("/api/admin/users")
+async def admin_get_users(current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "Superadmin":
+        raise HTTPException(status_code=403, detail="Superadmin only")
+    return {"status": "success", "data": database.get_all_users()}
+
+@app.put("/api/admin/users/{user_id}/role")
+async def admin_update_user_role(user_id: int, payload: UpdateUserRoleModel, current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "Superadmin":
+        raise HTTPException(status_code=403, detail="Superadmin only")
+    if user_id == current_user.get("id"):
+        raise HTTPException(status_code=400, detail="Cannot change own role")
+    database.update_user_role(user_id, payload.role)
+    database.log_action(current_user.get("id"), current_user.get("name"), "ROLE_UPDATED", f"Changed user {user_id} role to {payload.role}")
+    return {"status": "success"}
+
+@app.delete("/api/admin/users/{user_id}")
+async def admin_delete_user(user_id: int, current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "Superadmin":
+        raise HTTPException(status_code=403, detail="Superadmin only")
+    if user_id == current_user.get("id"):
+        raise HTTPException(status_code=400, detail="Cannot delete self")
+    database.delete_user(user_id)
+    database.log_action(current_user.get("id"), current_user.get("name"), "USER_DELETED", f"Deleted user {user_id}")
+    return {"status": "success"}
+
+@app.get("/api/admin/backup-db")
+async def backup_database(current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "Superadmin":
+        raise HTTPException(status_code=403, detail="Superadmin only")
+    if not os.path.exists(database.DB_PATH):
+        raise HTTPException(status_code=404, detail="DB not found")
+    database.log_action(current_user.get("id"), current_user.get("name"), "DB_BACKUP", "Downloaded database backup")
+    return FileResponse(database.DB_PATH, media_type='application/octet-stream', filename=f"homeservice_backup_{datetime.now().strftime('%Y%m%d%H%M%S')}.db")
+
+@app.get("/api/admin/settings/{key}")
+async def get_setting(key: str, current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "Superadmin":
+        raise HTTPException(status_code=403, detail="Superadmin only")
+    val = database.get_setting(key)
+    return {"status": "success", "data": val}
+
+@app.post("/api/admin/settings")
+async def update_setting(payload: SettingUpdateModel, current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") != "Superadmin":
+        raise HTTPException(status_code=403, detail="Superadmin only")
+    database.set_setting(payload.key, payload.value)
+    database.log_action(current_user.get("id"), current_user.get("name"), "SETTING_UPDATED", f"Updated setting: {payload.key}")
     return {"status": "success"}
 
 # --- AUDIT LOG API (Superadmin Only) ---

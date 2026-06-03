@@ -337,6 +337,14 @@
                     <span class="nav-icon">🔐</span>
                     <span>Server Permit</span>
                 </a>
+                <a href="#" class="nav-item" id="nav-users" style="display:none;" onclick="switchView('users', this)">
+                    <span class="nav-icon">👥</span>
+                    <span>Kelola User</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-settings" style="display:none;" onclick="switchView('settings', this)">
+                    <span class="nav-icon">⚙️</span>
+                    <span>System & Backup</span>
+                </a>
             </aside>
 
             <!-- Main Content Area -->
@@ -892,6 +900,10 @@
                             <input type="email" id="permit-req-email" class="form-control" placeholder="john@example.com">
                         </div>
                         <div class="form-group">
+                            <label>Nomor WhatsApp (Opsional, awalan 08 / 62)</label>
+                            <input type="text" id="permit-req-whatsapp" class="form-control" placeholder="08123456789">
+                        </div>
+                        <div class="form-group">
                             <label>Pilih Cabang</label>
                             <select id="permit-req-branch" class="form-control" onchange="loadPermitServerLocations()">
                                 <option value="">Pilih Cabang...</option>
@@ -971,6 +983,57 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+
+                <!-- View: Manage Users (Superadmin) -->
+                <div id="view-users" class="view">
+                    <h2>Manajemen Pengguna (Superadmin)</h2>
+                    <div class="glass-panel">
+                        <button class="btn-primary" style="margin-bottom:1rem;" onclick="loadAdminUsers()">🔄 Refresh Data User</button>
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%; border-collapse:collapse;">
+                                <thead style="background:var(--border-color); text-align:left;">
+                                    <tr>
+                                        <th style="padding:10px;">ID</th>
+                                        <th style="padding:10px;">Nama</th>
+                                        <th style="padding:10px;">Email</th>
+                                        <th style="padding:10px;">Role Saat Ini</th>
+                                        <th style="padding:10px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View: System Settings & Backup (Superadmin) -->
+                <div id="view-settings" class="view">
+                    <h2>System Settings & Database Backup</h2>
+                    
+                    <div class="glass-panel" style="margin-bottom: 2rem;">
+                        <h3>Backup Database</h3>
+                        <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.95rem;">Download file SQLite Database (berisi semua riwayat SPK, Master Data, Permohonan, dll). Anda bisa membukanya menggunakan DB Browser for SQLite.</p>
+                        <button class="btn-primary" onclick="downloadDatabaseBackup()">💾 Download homeservice_v3.db</button>
+                    </div>
+
+                    <div class="glass-panel" style="margin-bottom: 2rem;">
+                        <h3>Integrasi WhatsApp Gateway (Fonnte)</h3>
+                        <p style="color:var(--text-muted); margin-bottom:1rem; font-size:0.95rem;">Masukkan Token Fonnte Anda untuk mengaktifkan notifikasi WA otomatis saat ada permohonan baru atau pembaruan status.</p>
+                        <div class="form-group">
+                            <label>Token Fonnte</label>
+                            <div style="display:flex; gap:10px;">
+                                <input type="password" id="fonnte-token-input" class="form-control" placeholder="Masukkan token Fonnte...">
+                                <button class="btn-secondary" onclick="togglePasswordVisibility('fonnte-token-input', this)">👁️</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Nomor WA Admin (Menerima notif permit baru)</label>
+                            <input type="text" id="admin-wa-input" class="form-control" placeholder="Contoh: 08123456789">
+                        </div>
+                        <button class="btn-primary" onclick="saveSettings()">Simpan Konfigurasi</button>
                     </div>
                 </div>
 
