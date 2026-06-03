@@ -110,6 +110,19 @@ class JobCreate(BaseModel):
     branch: str
     assigned_to: int
 
+class ServerAccessRequestModel(BaseModel):
+    requester_name: str
+    jabatan: str
+    requester_email: str
+    server_id: int
+    server_info: str
+    purpose: str
+    access_date: str
+
+class ServerAccessReviewModel(BaseModel):
+    status: str
+    reject_reason: str = ""
+
 # --- AUTH API ---
 @app.post("/api/auth/login")
 async def login(payload: LoginRequest, request: Request):
@@ -291,6 +304,39 @@ async def submit_progress(job_id: int, asset_id: int = Form(...), notes: str = F
 import smtplib
 from email.message import EmailMessage
 
+def send_email_helper(to_email: str, subject: str, content: str, attachment_filepath: str = None, attachment_filename: str = None):
+    SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    SMTP_PORT   = int(os.getenv("SMTP_PORT", "465"))
+    SMTP_USER   = os.getenv("SMTP_USER", "")
+    SMTP_PASS   = os.getenv("SMTP_PASS", "")
+    
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = f"Sistem HCS <{SMTP_USER}>"
+    msg['To'] = to_email
+    
+    # Send as HTML if content contains HTML tags, else plain text
+    if "<html>" in content or "<b>" in content:
+        msg.add_alternative(content, subtype='html')
+    else:
+        msg.set_content(content)
+        
+    if attachment_filepath and os.path.exists(attachment_filepath):
+        ext = attachment_filename.split('.')[-1] if attachment_filename else 'bin'
+        with open(attachment_filepath, 'rb') as f:
+            file_data = f.read()
+        msg.add_attachment(file_data, maintype='image', subtype=ext, filename=attachment_filename)
+        
+    try:
+        import ssl
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+            server.login(SMTP_USER, SMTP_PASS)
+            server.send_message(msg)
+        return True, "Email berhasil dikirim!"
+    except Exception as e:
+        return False, str(e)
+
 @app.post("/api/kwh-email")
 async def send_kwh_email(
     sender_name: str = Form(...),
@@ -300,23 +346,14 @@ async def send_kwh_email(
     photo: UploadFile = File(...),
     _u: dict = Depends(get_current_user)
 ):
-    SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
-    SMTP_PORT   = int(os.getenv("SMTP_PORT", "465"))
-    SMTP_USER   = os.getenv("SMTP_USER", "")
-    SMTP_PASS   = os.getenv("SMTP_PASS", "")
-    
     # Save photo temporarily to attach
     ext = photo.filename.split('.')[-1]
     filename = f"kwh_req_{uuid.uuid4().hex[:8]}.{ext}"
     filepath = os.path.join(UPLOAD_DIR, filename)
     with open(filepath, "wb") as buffer:
         shutil.copyfileobj(photo.file, buffer)
-    
-    msg = EmailMessage()
-    msg['Subject'] = f"Pengajuan Pulsa Listrik KWH - {kwh_location}"
-    msg['From'] = f"{sender_name} <{SMTP_USER}>"
-    msg['To'] = recipient_email
-    
+        
+    subject = f"Pengajuan Pulsa Listrik KWH - {kwh_location}"
     content = f"""Halo,
 
 Terdapat pengajuan pengisian pulsa listrik (token) untuk KWH meter berikut:
@@ -328,28 +365,100 @@ Terlampir adalah foto bukti meteran KWH saat ini.
 Terima kasih,
 Tim Home-Service
 """
-    msg.set_content(content)
+    success, msg = send_email_helper(recipient_email, subject, content, filepath, photo.filename)
+    if success:
+        return {"status": "success", "detail": msg}
+    else:
+        return {"status": "error", "detail": msg}
+
+# --- SERVER ACCESS PERMIT API ---
+@app.post("/api/server-access/request")
+async def request_server_access(payload: ServerAccessRequestModel):
+    # Simpan ke DB
+    res = database.create_access_request(
+        payload.requester_name, payload.jabatan, payload.requester_email,
+        payload.server_id, payload.server_info, payload.purpose, payload.access_date
+    )
+    token = res["token"]
     
-    # Attach photo
-    with open(filepath, 'rb') as f:
-        img_data = f.read()
-    msg.add_attachment(img_data, maintype='image', subtype=ext, filename=photo.filename)
+    # Ambil superadmin/admin emails untuk notifikasi (ambil semua Superadmin/Admin dari DB)
+    conn = database.sqlite3.connect(database.DB_PATH)
+    cur = conn.cursor()
+    cur.execute("SELECT email FROM users WHERE role IN ('Superadmin', 'Admin')")
+    admins = [row[0] for row in cur.fetchall() if row[0]]
+    conn.close()
     
-    try:
-        import ssl
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
-            server.login(SMTP_USER, SMTP_PASS)
-            server.send_message(msg)
-        return {"status": "success", "detail": "Email berhasil dikirim!"}
-    except Exception as e:
-        return {"status": "error", "detail": str(e)}
+    # Kirim email ke semua admin
+    for admin_email in admins:
+        subj = f"HCS - Pengajuan Izin Akses Server Baru"
+        html = f"""
+        <html><body>
+        <h3>Pengajuan Izin Akses Server</h3>
+        <p>Ada pengajuan akses server baru dari <b>{payload.requester_name}</b> ({payload.jabatan}).</p>
+        <ul>
+            <li><b>Server:</b> {payload.server_info}</li>
+            <li><b>Keperluan:</b> {payload.purpose}</li>
+            <li><b>Tgl Akses:</b> {payload.access_date}</li>
+        </ul>
+        <p>Silakan login ke <a href="https://hcs.yourdomain.com">Sistem HCS</a> (Admin Panel) untuk meninjau permintaan ini.</p>
+        </body></html>
+        """
+        send_email_helper(admin_email, subj, html)
+        
+    return {"status": "success", "token": token}
+
+@app.get("/api/server-access/status/{token}")
+async def get_server_access_status(token: str):
+    data = database.get_request_by_token(token)
+    if not data:
+        raise HTTPException(status_code=404, detail="Token permit tidak ditemukan.")
+    return {"status": "success", "data": data}
+
+@app.get("/api/server-access/requests")
+async def get_all_server_requests(status: Optional[str] = None, current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") not in ["Superadmin", "Admin"]:
+        raise HTTPException(status_code=403, detail="Akses ditolak - Hanya Admin")
+    return {"status": "success", "data": database.get_all_access_requests(status)}
+
+@app.post("/api/server-access/{req_id}/review")
+async def review_server_access(req_id: int, payload: ServerAccessReviewModel, current_user: dict = Depends(get_current_user)):
+    if current_user.get("role") not in ["Superadmin", "Admin"]:
+        raise HTTPException(status_code=403, detail="Akses ditolak - Hanya Admin")
+        
+    req = database.get_request_by_id(req_id)
+    if not req:
+        raise HTTPException(status_code=404, detail="Permit tidak ditemukan")
+        
+    database.update_request_status(req_id, payload.status, current_user.get("name"), payload.reject_reason)
+    database.log_action(current_user.get("id"), current_user.get("name"), f"PERMIT_REVIEW", f"Permit {req_id} {payload.status}")
+    
+    # Kirim email ke requester
+    subj = f"HCS - Status Izin Akses Server: {payload.status.upper()}"
+    status_color = "green" if payload.status == "approved" else "red"
+    
+    html = f"""
+    <html><body>
+    <h3>Update Status Izin Akses Server</h3>
+    <p>Halo {req['requester_name']},</p>
+    <p>Pengajuan izin akses server Anda telah direview oleh <b>{current_user.get('name')}</b>.</p>
+    <p>Status: <b style="color:{status_color};">{payload.status.upper()}</b></p>
+    """
+    if payload.status == "rejected":
+        html += f"<p><b>Alasan Penolakan:</b> {payload.reject_reason}</p>"
+        
+    html += """
+    <p>Terima kasih,<br>Tim Home-Service</p>
+    </body></html>
+    """
+    send_email_helper(req['requester_email'], subj, html)
+    
+    return {"status": "success"}
 
 # --- AUDIT LOG API (Superadmin Only) ---
 @app.get("/api/audit-log")
 async def get_audit_log(current_user: dict = Depends(get_current_user)):
-    if current_user.get("role") != "Superadmin":
-        raise HTTPException(status_code=403, detail="Akses ditolak - Superadmin only")
+    if current_user.get("role") not in ["Superadmin", "Admin"]:
+        raise HTTPException(status_code=403, detail="Akses ditolak - Admin only")
     return {"status": "success", "data": database.get_audit_log()}
 
 if __name__ == "__main__":

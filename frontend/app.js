@@ -52,6 +52,29 @@ let currentAssetsCache = [];
 
 // --- BOOTSTRAP ---
 window.onload = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('permit')) {
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'flex';
+        document.querySelector('.sidebar').style.display = 'none';
+        document.querySelector('.app-header').style.display = 'none';
+        switchView('permit-public');
+        window.loadPermitServerBranches();
+        return;
+    }
+    if (urlParams.has('status')) {
+        const token = urlParams.get('status');
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'flex';
+        document.querySelector('.sidebar').style.display = 'none';
+        document.querySelector('.app-header').style.display = 'none';
+        switchView('permit-status');
+        if (token && token.trim() !== "") {
+            document.getElementById('permit-status-token').value = token;
+            window.checkPermitStatus();
+        }
+        return;
+    }
     checkAuth();
 };
 
@@ -96,6 +119,9 @@ function checkAuth() {
 
         if (currentUser.role === 'Superadmin') {
             document.getElementById('nav-admin').style.display = 'flex';
+        }
+        if (currentUser.role === 'Superadmin' || currentUser.role === 'Admin') {
+            document.getElementById('nav-permit-admin').style.display = 'flex';
         }
 
         // Mulai aplikasi
@@ -368,6 +394,215 @@ window.previewProgressPhoto = function (event, type) {
         document.getElementById(`lbl-prog-${type}`).classList.add('hidden');
     };
     reader.readAsDataURL(file);
+}
+
+window.uploadKwhProgress = async function() {
+    let reqId = currentKwhReqId;
+    let senderName = document.getElementById('kwh-prog-sender-name').value;
+    let senderEmail = document.getElementById('kwh-prog-sender-email').value;
+    let file = document.getElementById('cam-prog-kwh-upload').files[0];
+
+    if (!senderName || !senderEmail || !file) {
+        return alert("Harap isi nama, email, dan unggah foto!");
+    }
+
+    let formData = new FormData();
+    formData.append("sender_name", senderName);
+    formData.append("sender_email", senderEmail);
+    formData.append("kwh_location", currentKwhLocation);
+    formData.append("recipient_email", currentKwhAdminEmail);
+    formData.append("photo", await compressImage(file));
+
+    try {
+        let res = await fetch(`${API_BASE}/kwh-email`, {
+            method: 'POST',
+            body: formData
+        });
+        let data = await res.json();
+        if (res.ok) {
+            alert("Berhasil! Email pengajuan pulsa telah dikirim ke admin.");
+            
+            // Tandai progress SPK selesai jika ada job id
+            if (currentJobId && currentAssetId) {
+                let pForm = new FormData();
+                pForm.append("asset_id", currentAssetId);
+                pForm.append("notes", "Email pengajuan KWH dikirim oleh: " + senderName);
+                await fetch(`${API_BASE}/jobs/${currentJobId}/progress`, { method: 'POST', body: pForm });
+                openChecklist(currentJobId);
+            } else {
+                switchView('home');
+            }
+        } else {
+            alert("Gagal kirim email: " + data.detail);
+        }
+    } catch (e) { alert("Error koneksi!"); }
+}
+
+// ==========================================
+// --- SERVER ACCESS PERMIT LOGIC ---
+// ==========================================
+let permitServerCache = [];
+
+window.loadPermitServerBranches = async function() {
+    try {
+        let res = await fetch(`${API_BASE}/server_assets`);
+        let data = await res.json();
+        permitServerCache = data.data || [];
+        let branchSelect = document.getElementById('permit-req-branch');
+        let branches = [...new Set(permitServerCache.map(a => a.branch))].filter(Boolean);
+        branchSelect.innerHTML = '<option value="">Pilih Cabang...</option>';
+        branches.forEach(b => branchSelect.innerHTML += `<option value="${b}">${b}</option>`);
+    } catch (e) {}
+}
+
+window.loadPermitServerLocations = function() {
+    let branch = document.getElementById('permit-req-branch').value;
+    let select = document.getElementById('permit-req-location'); 
+    select.innerHTML = '<option value="">Pilih Lokasi...</option>';
+    if (branch) {
+        permitServerCache.filter(a => a.branch === branch).forEach(a => {
+            select.innerHTML += `<option value="${a.id}" data-info="${a.branch} - ${a.server_location}">${a.server_location}</option>`;
+        });
+    }
+}
+
+window.submitPermitRequest = async function() {
+    let name = document.getElementById('permit-req-name').value;
+    let jabatan = document.getElementById('permit-req-jabatan').value;
+    let email = document.getElementById('permit-req-email').value;
+    let serverEl = document.getElementById('permit-req-location');
+    let server_id = serverEl.value;
+    let server_info = serverEl.options[serverEl.selectedIndex]?.getAttribute('data-info') || '';
+    let date = document.getElementById('permit-req-date').value;
+    let purpose = document.getElementById('permit-req-purpose').value;
+    
+    if (!name || !jabatan || !email || !server_id || !date || !purpose) {
+        return alert("Harap lengkapi semua field form.");
+    }
+    
+    try {
+        let res = await fetch(`${API_BASE}/server-access/request`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ requester_name: name, jabatan, requester_email: email, server_id: parseInt(server_id), server_info, purpose, access_date: date })
+        });
+        let data = await res.json();
+        if (res.ok) {
+            alert(`Permohonan Terkirim!\nSimpan Token Anda untuk melacak status: ${data.token}`);
+            window.location.href = `/?status=${data.token}`;
+        } else {
+            alert("Gagal: " + data.detail);
+        }
+    } catch (e) { alert("Error koneksi!"); }
+}
+
+window.checkPermitStatus = async function() {
+    let token = document.getElementById('permit-status-token').value;
+    if (!token) return alert("Masukkan token.");
+    
+    try {
+        let res = await fetch(`${API_BASE}/server-access/status/${token}`);
+        let data = await res.json();
+        if (res.ok) {
+            let req = data.data;
+            document.getElementById('lbl-ps-name').innerText = `${req.requester_name} (${req.jabatan})`;
+            document.getElementById('lbl-ps-server').innerText = req.server_info;
+            document.getElementById('lbl-ps-date').innerText = req.access_date;
+            
+            let statusEl = document.getElementById('lbl-ps-status');
+            statusEl.innerText = req.status.toUpperCase();
+            statusEl.className = `status-pill ${req.status}`;
+            
+            if (req.status !== 'pending') {
+                document.getElementById('lbl-ps-reviewer-container').style.display = 'block';
+                document.getElementById('lbl-ps-reviewer').innerText = req.reviewed_by;
+                document.getElementById('lbl-ps-review-date').innerText = req.reviewed_at;
+                
+                if (req.status === 'rejected') {
+                    document.getElementById('lbl-ps-reason-container').style.display = 'block';
+                    document.getElementById('lbl-ps-reason').innerText = req.reject_reason;
+                } else {
+                    document.getElementById('lbl-ps-reason-container').style.display = 'none';
+                }
+            } else {
+                document.getElementById('lbl-ps-reviewer-container').style.display = 'none';
+                document.getElementById('lbl-ps-reason-container').style.display = 'none';
+            }
+            
+            document.getElementById('permit-status-result').style.display = 'block';
+        } else {
+            alert(data.detail || "Token tidak valid.");
+        }
+    } catch (e) { alert("Error!"); }
+}
+
+window.resetPermitStatusSearch = function() {
+    document.getElementById('permit-status-token').value = "";
+    document.getElementById('permit-status-result').style.display = 'none';
+}
+
+window.loadAdminPermits = async function(status = '') {
+    try {
+        let url = `${API_BASE}/server-access/requests`;
+        if (status) url += `?status=${status}`;
+        let res = await fetch(url);
+        let data = await res.json();
+        
+        let tbody = document.getElementById('admin-permit-table-body');
+        tbody.innerHTML = '';
+        
+        if (data.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="padding:1rem; text-align:center;">Data tidak ditemukan.</td></tr>';
+            return;
+        }
+        
+        data.data.forEach(p => {
+            let actions = '';
+            if (p.status === 'pending') {
+                actions = `
+                    <button class="btn-success" style="padding:0.3rem 0.6rem; font-size:0.8rem; border:none; border-radius:4px; margin-right:5px; cursor:pointer;" onclick="reviewPermit(${p.id}, 'approved')">Approve</button>
+                    <button class="btn-danger" style="padding:0.3rem 0.6rem; font-size:0.8rem; border:none; border-radius:4px; cursor:pointer;" onclick="reviewPermit(${p.id}, 'rejected')">Reject</button>
+                `;
+            } else {
+                actions = `<span style="font-size:0.85rem; color:var(--text-muted);">Reviewed by ${p.reviewed_by}</span>`;
+            }
+            
+            tbody.innerHTML += `
+                <tr style="border-bottom:1px solid var(--border-color);">
+                    <td style="padding:10px; font-size:0.85rem;">${p.created_at.split(' ')[0]}</td>
+                    <td style="padding:10px; font-size:0.9rem;"><b>${p.requester_name}</b><br><span style="font-size:0.8rem; color:var(--text-muted);">${p.jabatan}</span></td>
+                    <td style="padding:10px; font-size:0.9rem;">${p.server_info}<br><span style="font-size:0.85rem; color:var(--primary);">Tgl: ${p.access_date}</span></td>
+                    <td style="padding:10px; font-size:0.85rem;">${p.purpose}</td>
+                    <td style="padding:10px;"><span class="status-pill ${p.status}">${p.status.toUpperCase()}</span></td>
+                    <td style="padding:10px;">${actions}</td>
+                </tr>
+            `;
+        });
+    } catch (e) { alert("Error memuat permit."); }
+}
+
+window.reviewPermit = async function(reqId, status) {
+    let reject_reason = "";
+    if (status === 'rejected') {
+        reject_reason = prompt("Masukkan alasan penolakan:");
+        if (reject_reason === null) return;
+    } else {
+        if (!confirm("Setujui izin akses ini?")) return;
+    }
+    
+    try {
+        let res = await fetch(`${API_BASE}/server-access/${reqId}/review`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status, reject_reason })
+        });
+        if (res.ok) {
+            alert(`Berhasil! Status diupdate menjadi ${status.toUpperCase()}. Email notifikasi akan dikirim.`);
+            loadAdminPermits();
+        } else {
+            alert("Gagal update status.");
+        }
+    } catch (e) { alert("Error koneksi!"); }
 }
 
 window.submitProgress = async function () {

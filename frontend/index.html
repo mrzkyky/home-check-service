@@ -39,7 +39,7 @@
             left: -5%;
             width: 400px;
             height: 400px;
-            background: rgba(32, 32, 99, 0.3);
+            background: rgba(124, 58, 237, 0.3); /* violet */
             border-radius: 50%;
         }
 
@@ -48,7 +48,7 @@
             right: -5%;
             width: 500px;
             height: 500px;
-            background: rgba(99, 102, 241, 0.3);
+            background: rgba(14, 165, 233, 0.3); /* sky blue */
             border-radius: 50%;
             animation-delay: -5s;
         }
@@ -87,7 +87,7 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            background: linear-gradient(135deg, #202063, #3030a0);
+            background: linear-gradient(135deg, #0ea5e9, #7c3aed);
             position: relative;
         }
 
@@ -114,8 +114,8 @@
 
         .login-input:focus {
             background: #ffffff;
-            border-color: #202063;
-            box-shadow: 0 0 0 4px rgba(32, 32, 99, 0.1);
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
         }
 
         .login-label {
@@ -132,21 +132,21 @@
             width: 100%;
             padding: 0.9rem;
             border-radius: 12px;
-            background: linear-gradient(135deg, #202063, #3030a0);
+            background: linear-gradient(135deg, #0ea5e9, #7c3aed);
             color: white;
             font-weight: 700;
             font-size: 1rem;
             border: none;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 8px 15px rgba(32, 32, 99, 0.2);
+            box-shadow: 0 8px 15px rgba(124, 58, 237, 0.2);
             margin-top: 1.5rem;
         }
 
         .login-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 20px rgba(32, 32, 99, 0.3);
-            background: linear-gradient(135deg, #131342, #202063);
+            box-shadow: 0 12px 20px rgba(124, 58, 237, 0.3);
+            background: linear-gradient(135deg, #0284c7, #6d28d9);
         }
 
         .switch-mode-text {
@@ -159,7 +159,7 @@
         }
 
         .switch-mode-text span {
-            color: #202063;
+            color: #7c3aed;
             font-weight: 700;
         }
 
@@ -222,8 +222,14 @@
                         <input type="password" id="login-password" placeholder="••••••••" class="login-input">
                     </div>
                     <button class="login-btn" onclick="doLogin()">Sign In</button>
-                    <p class="switch-mode-text" onclick="toggleAuthMode()">Belum punya akun? <span>Daftar di sini</span>
-                    </p>
+                    <p class="switch-mode-text" onclick="toggleAuthMode()">Belum punya akun? <span>Daftar di sini</span></p>
+                    
+                    <div style="margin-top: 2rem; border-top: 1px solid #e2e8f0; padding-top: 1.5rem; text-align: center;">
+                        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 0.8rem;">Bukan tim internal?</p>
+                        <button onclick="window.location.href='?permit'" style="background: transparent; border: 1px solid #0ea5e9; color: #0ea5e9; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                            📝 Ajukan Izin Akses Server (Publik)
+                        </button>
+                    </div>
                 </div>
 
                 <div id="register-form" style="display:none;">
@@ -326,6 +332,10 @@
                 <a href="#" class="nav-item" id="nav-admin" style="display:none;" onclick="switchView('admin', this)">
                     <span class="nav-icon">⚙️</span>
                     <span>Admin Panel</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-permit-admin" style="display:none;" onclick="switchView('permit-admin', this)">
+                    <span class="nav-icon">🔐</span>
+                    <span>Server Permit</span>
                 </a>
             </aside>
 
@@ -861,6 +871,107 @@
                             style="justify-content:center; color: var(--text-muted); background: transparent; box-shadow: none; border: 1px dashed var(--border-color);">
                             Memuat riwayat...</li>
                     </ul>
+                </div>
+
+                <!-- View: Permit Public (Request Form) -->
+                <div id="view-permit-public" class="view">
+                    <h2 style="text-align:center; color:var(--primary); margin-bottom:1rem;">Permohonan Izin Akses Server</h2>
+                    <p style="text-align:center; color:var(--text-muted); margin-bottom:2rem;">Silakan isi formulir di bawah ini untuk mendapatkan izin akses ke ruang server.</p>
+                    
+                    <div class="glass-panel" style="max-width: 600px; margin: 0 auto;">
+                        <div class="form-group">
+                            <label>Nama Lengkap</label>
+                            <input type="text" id="permit-req-name" class="form-control" placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label>Jabatan / Instansi</label>
+                            <input type="text" id="permit-req-jabatan" class="form-control" placeholder="Teknisi Vendor PT XYZ">
+                        </div>
+                        <div class="form-group">
+                            <label>Email (Untuk menerima notifikasi status)</label>
+                            <input type="email" id="permit-req-email" class="form-control" placeholder="john@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Pilih Cabang</label>
+                            <select id="permit-req-branch" class="form-control" onchange="loadPermitServerLocations()">
+                                <option value="">Pilih Cabang...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Pilih Lokasi Server</label>
+                            <select id="permit-req-location" class="form-control">
+                                <option value="">Pilih Lokasi...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal Rencana Akses</label>
+                            <input type="date" id="permit-req-date" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Keperluan / Deskripsi Pekerjaan</label>
+                            <textarea id="permit-req-purpose" class="form-control" placeholder="Jelaskan detail aktivitas di dalam ruang server..."></textarea>
+                        </div>
+                        <button class="btn-primary" style="width:100%; margin-top:1rem;" onclick="submitPermitRequest()">Kirim Permohonan Akses</button>
+                    </div>
+                </div>
+
+                <!-- View: Permit Status -->
+                <div id="view-permit-status" class="view">
+                    <h2 style="text-align:center; color:var(--primary); margin-bottom:1rem;">Status Izin Akses Server</h2>
+                    <div class="glass-panel" style="max-width: 600px; margin: 0 auto; text-align:center;">
+                        <div id="permit-status-search">
+                            <p style="margin-bottom:1rem;">Masukkan Token Anda untuk melacak status permohonan:</p>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" id="permit-status-token" class="form-control" placeholder="Contoh: A1B2C3D4">
+                                <button class="btn-primary" onclick="checkPermitStatus()">Cek Status</button>
+                            </div>
+                        </div>
+                        <div id="permit-status-result" style="display:none; margin-top:2rem; text-align:left;">
+                            <h3 style="border-bottom:1px solid var(--border-color); padding-bottom:10px; margin-bottom:15px;">Detail Permohonan</h3>
+                            <p><strong>Nama:</strong> <span id="lbl-ps-name"></span></p>
+                            <p><strong>Server:</strong> <span id="lbl-ps-server"></span></p>
+                            <p><strong>Tgl Akses:</strong> <span id="lbl-ps-date"></span></p>
+                            <div style="margin-top:1.5rem; padding:15px; border-radius:10px; background:var(--bg-color);">
+                                <h4 style="margin-bottom:10px;">Status: <span id="lbl-ps-status" class="status-pill"></span></h4>
+                                <p id="lbl-ps-reviewer-container" style="font-size:0.9rem; color:var(--text-muted); display:none;">Ditinjau oleh: <strong id="lbl-ps-reviewer"></strong> pada <span id="lbl-ps-review-date"></span></p>
+                                <p id="lbl-ps-reason-container" style="font-size:0.9rem; color:var(--danger); display:none; margin-top:10px;"><strong>Alasan Penolakan:</strong> <span id="lbl-ps-reason"></span></p>
+                            </div>
+                            <button class="btn-secondary" style="width:100%; margin-top:1.5rem;" onclick="resetPermitStatusSearch()">Cek Token Lain</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View: Admin Permit Management -->
+                <div id="view-permit-admin" class="view">
+                    <h2>Manajemen Izin Akses Server (Admin)</h2>
+                    <div class="glass-panel">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                            <div style="display:flex; gap:10px;">
+                                <button class="btn-secondary" onclick="loadAdminPermits('pending')">Pending</button>
+                                <button class="btn-secondary" onclick="loadAdminPermits('approved')">Approved</button>
+                                <button class="btn-secondary" onclick="loadAdminPermits('rejected')">Rejected</button>
+                                <button class="btn-secondary" onclick="loadAdminPermits('')">Semua</button>
+                            </div>
+                            <button class="btn-primary" onclick="loadAdminPermits()">🔄 Refresh</button>
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%; border-collapse:collapse; min-width:800px;">
+                                <thead style="background:var(--border-color); text-align:left;">
+                                    <tr>
+                                        <th style="padding:10px;">Tanggal</th>
+                                        <th style="padding:10px;">Pemohon</th>
+                                        <th style="padding:10px;">Server & Jadwal</th>
+                                        <th style="padding:10px;">Keperluan</th>
+                                        <th style="padding:10px;">Status</th>
+                                        <th style="padding:10px;">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-permit-table-body">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
 
             </main>

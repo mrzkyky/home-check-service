@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import bcrypt
+import uuid
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 
@@ -128,6 +129,26 @@ def init_db():
             action TEXT,
             detail TEXT,
             ip TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Table Server Access Requests (Permit Izin Masuk Server)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS server_access_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            requester_name TEXT NOT NULL,
+            jabatan TEXT,
+            requester_email TEXT NOT NULL,
+            server_id INTEGER,
+            server_info TEXT,
+            purpose TEXT,
+            access_date TEXT,
+            status TEXT DEFAULT 'pending',
+            token TEXT UNIQUE,
+            reviewed_by TEXT,
+            reviewed_at TEXT,
+            reject_reason TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -395,7 +416,7 @@ def create_job(title: str, branch: str, assigned_to: int):
 def get_jobs(user_id: int = None, role: str = None):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    if role == 'Superadmin':
+    if role in ['Superadmin', 'Admin']:
         cursor.execute("SELECT * FROM jobs ORDER BY id DESC")
     else:
         cursor.execute("SELECT * FROM jobs WHERE assigned_to=? ORDER BY id DESC", (user_id,))
@@ -470,5 +491,86 @@ def delete_job(job_id: int):
     conn.close()
     return True
 
+# --- SERVER ACCESS PERMIT ---
+def create_access_request(requester_name: str, jabatan: str, requester_email: str,
+                          server_id: int, server_info: str, purpose: str, access_date: str) -> dict:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    token = uuid.uuid4().hex[:12].upper()
+    cursor.execute(
+        """INSERT INTO server_access_requests
+           (requester_name, jabatan, requester_email, server_id, server_info, purpose, access_date, token)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+        (requester_name, jabatan, requester_email, server_id, server_info, purpose, access_date, token)
+    )
+    conn.commit()
+    req_id = cursor.lastrowid
+    conn.close()
+    return {"id": req_id, "token": token}
+
+def get_all_access_requests(status_filter: str = None) -> list:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    if status_filter:
+        cursor.execute(
+            "SELECT * FROM server_access_requests WHERE status=? ORDER BY id DESC",
+            (status_filter,)
+        )
+    else:
+        cursor.execute("SELECT * FROM server_access_requests ORDER BY id DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    return [_row_to_request(r) for r in rows]
+
+def get_request_by_token(token: str) -> dict:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM server_access_requests WHERE token=?", (token,))
+    r = cursor.fetchone()
+    conn.close()
+    return _row_to_request(r) if r else None
+
+def get_request_by_id(req_id: int) -> dict:
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM server_access_requests WHERE id=?", (req_id,))
+    r = cursor.fetchone()
+    conn.close()
+    return _row_to_request(r) if r else None
+
+def update_request_status(req_id: int, status: str, reviewed_by: str, reject_reason: str = "") -> bool:
+    from datetime import datetime
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute(
+        """UPDATE server_access_requests
+           SET status=?, reviewed_by=?, reviewed_at=?, reject_reason=?
+           WHERE id=?""",
+        (status, reviewed_by, now, reject_reason, req_id)
+    )
+    conn.commit()
+    conn.close()
+    return True
+
+def _row_to_request(r) -> dict:
+    return {
+        "id": r[0],
+        "requester_name": r[1],
+        "jabatan": r[2],
+        "requester_email": r[3],
+        "server_id": r[4],
+        "server_info": r[5],
+        "purpose": r[6],
+        "access_date": r[7],
+        "status": r[8],
+        "token": r[9],
+        "reviewed_by": r[10],
+        "reviewed_at": r[11],
+        "reject_reason": r[12],
+        "created_at": r[13],
+    }
+
 # Inisialisasi otomatis
 init_db()
+
