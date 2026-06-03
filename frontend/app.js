@@ -742,17 +742,29 @@ window.adminCreateServer = async function () {
     let branch = document.getElementById('server-branch').value;
     let server_location = document.getElementById('server-location').value;
     if (!branch || !server_location) return alert("Isi semua data!");
-    let res = await fetch(`${API_BASE}/server_assets`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ branch, server_location }) });
-    if (res.ok) { alert("Berhasil ditambah!"); loadAdminServerAssets(); }
+    try {
+        let res = await fetch(`${API_BASE}/server_assets`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ branch, server_location }) });
+        let data = await res.json();
+        if (res.ok) { alert("Berhasil ditambah!"); loadAdminServerAssets(); }
+        else { alert("Gagal tambah server: " + JSON.stringify(data)); }
+    } catch(e) { alert("Error: " + e.message); }
 }
 window.loadAdminServerAssets = async function () {
-    let res = await fetch(`${API_BASE}/server_assets`); let data = await res.json();
-    let tbody = document.getElementById('admin-server-table-body'); tbody.innerHTML = '';
-    if (data.data.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem;">Kosong</td></tr>';
-    data.data.forEach(a => tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);"><td style="padding:1rem;">#${a.id}</td><td style="padding:1rem;">${a.branch}</td><td style="padding:1rem;">${a.server_location}</td><td style="padding:1rem;"><button class="btn-secondary" style="color:var(--danger); border-color:var(--danger);" onclick="adminDeleteServer(${a.id})">Hapus</button></td></tr>`);
+    try {
+        let res = await fetch(`${API_BASE}/server_assets`); 
+        let data = await res.json();
+        let tbody = document.getElementById('admin-server-table-body'); tbody.innerHTML = '';
+        if (!res.ok) { tbody.innerHTML = `<tr><td colspan="4">Error: ${JSON.stringify(data)}</td></tr>`; return; }
+        if (!data.data || data.data.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem;">Kosong</td></tr>';
+        else data.data.forEach(a => tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);"><td style="padding:1rem;">#${a.id}</td><td style="padding:1rem;">${a.branch}</td><td style="padding:1rem;">${a.server_location}</td><td style="padding:1rem;"><button class="btn-secondary" style="color:var(--danger); border-color:var(--danger);" onclick="adminDeleteServer(${a.id})">Hapus</button></td></tr>`);
+    } catch(e) { console.error("Load Server Error", e); }
 }
 window.adminDeleteServer = async function (id) {
-    if (confirm("Hapus?")) { await fetch(`${API_BASE}/server_assets/${id}`, { method: 'DELETE' }); loadAdminServerAssets(); }
+    if (confirm("Hapus?")) { 
+        let res = await fetch(`${API_BASE}/server_assets/${id}`, { method: 'DELETE' }); 
+        if(res.ok) loadAdminServerAssets(); 
+        else alert("Gagal hapus!");
+    }
 }
 
 window.adminCreateApar = async function () {
@@ -761,34 +773,58 @@ window.adminCreateApar = async function () {
     let fill_date = document.getElementById('apar-fill').value;
     let expiry_date = document.getElementById('apar-expiry').value;
     if (!branch || !apar_location) return alert("Isi data!");
-    let res = await fetch(`${API_BASE}/apar_assets`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ branch, apar_location, fill_date, expiry_date }) });
-    if (res.ok) { alert("Berhasil ditambah!"); loadAdminAparAssets(); }
+    try {
+        let res = await fetch(`${API_BASE}/apar_assets`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ branch, apar_location, fill_date, expiry_date }) });
+        let data = await res.json();
+        if (res.ok) { alert("Berhasil ditambah!"); loadAdminAparAssets(); }
+        else { alert("Gagal tambah APAR: " + JSON.stringify(data)); }
+    } catch(e) { alert("Error: " + e.message); }
 }
 window.loadAdminAparAssets = async function () {
-    let res = await fetch(`${API_BASE}/apar_assets`); let data = await res.json();
-    let tbody = document.getElementById('admin-apar-table-body'); tbody.innerHTML = '';
-    if (data.data.length === 0) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1rem;">Kosong</td></tr>';
-    data.data.forEach(a => tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);"><td style="padding:1rem;">#${a.id}</td><td style="padding:1rem;">${a.branch}</td><td style="padding:1rem;">${a.apar_location}</td><td style="padding:1rem;">${a.fill_date}</td><td style="padding:1rem;">${a.expiry_date}</td><td style="padding:1rem;"><button class="btn-secondary" style="color:var(--danger); border-color:var(--danger);" onclick="adminDeleteApar(${a.id})">Hapus</button></td></tr>`);
+    try {
+        let res = await fetch(`${API_BASE}/apar_assets`); 
+        let data = await res.json();
+        let tbody = document.getElementById('admin-apar-table-body'); tbody.innerHTML = '';
+        if (!res.ok) { tbody.innerHTML = `<tr><td colspan="6">Error: ${JSON.stringify(data)}</td></tr>`; return; }
+        if (!data.data || data.data.length === 0) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1rem;">Kosong</td></tr>';
+        else data.data.forEach(a => tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);"><td style="padding:1rem;">#${a.id}</td><td style="padding:1rem;">${a.branch}</td><td style="padding:1rem;">${a.apar_location}</td><td style="padding:1rem;">${a.fill_date}</td><td style="padding:1rem;">${a.expiry_date}</td><td style="padding:1rem;"><button class="btn-secondary" style="color:var(--danger); border-color:var(--danger);" onclick="adminDeleteApar(${a.id})">Hapus</button></td></tr>`);
+    } catch(e) { console.error("Load APAR Error", e); }
 }
 window.adminDeleteApar = async function (id) {
-    if (confirm("Hapus?")) { await fetch(`${API_BASE}/apar_assets/${id}`, { method: 'DELETE' }); loadAdminAparAssets(); }
+    if (confirm("Hapus?")) { 
+        let res = await fetch(`${API_BASE}/apar_assets/${id}`, { method: 'DELETE' }); 
+        if(res.ok) loadAdminAparAssets(); 
+        else alert("Gagal hapus!");
+    }
 }
 
 window.adminCreateKwh = async function () {
     let branch = document.getElementById('kwh-branch').value;
     let kwh_location = document.getElementById('kwh-location').value;
     if (!branch || !kwh_location) return alert("Isi data!");
-    let res = await fetch(`${API_BASE}/kwh_assets`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ branch, kwh_location }) });
-    if (res.ok) { alert("Berhasil ditambah!"); loadAdminKwhAssets(); }
+    try {
+        let res = await fetch(`${API_BASE}/kwh_assets`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ branch, kwh_location }) });
+        let data = await res.json();
+        if (res.ok) { alert("Berhasil ditambah!"); loadAdminKwhAssets(); }
+        else { alert("Gagal tambah KWH: " + JSON.stringify(data)); }
+    } catch(e) { alert("Error: " + e.message); }
 }
 window.loadAdminKwhAssets = async function () {
-    let res = await fetch(`${API_BASE}/kwh_assets`); let data = await res.json();
-    let tbody = document.getElementById('admin-kwh-table-body'); tbody.innerHTML = '';
-    if (data.data.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem;">Kosong</td></tr>';
-    data.data.forEach(a => tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);"><td style="padding:1rem;">#${a.id}</td><td style="padding:1rem;">${a.branch}</td><td style="padding:1rem;">${a.kwh_location}</td><td style="padding:1rem;"><button class="btn-secondary" style="color:var(--danger); border-color:var(--danger);" onclick="adminDeleteKwh(${a.id})">Hapus</button></td></tr>`);
+    try {
+        let res = await fetch(`${API_BASE}/kwh_assets`); 
+        let data = await res.json();
+        let tbody = document.getElementById('admin-kwh-table-body'); tbody.innerHTML = '';
+        if (!res.ok) { tbody.innerHTML = `<tr><td colspan="4">Error: ${JSON.stringify(data)}</td></tr>`; return; }
+        if (!data.data || data.data.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:1rem;">Kosong</td></tr>';
+        else data.data.forEach(a => tbody.innerHTML += `<tr style="border-bottom: 1px solid var(--border-color);"><td style="padding:1rem;">#${a.id}</td><td style="padding:1rem;">${a.branch}</td><td style="padding:1rem;">${a.kwh_location}</td><td style="padding:1rem;"><button class="btn-secondary" style="color:var(--danger); border-color:var(--danger);" onclick="adminDeleteKwh(${a.id})">Hapus</button></td></tr>`);
+    } catch(e) { console.error("Load KWH Error", e); }
 }
 window.adminDeleteKwh = async function (id) {
-    if (confirm("Hapus?")) { await fetch(`${API_BASE}/kwh_assets/${id}`, { method: 'DELETE' }); loadAdminKwhAssets(); }
+    if (confirm("Hapus?")) { 
+        let res = await fetch(`${API_BASE}/kwh_assets/${id}`, { method: 'DELETE' }); 
+        if(res.ok) loadAdminKwhAssets(); 
+        else alert("Gagal hapus!");
+    }
 }
 
 // --- PROFILE EDITING ---

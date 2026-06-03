@@ -55,6 +55,11 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
 
 app = FastAPI()
 
+# Auto-initialize database on startup
+@app.on_event("startup")
+def startup_event():
+    database.init_db()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
