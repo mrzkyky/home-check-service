@@ -221,7 +221,7 @@ async def create_server_asset(payload: ServerAssetCreate, _u: dict = Depends(get
     return {"status": "success", "asset_id": asset_id}
 
 @app.get("/api/server_assets")
-async def get_server_assets(_u: dict = Depends(get_current_user)):
+async def get_server_assets():
     return {"status": "success", "data": database.get_server_assets()}
 
 @app.delete("/api/server_assets/{asset_id}")
@@ -357,7 +357,11 @@ import json
 def send_wa_notification(target: str, message: str):
     token = database.get_setting("fonnte_token")
     if not token or not target:
+        print("WA Notification skipped: Token or target missing.")
         return False, "Fonnte token or target missing"
+    
+    token = token.strip()
+    target = target.strip()
     
     url = "https://api.fonnte.com/send"
     data = urllib.parse.urlencode({"target": target, "message": message}).encode('utf-8')
@@ -367,8 +371,10 @@ def send_wa_notification(target: str, message: str):
     try:
         with urllib.request.urlopen(req) as response:
             res = response.read().decode('utf-8')
+            print(f"Fonnte response for {target}: {res}")
             return True, res
     except Exception as e:
+        print(f"Fonnte Exception for {target}: {str(e)}")
         return False, str(e)
 
 @app.post("/api/kwh-email")
