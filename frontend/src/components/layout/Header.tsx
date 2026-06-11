@@ -33,13 +33,13 @@ export function Header() {
         </button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative size-8 rounded-full">
+          <DropdownMenuTrigger className="outline-none">
+            <div className="relative size-8 rounded-full hover:opacity-80 transition-opacity cursor-pointer">
               <Avatar className="size-8">
                 <AvatarImage src="" alt="User" />
                 <AvatarFallback>AD</AvatarFallback>
               </Avatar>
-            </Button>
+            </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
