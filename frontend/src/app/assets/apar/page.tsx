@@ -85,7 +85,7 @@ export default function APARPage() {
                 <th className="p-4 text-left text-muted-foreground font-medium w-1/4">Type & Capacity</th>
                 <th className="p-4 text-left text-muted-foreground font-medium w-1/5">Expiry Date</th>
                 <th className="p-4 text-left text-muted-foreground font-medium w-1/5">Status</th>
-                <th className="p-4 text-right text-muted-foreground font-medium" className="w-32">Action</th>
+                <th className="p-4 text-right text-muted-foreground font-medium w-32">Action</th>
               </tr>
             </thead>
             <tbody>
