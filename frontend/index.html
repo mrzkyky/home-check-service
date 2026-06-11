@@ -328,17 +328,9 @@
                     <span class="nav-icon">🏠</span>
                     <span>Dashboard</span>
                 </a>
-                <a href="#" class="nav-item" onclick="switchView('cmms-monitoring', this)">
-                    <span class="nav-icon">📊</span>
-                    <span>Monitoring AC</span>
-                </a>
-                <a href="#" class="nav-item" onclick="switchView('cmms-pm', this)">
-                    <span class="nav-icon">🛠️</span>
-                    <span>Pemeriksaan (PM)</span>
-                </a>
-                <a href="#" class="nav-item" onclick="switchView('cmms-cuci', this)">
-                    <span class="nav-icon">🚿</span>
-                    <span>Cuci AC</span>
+                <a href="#" class="nav-item" onclick="switchView('history', this)">
+                    <span class="nav-icon">📋</span>
+                    <span>Riwayat SPK</span>
                 </a>
                 <a href="#" class="nav-item" onclick="switchView('history', this)">
                     <span class="nav-icon">📋</span>
@@ -365,8 +357,32 @@
             <!-- Main Content Area -->
             <main id="app-content" class="main-content">
 
+                <!-- CMMS: Sub-Menu Dashboard -->
+                <div id="view-cmms-menu" class="view">
+                    <button class="back-btn" onclick="switchView('home')">← Kembali ke Dashboard</button>
+                    <h2>Manajemen AC (CMMS)</h2>
+                    <div class="task-grid" style="margin-bottom: 2.5rem;">
+                        <div class="task-card" onclick="switchView('cmms-monitoring')">
+                            <span class="icon"><i class="ph ph-thermometer"></i></span>
+                            <h3>Monitoring AC</h3>
+                            <p style="font-size:0.85rem; color:var(--text-muted);">Pengecekan Harian/Mingguan (Khusus Kepala Cabang)</p>
+                        </div>
+                        <div class="task-card" onclick="switchView('cmms-pm')">
+                            <span class="icon"><i class="ph ph-wrench"></i></span>
+                            <h3>Pemeriksaan (PM)</h3>
+                            <p style="font-size:0.85rem; color:var(--text-muted);">Preventive Maintenance Bulanan</p>
+                        </div>
+                        <div class="task-card" onclick="switchView('cmms-cuci')">
+                            <span class="icon"><i class="ph ph-drop"></i></span>
+                            <h3>Cuci AC & Dok.</h3>
+                            <p style="font-size:0.85rem; color:var(--text-muted);">Laporan Cuci & Pengajuan Approval</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- CMMS: Monitoring AC -->
                 <div id="view-cmms-monitoring" class="view">
+                    <button class="back-btn" onclick="switchView('cmms-menu')">← Kembali ke Manajemen AC</button>
                     <h2>Monitoring Harian AC</h2>
                     
                     <div class="task-grid" style="margin-bottom: 2rem;">
@@ -456,6 +472,7 @@
 
                 <!-- CMMS: Pemeriksaan (PM) -->
                 <div id="view-cmms-pm" class="view">
+                    <button class="back-btn" onclick="switchView('cmms-menu')">← Kembali ke Manajemen AC</button>
                     <h2>Pemeriksaan AC (Preventive Maintenance)</h2>
                     
                     <div style="display:flex; justify-content:flex-end; margin-bottom:1rem;">
@@ -496,6 +513,7 @@
 
                 <!-- CMMS: Cuci AC & Dokumentasi -->
                 <div id="view-cmms-cuci" class="view">
+                    <button class="back-btn" onclick="switchView('cmms-menu')">← Kembali ke Manajemen AC</button>
                     <h2>Cuci AC & Dokumentasi</h2>
                     
                     <div class="glass-panel" style="margin-bottom: 2rem;">
@@ -557,9 +575,9 @@
                 <div id="view-home" class="view active">
                     <h2>Dashboard Menu</h2>
                     <div class="task-grid" style="margin-bottom: 2.5rem;">
-                        <div class="task-card" onclick="openJobForm('Cuci AC')">
-                            <span class="icon">❄️</span>
-                            <h3>Cuci AC</h3>
+                        <div class="task-card" onclick="switchView('cmms-menu')">
+                            <span class="icon"><i class="ph ph-wind"></i></span>
+                            <h3>Manajemen AC</h3>
                         </div>
                         <div class="task-card" onclick="openJobForm('Maintenance Server')">
                             <span class="icon">🖥️</span>

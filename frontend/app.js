@@ -1509,6 +1509,11 @@ window.openNewJadwalPMForm = function() {
 
 const originalSwitchView = window.switchView;
 window.switchView = function(viewId, navElement = null) {
+    if(viewId === 'cmms-monitoring' && currentUser.role === 'Staff') {
+        Swal.fire('Akses Ditolak', 'Fitur Pengecekan Mingguan khusus untuk Admin / Kepala Cabang.', 'error');
+        return;
+    }
+
     originalSwitchView(viewId, navElement);
     if(viewId === 'cmms-monitoring') {
         loadCMMSAssets();
