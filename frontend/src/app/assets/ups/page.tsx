@@ -38,7 +38,7 @@ export default function UPSPage() {
       <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardContent className="p-0">
           <div className="overflow-x-auto w-full">
-          <table className="w-full text-sm ">
+          <table className="w-full text-sm table-fixed">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left font-medium text-muted-foreground">Brand/Model</th>

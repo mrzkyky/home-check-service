@@ -57,7 +57,7 @@ export default function ServerRoomsPage() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
-          <table className="w-full text-sm ">
+          <table className="w-full text-sm table-fixed">
               <thead className="bg-muted/30 border-b border-border/50">
                 <tr>
                   <th className="p-4 text-left text-muted-foreground font-medium">Room Name</th>
@@ -95,7 +95,7 @@ export default function ServerRoomsPage() {
           </CardHeader>
           <CardContent className="p-0">
             <div className="overflow-x-auto w-full">
-          <table className="w-full text-sm ">
+          <table className="w-full text-sm table-fixed">
               <thead className="bg-muted/30 border-b border-border/50">
                 <tr>
                   <th className="p-4 text-left text-muted-foreground font-medium">Visitor</th>
