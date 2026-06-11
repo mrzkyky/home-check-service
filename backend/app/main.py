@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.api import ac, server_room, apar, kwh, dashboard, upload, ticket
+from app.api import ac, server_room, apar, kwh, dashboard, upload, ticket, ups, cctv, network
 
 # Create all tables (dev mode)
 Base.metadata.create_all(bind=engine)
@@ -29,6 +29,9 @@ app.include_router(kwh.router, prefix="/api/v1/kwh", tags=["KWH Monitoring"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboard"])
 app.include_router(upload.router, prefix="/api/v1/upload", tags=["Media Upload"])
 app.include_router(ticket.router, prefix="/api/v1/tickets", tags=["Ticketing"])
+app.include_router(ups.router, prefix="/api/v1/ups", tags=["UPS"])
+app.include_router(cctv.router, prefix="/api/v1/cctv", tags=["CCTV"])
+app.include_router(network.router, prefix="/api/v1/network", tags=["Network"])
 
 @app.get("/")
 def read_root():
