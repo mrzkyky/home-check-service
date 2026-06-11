@@ -62,7 +62,7 @@ export default function ACAssetsPage() {
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline"><Filter className="mr-2 h-4 w-4" /> Filter</Button>
-          <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add AC Asset</Button>
+          <Button onClick={() => alert("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add AC Asset</Button>
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export default function ACAssetsPage() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="relative w-full overflow-auto">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto w-full">
           <table className="w-full caption-bottom text-sm">
               <thead className="[&_tr]:border-b border-border/50 bg-muted/30">
                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">

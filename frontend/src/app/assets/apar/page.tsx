@@ -31,7 +31,7 @@ export default function APARPage() {
           <p className="text-muted-foreground mt-1">Manage Fire Extinguishers, monthly inspections, and expiry tracking.</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add APAR</Button>
+          <Button onClick={() => alert("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add APAR</Button>
         </div>
       </div>
 
@@ -77,8 +77,8 @@ export default function APARPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
+          <div className="overflow-x-auto w-full">
+          <table className="w-full text-sm ">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left text-muted-foreground font-medium">Location</th>

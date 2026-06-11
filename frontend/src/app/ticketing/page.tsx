@@ -42,7 +42,7 @@ export default function TicketingPage() {
           <p className="text-muted-foreground mt-1">Manage, assign, and resolve facility incident tickets.</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Create Ticket</Button>
+          <Button onClick={() => alert("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Create Ticket</Button>
         </div>
       </div>
 
@@ -96,16 +96,16 @@ export default function TicketingPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
+          <div className="overflow-x-auto w-full">
+          <table className="w-full text-sm table-fixed">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
-                <th className="p-4 text-left text-muted-foreground font-medium">Ticket ID</th>
-                <th className="p-4 text-left text-muted-foreground font-medium">Issue Detail</th>
-                <th className="p-4 text-left text-muted-foreground font-medium">Priority</th>
-                <th className="p-4 text-left text-muted-foreground font-medium">Status</th>
-                <th className="p-4 text-left text-muted-foreground font-medium">Assigned To</th>
-                <th className="p-4 text-right text-muted-foreground font-medium">Action</th>
+                <th className="p-4 text-left text-muted-foreground font-medium w-32">Ticket ID</th>
+                <th className="p-4 text-left text-muted-foreground font-medium w-1/3">Issue Detail</th>
+                <th className="p-4 text-left text-muted-foreground font-medium w-28">Priority</th>
+                <th className="p-4 text-left text-muted-foreground font-medium w-36">Status</th>
+                <th className="p-4 text-left text-muted-foreground font-medium w-48">Assigned To</th>
+                <th className="p-4 text-right text-muted-foreground font-medium w-32">Action</th>
               </tr>
             </thead>
             <tbody>

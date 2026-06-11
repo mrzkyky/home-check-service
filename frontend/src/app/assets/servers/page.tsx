@@ -28,8 +28,8 @@ export default function ServerRoomsPage() {
           <p className="text-muted-foreground mt-1">Manage server rooms, inspections, and visitor access permits.</p>
         </div>
         <div className="flex items-center space-x-2">
-          {activeTab === "permits" && <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Request Permit</Button>}
-          {activeTab === "rooms" && <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add Room</Button>}
+          {activeTab === "permits" && <Button onClick={() => alert("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Request Permit</Button>}
+          {activeTab === "rooms" && <Button onClick={() => alert("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add Room</Button>}
         </div>
       </div>
 
@@ -56,8 +56,8 @@ export default function ServerRoomsPage() {
             <CardTitle>Registered Rooms</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
+            <div className="overflow-x-auto w-full">
+          <table className="w-full text-sm ">
               <thead className="bg-muted/30 border-b border-border/50">
                 <tr>
                   <th className="p-4 text-left text-muted-foreground font-medium">Room Name</th>
@@ -94,8 +94,8 @@ export default function ServerRoomsPage() {
             <CardTitle>Permit Requests</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
+            <div className="overflow-x-auto w-full">
+          <table className="w-full text-sm ">
               <thead className="bg-muted/30 border-b border-border/50">
                 <tr>
                   <th className="p-4 text-left text-muted-foreground font-medium">Visitor</th>

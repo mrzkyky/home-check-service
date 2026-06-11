@@ -30,7 +30,7 @@ export default function KWHPage() {
           <p className="text-muted-foreground mt-1">Daily electricity readings and consumption tracking.</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Input Daily Reading</Button>
+          <Button onClick={() => alert("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Input Daily Reading</Button>
         </div>
       </div>
 
@@ -87,8 +87,8 @@ export default function KWHPage() {
           <CardTitle>Daily Reading Log</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
+          <div className="overflow-x-auto w-full">
+          <table className="w-full text-sm ">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left text-muted-foreground font-medium">Meter & Location</th>

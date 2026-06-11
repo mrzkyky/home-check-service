@@ -23,7 +23,7 @@ export default function InspectionPage() {
           </h2>
           <p className="text-muted-foreground mt-1">Daily rounds, room cleanliness, and fire safety (APAR) inspection logs.</p>
         </div>
-        <Button onClick={() => toast("Fitur tambah log sedang dikembangkan!")}><Plus className="mr-2 h-4 w-4" /> Log Inspection</Button>
+        <Button onClick={() => alert("Fitur tambah log sedang dikembangkan!")}><Plus className="mr-2 h-4 w-4" /> Log Inspection</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -54,8 +54,8 @@ export default function InspectionPage() {
           <CardTitle className="flex items-center gap-2"><ClipboardCheck className="h-5 w-5" /> Recent Inspection Logs</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm table-fixed min-w-[800px]">
+          <div className="overflow-x-auto w-full">
+          <table className="w-full text-sm table-fixed ">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left font-medium text-muted-foreground w-24">ID</th>

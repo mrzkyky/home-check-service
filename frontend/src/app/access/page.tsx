@@ -23,7 +23,7 @@ export default function AccessPage() {
           </h2>
           <p className="text-muted-foreground mt-1">Control and audit visitor access permits to critical facilities.</p>
         </div>
-        <Button onClick={() => toast("Portal permohonan sedang disiapkan!")}><Plus className="mr-2 h-4 w-4" /> Request Permit</Button>
+        <Button onClick={() => alert("Portal permohonan sedang disiapkan!")}><Plus className="mr-2 h-4 w-4" /> Request Permit</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -64,8 +64,8 @@ export default function AccessPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
+          <div className="overflow-x-auto w-full">
+          <table className="w-full text-sm ">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left font-medium text-muted-foreground">Permit ID</th>

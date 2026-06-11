@@ -31,7 +31,7 @@ export default function MaintenancePage() {
           </h2>
           <p className="text-muted-foreground mt-1">Aggregate view of all upcoming and overdue asset maintenance tasks.</p>
         </div>
-        <Button onClick={() => toast("Fitur tambah jadwal PM segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Schedule PM</Button>
+        <Button onClick={() => alert("Fitur tambah jadwal PM segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Schedule PM</Button>
       </div>
 
       <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
@@ -39,8 +39,8 @@ export default function MaintenancePage() {
           <CardTitle className="flex items-center gap-2"><Calendar className="h-5 w-5" /> Maintenance Calendar</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
+          <div className="overflow-x-auto w-full">
+          <table className="w-full text-sm ">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left font-medium text-muted-foreground">Date</th>

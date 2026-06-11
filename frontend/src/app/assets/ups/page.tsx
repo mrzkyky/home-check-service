@@ -32,13 +32,13 @@ export default function UPSPage() {
       </div>
 
       <div className="flex items-center justify-end">
-        <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add UPS</Button>
+        <Button onClick={() => alert("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add UPS</Button>
       </div>
 
       <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[800px]">
+          <div className="overflow-x-auto w-full">
+          <table className="w-full text-sm ">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left font-medium text-muted-foreground">Brand/Model</th>
