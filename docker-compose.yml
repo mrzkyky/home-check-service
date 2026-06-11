@@ -8,10 +8,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: eoms_frontend
+    container_name: homeservice-frontend
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "3001:80"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
     depends_on:
@@ -92,6 +92,19 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - miniodata:/data
+    networks:
+      - eoms_net
+
+  # ----------------------------------------------------
+  # CLOUDFLARE TUNNEL
+  # ----------------------------------------------------
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: homeservice-tunnel
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}
+    restart: unless-stopped
+    depends_on:
+      - frontend
     networks:
       - eoms_net
 
