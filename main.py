@@ -92,6 +92,55 @@ class AssetCreate(BaseModel):
     room: str
     ac_type: str
     details: str
+    regional: str = ""
+    building: str = ""
+    ac_brand: str = ""
+    ac_pk: float = 0.0
+    ac_vendor: str = ""
+    install_date: str = ""
+
+# --- CMMS MODELS ---
+class MonitoringCreate(BaseModel):
+    tanggal: str
+    id_ac: int
+    suhu: float
+    kelembaban: float
+    status_unit: str
+    kebocoran: bool
+    catatan: str
+    petugas: str
+
+class JadwalPMCreate(BaseModel):
+    id_ac: int
+    lokasi: str
+    jenis_pm: str
+    frekuensi_bulan: int
+    pm_terakhir: str
+    next_pm: str
+
+class ChecklistPMCreate(BaseModel):
+    tanggal: str
+    id_ac: int
+    filter_status: str
+    evaporator: str
+    kondensor: str
+    drainase: str
+    fan_motor: str
+    refrigerant: str
+    terminal: str
+    status_pm: str
+    petugas: str
+
+class ApprovalCreate(BaseModel):
+    tanggal: str
+    id_ac: int
+    pekerjaan: str
+    pelaksana: str
+    supervisor: str
+    engineering_support: str
+
+class ApprovalUpdate(BaseModel):
+    status: str
 
 class ServerAssetCreate(BaseModel):
     branch: str
@@ -197,7 +246,10 @@ async def upload_avatar(user_id: int, file: UploadFile = File(...), _u: dict = D
 # --- ASSET API ---
 @app.post("/api/assets")
 async def create_asset(payload: AssetCreate, _u: dict = Depends(get_current_user)):
-    asset_id = database.create_asset(payload.branch, payload.room, payload.ac_type, payload.details)
+    asset_id = database.create_asset(
+        payload.branch, payload.room, payload.ac_type, payload.details,
+        payload.regional, payload.building, payload.ac_brand, payload.ac_pk, payload.ac_vendor, payload.install_date
+    )
     return {"status": "success", "asset_id": asset_id}
 
 @app.get("/api/assets")
@@ -206,7 +258,10 @@ async def get_assets(branch: Optional[str] = None, _u: dict = Depends(get_curren
 
 @app.put("/api/assets/{asset_id}")
 async def update_asset(asset_id: int, payload: AssetCreate, _u: dict = Depends(get_current_user)):
-    database.update_asset(asset_id, payload.branch, payload.room, payload.ac_type, payload.details)
+    database.update_asset(
+        asset_id, payload.branch, payload.room, payload.ac_type, payload.details,
+        payload.regional, payload.building, payload.ac_brand, payload.ac_pk, payload.ac_vendor, payload.install_date
+    )
     return {"status": "success"}
 
 @app.delete("/api/assets/{asset_id}")
@@ -566,6 +621,93 @@ async def get_audit_log(current_user: dict = Depends(get_current_user)):
     if current_user.get("role") not in ["Superadmin", "Admin"]:
         raise HTTPException(status_code=403, detail="Akses ditolak - Admin only")
     return {"status": "success", "data": database.get_audit_log()}
+
+# --- CMMS API ---
+@app.post("/api/cmms/monitoring")
+async def create_monitoring(payload: MonitoringCreate, _u: dict = Depends(get_current_user)):
+    m_id = database.create_monitoring(
+        payload.tanggal, payload.id_ac, payload.suhu, payload.kelembaban, 
+        payload.status_unit, payload.kebocoran, payload.catatan, payload.petugas
+    )
+    return {"status": "success", "id": m_id}
+
+@app.get("/api/cmms/monitoring")
+async def get_monitoring(branch: Optional[str] = None, _u: dict = Depends(get_current_user)):
+    return {"status": "success", "data": database.get_monitoring(branch)}
+
+@app.post("/api/cmms/pm/schedule")
+async def create_jadwal_pm(payload: JadwalPMCreate, _u: dict = Depends(get_current_user)):
+    j_id = database.create_jadwal_pm(
+        payload.id_ac, payload.lokasi, payload.jenis_pm, payload.frekuensi_bulan, 
+        payload.pm_terakhir, payload.next_pm
+    )
+    return {"status": "success", "id": j_id}
+
+@app.get("/api/cmms/pm/schedule")
+async def get_jadwal_pm(branch: Optional[str] = None, _u: dict = Depends(get_current_user)):
+    return {"status": "success", "data": database.get_jadwal_pm(branch)}
+
+@app.post("/api/cmms/pm/checklist")
+async def create_checklist_pm(payload: ChecklistPMCreate, _u: dict = Depends(get_current_user)):
+    c_id = database.create_checklist_pm(
+        payload.tanggal, payload.id_ac, payload.filter_status, payload.evaporator, 
+        payload.kondensor, payload.drainase, payload.fan_motor, payload.refrigerant, 
+        payload.terminal, payload.status_pm, payload.petugas
+    )
+    return {"status": "success", "id": c_id}
+
+@app.get("/api/cmms/pm/checklist/{id_ac}")
+async def get_checklist_pm(id_ac: int, _u: dict = Depends(get_current_user)):
+    return {"status": "success", "data": database.get_checklist_pm(id_ac)}
+
+@app.post("/api/cmms/dokumentasi")
+async def create_dokumentasi(
+    tanggal: str = Form(...),
+    id_ac: int = Form(...),
+    jenis_kegiatan: str = Form(...),
+    keterangan: str = Form(...),
+    foto_before: UploadFile = File(None),
+    foto_after: UploadFile = File(None),
+    _u: dict = Depends(get_current_user)
+):
+    b_filename = ""
+    a_filename = ""
+    
+    if foto_before:
+        ext = foto_before.filename.split('.')[-1]
+        b_filename = f"doc_b_{uuid.uuid4().hex[:8]}.{ext}"
+        with open(os.path.join(UPLOAD_DIR, b_filename), "wb") as buffer:
+            shutil.copyfileobj(foto_before.file, buffer)
+            
+    if foto_after:
+        ext = foto_after.filename.split('.')[-1]
+        a_filename = f"doc_a_{uuid.uuid4().hex[:8]}.{ext}"
+        with open(os.path.join(UPLOAD_DIR, a_filename), "wb") as buffer:
+            shutil.copyfileobj(foto_after.file, buffer)
+            
+    d_id = database.create_dokumentasi(tanggal, id_ac, jenis_kegiatan, b_filename, a_filename, keterangan)
+    return {"status": "success", "id": d_id}
+
+@app.get("/api/cmms/dokumentasi/{id_ac}")
+async def get_dokumentasi(id_ac: int, _u: dict = Depends(get_current_user)):
+    return {"status": "success", "data": database.get_dokumentasi(id_ac)}
+
+@app.post("/api/cmms/approval")
+async def create_approval(payload: ApprovalCreate, _u: dict = Depends(get_current_user)):
+    a_id = database.create_approval(
+        payload.tanggal, payload.id_ac, payload.pekerjaan, payload.pelaksana, 
+        payload.supervisor, payload.engineering_support
+    )
+    return {"status": "success", "id": a_id}
+
+@app.get("/api/cmms/approval")
+async def get_approvals(status: Optional[str] = None, _u: dict = Depends(get_current_user)):
+    return {"status": "success", "data": database.get_approvals(status)}
+
+@app.post("/api/cmms/approval/{approval_id}/approve")
+async def update_approval(approval_id: int, payload: ApprovalUpdate, _u: dict = Depends(get_current_user)):
+    database.update_approval_status(approval_id, payload.status)
+    return {"status": "success"}
 
 if __name__ == "__main__":
     import uvicorn

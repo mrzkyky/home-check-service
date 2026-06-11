@@ -1387,3 +1387,153 @@ window.togglePasswordVisibility = function(inputId, btn) {
         btn.innerHTML = "👁️";
     }
 }
+
+// ==========================================
+// --- CMMS AC MANAGEMENT LOGIC ---
+// ==========================================
+
+window.loadCMMSAssets = async function() {
+    try {
+        let res = await fetch(`${API_BASE}/assets`);
+        let data = await res.json();
+        if (res.ok) {
+            let acList = data.data;
+            let options = '<option value="">Pilih AC...</option>';
+            acList.forEach(ac => {
+                options += `<option value="${ac.id}">${ac.branch} - ${ac.room} (${ac.ac_type})</option>`;
+            });
+            document.getElementById('mon-id-ac').innerHTML = options;
+            document.getElementById('doc-id-ac').innerHTML = options;
+        }
+    } catch(e) { console.error("Error load CMMS assets", e); }
+}
+
+window.submitMonitoring = async function() {
+    let id_ac = document.getElementById('mon-id-ac').value;
+    let suhu = document.getElementById('mon-suhu').value;
+    let kelembaban = document.getElementById('mon-kelembaban').value;
+    let status = document.getElementById('mon-status').value;
+    let bocor = document.getElementById('mon-bocor').value === 'true';
+    let catatan = document.getElementById('mon-catatan').value;
+    let tanggal = new Date().toISOString().split('T')[0];
+    
+    if(!id_ac || !suhu || !kelembaban) return alert("Pilih AC, Suhu, dan Kelembaban!");
+
+    try {
+        let res = await fetch(`${API_BASE}/cmms/monitoring`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                tanggal, id_ac: parseInt(id_ac), suhu: parseFloat(suhu), kelembaban: parseFloat(kelembaban), 
+                status_unit: status, kebocoran: bocor, catatan, petugas: currentUser.name
+            })
+        });
+        if(res.ok) {
+            alert("Monitoring tersimpan!");
+            document.getElementById('mon-suhu').value = "";
+            document.getElementById('mon-kelembaban').value = "";
+            document.getElementById('mon-catatan').value = "";
+            loadMonitoringHistory();
+        }
+    } catch(e) { alert("Error simpan monitoring"); }
+}
+
+window.loadMonitoringHistory = async function() {
+    try {
+        let res = await fetch(`${API_BASE}/cmms/monitoring`);
+        let data = await res.json();
+        let tbody = document.getElementById('table-monitoring');
+        tbody.innerHTML = '';
+        if(res.ok && data.data) {
+            let normal = 0, abnormal = 0;
+            data.data.forEach(m => {
+                let isBocor = m.kebocoran ? "Bocor" : "Aman";
+                let color = (m.status_unit !== 'Normal' || m.kebocoran) ? "red" : "green";
+                if(color === "red") abnormal++; else normal++;
+                
+                tbody.innerHTML += `
+                    <tr style="border-bottom:1px solid #e2e8f0;">
+                        <td style="padding:10px;">${m.tanggal}</td>
+                        <td style="padding:10px;">AC ID: ${m.id_ac}</td>
+                        <td style="padding:10px;">${m.suhu}°C</td>
+                        <td style="padding:10px;">${m.kelembaban}%</td>
+                        <td style="padding:10px; color:${color}; font-weight:bold;">${m.status_unit} / ${isBocor}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('stat-normal').innerText = normal;
+            document.getElementById('stat-abnormal').innerText = abnormal;
+        }
+    } catch(e) { console.error("Load monitoring error", e); }
+}
+
+window.openNewJadwalPMForm = function() {
+    alert("Pembuatan Jadwal PM akan tersedia. Saat ini gunakan API / DB langsung.");
+}
+
+const originalSwitchView = window.switchView;
+window.switchView = function(viewId, navElement = null) {
+    originalSwitchView(viewId, navElement);
+    if(viewId === 'cmms-monitoring') {
+        loadCMMSAssets();
+        loadMonitoringHistory();
+    } else if (viewId === 'cmms-pm') {
+        // PM Logic
+    } else if (viewId === 'cmms-cuci') {
+        loadCMMSAssets();
+    }
+}
+
+window.previewDocPhoto = function (event, type) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        let img = document.getElementById(`img-doc-${type}`);
+        img.src = e.target.result;
+        img.classList.remove('hidden');
+        document.getElementById(`lbl-doc-${type}`).classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+window.submitDokumentasi = async function() {
+    let id_ac = document.getElementById('doc-id-ac').value;
+    let kegiatan = document.getElementById('doc-kegiatan').value;
+    let keterangan = document.getElementById('doc-keterangan').value;
+    let spv = document.getElementById('doc-spv').value;
+    let eng = document.getElementById('doc-eng').value;
+    let bFile = document.getElementById('cam-doc-before').files[0];
+    let aFile = document.getElementById('cam-doc-after').files[0];
+    let tanggal = new Date().toISOString().split('T')[0];
+
+    if(!id_ac || !kegiatan) return alert("Pilih AC dan Kegiatan!");
+
+    let formData = new FormData();
+    formData.append("tanggal", tanggal);
+    formData.append("id_ac", id_ac);
+    formData.append("jenis_kegiatan", kegiatan);
+    formData.append("keterangan", keterangan);
+    if(bFile) formData.append("foto_before", await compressImage(bFile));
+    if(aFile) formData.append("foto_after", await compressImage(aFile));
+
+    try {
+        let res = await fetch(`${API_BASE}/cmms/dokumentasi`, { method: 'POST', body: formData });
+        let data = await res.json();
+        
+        if(res.ok) {
+            if(spv || eng) {
+                await fetch(`${API_BASE}/cmms/approval`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        tanggal, id_ac: parseInt(id_ac), pekerjaan: kegiatan, pelaksana: currentUser.name, supervisor: spv || "", engineering_support: eng || ""
+                    })
+                });
+                alert("Dokumentasi tersimpan & Approval diajukan!");
+            } else {
+                alert("Dokumentasi tersimpan!");
+            }
+            switchView('home');
+        }
+    } catch(e) { alert("Error simpan dokumentasi!"); }
+}

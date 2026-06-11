@@ -60,7 +60,13 @@ def init_db():
             branch TEXT,
             room TEXT,
             ac_type TEXT,
-            details TEXT
+            details TEXT,
+            regional TEXT,
+            building TEXT,
+            ac_brand TEXT,
+            ac_pk REAL,
+            ac_vendor TEXT,
+            install_date TEXT
         )
     ''')
 
@@ -161,6 +167,101 @@ def init_db():
             value TEXT
         )
     ''')
+
+    # CMMS: Monitoring Harian
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS monitoring_harian (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tanggal TEXT NOT NULL,
+            id_ac INTEGER,
+            suhu REAL,
+            kelembaban REAL,
+            status_unit TEXT,
+            kebocoran BOOLEAN,
+            catatan TEXT,
+            petugas TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(id_ac) REFERENCES ac_assets(id) ON DELETE CASCADE
+        )
+    ''')
+
+    # CMMS: Jadwal PM
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS jadwal_pm (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_ac INTEGER,
+            lokasi TEXT,
+            jenis_pm TEXT,
+            frekuensi_bulan INTEGER,
+            pm_terakhir TEXT,
+            next_pm TEXT,
+            status TEXT DEFAULT 'Scheduled',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(id_ac) REFERENCES ac_assets(id) ON DELETE CASCADE
+        )
+    ''')
+
+    # CMMS: Checklist PM
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS checklist_pm (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tanggal TEXT NOT NULL,
+            id_ac INTEGER,
+            filter_status TEXT,
+            evaporator TEXT,
+            kondensor TEXT,
+            drainase TEXT,
+            fan_motor TEXT,
+            refrigerant TEXT,
+            terminal TEXT,
+            status_pm TEXT,
+            petugas TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(id_ac) REFERENCES ac_assets(id) ON DELETE CASCADE
+        )
+    ''')
+
+    # CMMS: Dokumentasi
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS dokumentasi (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tanggal TEXT NOT NULL,
+            id_ac INTEGER,
+            jenis_kegiatan TEXT,
+            link_foto_before TEXT,
+            link_foto_after TEXT,
+            keterangan TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(id_ac) REFERENCES ac_assets(id) ON DELETE CASCADE
+        )
+    ''')
+
+    # CMMS: Approval
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS approval (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tanggal TEXT NOT NULL,
+            id_ac INTEGER,
+            pekerjaan TEXT,
+            pelaksana TEXT,
+            supervisor TEXT,
+            engineering_support TEXT,
+            status TEXT DEFAULT 'Pending',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(id_ac) REFERENCES ac_assets(id) ON DELETE CASCADE
+        )
+    ''')
+
+    # Alter table ac_assets untuk data lama
+    new_cols = {
+        'regional': 'TEXT', 'building': 'TEXT', 'ac_brand': 'TEXT',
+        'ac_pk': 'REAL', 'ac_vendor': 'TEXT', 'install_date': 'TEXT'
+    }
+    for col, ctype in new_cols.items():
+        try:
+            cursor.execute(f"ALTER TABLE ac_assets ADD COLUMN {col} {ctype}")
+        except sqlite3.OperationalError:
+            pass
 
     # Alter table untuk data lama (tambah whatsapp_number jika belum ada)
     try:
@@ -278,16 +379,19 @@ def update_user_avatar(user_id: int, filename: str):
     return True
 
 # --- ASSETS MANAGEMENT ---
-def create_asset(branch: str, room: str, ac_type: str, details: str):
+def create_asset(branch: str, room: str, ac_type: str, details: str, regional: str = "", building: str = "", ac_brand: str = "", ac_pk: float = 0.0, ac_vendor: str = "", install_date: str = ""):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO ac_assets (branch, room, ac_type, details) VALUES (?, ?, ?, ?)", (branch, room, ac_type, details))
+    cursor.execute("""
+        INSERT INTO ac_assets (branch, room, ac_type, details, regional, building, ac_brand, ac_pk, ac_vendor, install_date) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", 
+        (branch, room, ac_type, details, regional, building, ac_brand, ac_pk, ac_vendor, install_date))
     conn.commit()
     asset_id = cursor.lastrowid
     conn.close()
     return asset_id
 
-def get_assets_by_branch(branch: str):
+def get_assets_by_branch(branch: str = None):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     if branch:
@@ -296,13 +400,30 @@ def get_assets_by_branch(branch: str):
         cursor.execute("SELECT * FROM ac_assets")
     rows = cursor.fetchall()
     conn.close()
-    return [{"id": r[0], "branch": r[1], "room": r[2], "ac_type": r[3], "details": r[4]} for r in rows]
+    
+    # Menangani baris lama yang mungkin kurang kolom
+    result = []
+    for r in rows:
+        regional = r[5] if len(r) > 5 else ""
+        building = r[6] if len(r) > 6 else ""
+        ac_brand = r[7] if len(r) > 7 else ""
+        ac_pk = r[8] if len(r) > 8 else 0.0
+        ac_vendor = r[9] if len(r) > 9 else ""
+        install_date = r[10] if len(r) > 10 else ""
+        result.append({
+            "id": r[0], "branch": r[1], "room": r[2], "ac_type": r[3], "details": r[4], 
+            "regional": regional, "building": building, "ac_brand": ac_brand, "ac_pk": ac_pk, "ac_vendor": ac_vendor, "install_date": install_date
+        })
+    return result
 
-def update_asset(asset_id: int, branch: str, room: str, ac_type: str, details: str):
+def update_asset(asset_id: int, branch: str, room: str, ac_type: str, details: str, regional: str = "", building: str = "", ac_brand: str = "", ac_pk: float = 0.0, ac_vendor: str = "", install_date: str = ""):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("UPDATE ac_assets SET branch=?, room=?, ac_type=?, details=? WHERE id=?", 
-                   (branch, room, ac_type, details, asset_id))
+    cursor.execute("""
+        UPDATE ac_assets 
+        SET branch=?, room=?, ac_type=?, details=?, regional=?, building=?, ac_brand=?, ac_pk=?, ac_vendor=?, install_date=? 
+        WHERE id=?""", 
+        (branch, room, ac_type, details, regional, building, ac_brand, ac_pk, ac_vendor, install_date, asset_id))
     conn.commit()
     conn.close()
     return True
@@ -311,6 +432,161 @@ def delete_asset(asset_id: int):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM ac_assets WHERE id=?", (asset_id,))
+    conn.commit()
+    conn.close()
+    return True
+
+# --- CMMS API: Monitoring Harian ---
+def create_monitoring(tanggal: str, id_ac: int, suhu: float, kelembaban: float, status_unit: str, kebocoran: bool, catatan: str, petugas: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO monitoring_harian (tanggal, id_ac, suhu, kelembaban, status_unit, kebocoran, catatan, petugas)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (tanggal, id_ac, suhu, kelembaban, status_unit, kebocoran, catatan, petugas))
+    conn.commit()
+    m_id = cursor.lastrowid
+    conn.close()
+    return m_id
+
+def get_monitoring(branch: str = None, limit: int = 100):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    query = """
+        SELECT m.id, m.tanggal, m.id_ac, a.room, a.ac_brand, m.suhu, m.kelembaban, m.status_unit, m.kebocoran, m.catatan, m.petugas 
+        FROM monitoring_harian m
+        JOIN ac_assets a ON m.id_ac = a.id
+    """
+    params = []
+    if branch:
+        query += " WHERE a.branch = ?"
+        params.append(branch)
+    query += " ORDER BY m.id DESC LIMIT ?"
+    params.append(limit)
+    cursor.execute(query, tuple(params))
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "tanggal": r[1], "id_ac": r[2], "room": r[3], "ac_brand": r[4] if r[4] else "", "suhu": r[5], "kelembaban": r[6], "status_unit": r[7], "kebocoran": bool(r[8]), "catatan": r[9], "petugas": r[10]} for r in rows]
+
+# --- CMMS API: Jadwal PM ---
+def create_jadwal_pm(id_ac: int, lokasi: str, jenis_pm: str, frekuensi_bulan: int, pm_terakhir: str, next_pm: str, status: str = 'Scheduled'):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO jadwal_pm (id_ac, lokasi, jenis_pm, frekuensi_bulan, pm_terakhir, next_pm, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (id_ac, lokasi, jenis_pm, frekuensi_bulan, pm_terakhir, next_pm, status))
+    conn.commit()
+    j_id = cursor.lastrowid
+    conn.close()
+    return j_id
+
+def get_jadwal_pm(branch: str = None):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    query = """
+        SELECT j.id, j.id_ac, j.lokasi, j.jenis_pm, j.frekuensi_bulan, j.pm_terakhir, j.next_pm, j.status, a.room, a.branch
+        FROM jadwal_pm j
+        JOIN ac_assets a ON j.id_ac = a.id
+    """
+    if branch:
+        query += " WHERE a.branch = ?"
+        cursor.execute(query, (branch,))
+    else:
+        cursor.execute(query)
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "id_ac": r[1], "lokasi": r[2], "jenis_pm": r[3], "frekuensi_bulan": r[4], "pm_terakhir": r[5], "next_pm": r[6], "status": r[7], "room": r[8], "branch": r[9]} for r in rows]
+
+# --- CMMS API: Checklist PM ---
+def create_checklist_pm(tanggal: str, id_ac: int, filter_status: str, evaporator: str, kondensor: str, drainase: str, fan_motor: str, refrigerant: str, terminal: str, status_pm: str, petugas: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO checklist_pm (tanggal, id_ac, filter_status, evaporator, kondensor, drainase, fan_motor, refrigerant, terminal, status_pm, petugas)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (tanggal, id_ac, filter_status, evaporator, kondensor, drainase, fan_motor, refrigerant, terminal, status_pm, petugas))
+    conn.commit()
+    c_id = cursor.lastrowid
+    
+    # Auto update jadwal_pm terakhir jika ada
+    cursor.execute("SELECT id, frekuensi_bulan FROM jadwal_pm WHERE id_ac=? ORDER BY id DESC LIMIT 1", (id_ac,))
+    jadwal = cursor.fetchone()
+    if jadwal:
+        from datetime import datetime
+        from dateutil.relativedelta import relativedelta
+        # Menghitung next PM
+        dt_terakhir = datetime.strptime(tanggal, '%Y-%m-%d')
+        next_dt = dt_terakhir + relativedelta(months=jadwal[1])
+        next_pm = next_dt.strftime('%Y-%m-%d')
+        cursor.execute("UPDATE jadwal_pm SET pm_terakhir=?, next_pm=?, status='Scheduled' WHERE id=?", (tanggal, next_pm, jadwal[0]))
+        conn.commit()
+        
+    conn.close()
+    return c_id
+
+def get_checklist_pm(id_ac: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM checklist_pm WHERE id_ac=? ORDER BY id DESC", (id_ac,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "tanggal": r[1], "id_ac": r[2], "filter_status": r[3], "evaporator": r[4], "kondensor": r[5], "drainase": r[6], "fan_motor": r[7], "refrigerant": r[8], "terminal": r[9], "status_pm": r[10], "petugas": r[11]} for r in rows]
+
+# --- CMMS API: Dokumentasi & Approval ---
+def create_dokumentasi(tanggal: str, id_ac: int, jenis_kegiatan: str, link_foto_before: str, link_foto_after: str, keterangan: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO dokumentasi (tanggal, id_ac, jenis_kegiatan, link_foto_before, link_foto_after, keterangan)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (tanggal, id_ac, jenis_kegiatan, link_foto_before, link_foto_after, keterangan))
+    conn.commit()
+    d_id = cursor.lastrowid
+    conn.close()
+    return d_id
+
+def get_dokumentasi(id_ac: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM dokumentasi WHERE id_ac=? ORDER BY id DESC", (id_ac,))
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "tanggal": r[1], "id_ac": r[2], "jenis_kegiatan": r[3], "link_foto_before": r[4], "link_foto_after": r[5], "keterangan": r[6]} for r in rows]
+
+def create_approval(tanggal: str, id_ac: int, pekerjaan: str, pelaksana: str, supervisor: str, engineering_support: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO approval (tanggal, id_ac, pekerjaan, pelaksana, supervisor, engineering_support, status)
+        VALUES (?, ?, ?, ?, ?, ?, 'Pending')
+    """, (tanggal, id_ac, pekerjaan, pelaksana, supervisor, engineering_support))
+    conn.commit()
+    a_id = cursor.lastrowid
+    conn.close()
+    return a_id
+
+def get_approvals(status: str = None):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    query = """
+        SELECT a.id, a.tanggal, a.id_ac, ac.room, a.pekerjaan, a.pelaksana, a.supervisor, a.engineering_support, a.status 
+        FROM approval a
+        JOIN ac_assets ac ON a.id_ac = ac.id
+    """
+    if status:
+        query += " WHERE a.status = ?"
+        cursor.execute(query, (status,))
+    else:
+        cursor.execute(query)
+    rows = cursor.fetchall()
+    conn.close()
+    return [{"id": r[0], "tanggal": r[1], "id_ac": r[2], "room": r[3], "pekerjaan": r[4], "pelaksana": r[5], "supervisor": r[6], "engineering_support": r[7], "status": r[8]} for r in rows]
+
+def update_approval_status(approval_id: int, status: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE approval SET status=? WHERE id=?", (status, approval_id))
     conn.commit()
     conn.close()
     return True

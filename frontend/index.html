@@ -325,6 +325,18 @@
                     <span class="nav-icon">🏠</span>
                     <span>Dashboard</span>
                 </a>
+                <a href="#" class="nav-item" onclick="switchView('cmms-monitoring', this)">
+                    <span class="nav-icon">📊</span>
+                    <span>Monitoring AC</span>
+                </a>
+                <a href="#" class="nav-item" onclick="switchView('cmms-pm', this)">
+                    <span class="nav-icon">🛠️</span>
+                    <span>Pemeriksaan (PM)</span>
+                </a>
+                <a href="#" class="nav-item" onclick="switchView('cmms-cuci', this)">
+                    <span class="nav-icon">🚿</span>
+                    <span>Cuci AC</span>
+                </a>
                 <a href="#" class="nav-item" onclick="switchView('history', this)">
                     <span class="nav-icon">📋</span>
                     <span>Riwayat SPK</span>
@@ -349,6 +361,180 @@
 
             <!-- Main Content Area -->
             <main id="app-content" class="main-content">
+
+                <!-- CMMS: Monitoring AC -->
+                <div id="view-cmms-monitoring" class="view">
+                    <h2>Monitoring Harian AC</h2>
+                    
+                    <div class="task-grid" style="margin-bottom: 2rem;">
+                        <div class="task-card" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-color: #86efac;">
+                            <span class="icon" style="font-size:2rem;">✅</span>
+                            <h3 style="color:#166534;">AC Normal</h3>
+                            <p id="stat-normal" style="font-size:1.5rem; font-weight:bold; color:#166534; margin-top:0.5rem;">0</p>
+                        </div>
+                        <div class="task-card" style="background: linear-gradient(135deg, #fef2f2, #fee2e2); border-color: #fca5a5;">
+                            <span class="icon" style="font-size:2rem;">⚠️</span>
+                            <h3 style="color:#991b1b;">AC Abnormal</h3>
+                            <p id="stat-abnormal" style="font-size:1.5rem; font-weight:bold; color:#991b1b; margin-top:0.5rem;">0</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel" style="margin-bottom: 2rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                            <h3 style="margin:0;">Input Monitoring Baru</h3>
+                        </div>
+                        <div class="form-group">
+                            <label>Pilih AC</label>
+                            <select id="mon-id-ac" class="form-control"></select>
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                            <div class="form-group">
+                                <label>Suhu (°C)</label>
+                                <input type="number" id="mon-suhu" class="form-control" placeholder="Misal: 22.5">
+                            </div>
+                            <div class="form-group">
+                                <label>Kelembaban (%)</label>
+                                <input type="number" id="mon-kelembaban" class="form-control" placeholder="Misal: 55">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Status Fisik Unit</label>
+                            <select id="mon-status" class="form-control">
+                                <option value="Normal">Normal</option>
+                                <option value="Rusak">Rusak</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Terdapat Kebocoran Air?</label>
+                            <select id="mon-bocor" class="form-control">
+                                <option value="false">Tidak Ada Kebocoran</option>
+                                <option value="true">Ya, Bocor</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Catatan Tambahan</label>
+                            <input type="text" id="mon-catatan" class="form-control" placeholder="Opsional">
+                        </div>
+                        <button class="btn-primary" onclick="submitMonitoring()">Simpan Data Monitoring</button>
+                    </div>
+
+                    <div class="glass-panel">
+                        <h3>Riwayat Monitoring Terbaru</h3>
+                        <div style="overflow-x: auto;">
+                            <table style="width:100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background:#f8fafc; border-bottom:1px solid #e2e8f0;">
+                                        <th style="padding:10px; text-align:left;">Tanggal</th>
+                                        <th style="padding:10px; text-align:left;">Ruangan/AC</th>
+                                        <th style="padding:10px; text-align:left;">Suhu</th>
+                                        <th style="padding:10px; text-align:left;">Kelembaban</th>
+                                        <th style="padding:10px; text-align:left;">Fisik/Bocor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-monitoring"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CMMS: Pemeriksaan (PM) -->
+                <div id="view-cmms-pm" class="view">
+                    <h2>Pemeriksaan AC (Preventive Maintenance)</h2>
+                    
+                    <div style="display:flex; justify-content:flex-end; margin-bottom:1rem;">
+                        <button class="btn-primary" onclick="openNewJadwalPMForm()">+ Buat Jadwal PM Baru</button>
+                    </div>
+
+                    <div class="task-grid" id="pm-kanban-board" style="margin-bottom:2rem;">
+                        <div class="glass-panel" style="padding:1rem;">
+                            <h3 style="border-bottom:2px solid #eab308; padding-bottom:5px; margin-bottom:1rem;">Segera (Bulan Ini)</h3>
+                            <div id="pm-soon-list" class="job-list" style="max-height:400px; overflow-y:auto; gap:0.5rem; display:flex; flex-direction:column;"></div>
+                        </div>
+                        <div class="glass-panel" style="padding:1rem;">
+                            <h3 style="border-bottom:2px solid #ef4444; padding-bottom:5px; margin-bottom:1rem;">Overdue (Terlewat)</h3>
+                            <div id="pm-overdue-list" class="job-list" style="max-height:400px; overflow-y:auto; gap:0.5rem; display:flex; flex-direction:column;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Modal/Section: Form Checklist PM -->
+                    <div id="pm-checklist-section" class="glass-panel" style="display:none; margin-bottom:2rem; border:2px solid var(--primary);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3 id="lbl-pm-target">Checklist PM AC: ...</h3>
+                            <button onclick="document.getElementById('pm-checklist-section').style.display='none'" style="background:none; border:none; color:var(--danger); cursor:pointer; font-weight:bold;">Tutup [X]</button>
+                        </div>
+                        <input type="hidden" id="pm-id-ac">
+                        <div class="checklist-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1rem;">
+                            <div class="form-group"><label>Filter Udara</label><select id="chk-filter" class="form-control"><option>OK</option><option>Kotor</option><option>Rusak</option></select></div>
+                            <div class="form-group"><label>Evaporator</label><select id="chk-evap" class="form-control"><option>OK</option><option>Kotor</option></select></div>
+                            <div class="form-group"><label>Kondensor</label><select id="chk-kondensor" class="form-control"><option>OK</option><option>Kotor</option></select></div>
+                            <div class="form-group"><label>Drainase / Pipa Pembuangan</label><select id="chk-drainase" class="form-control"><option>Lancar</option><option>Tersumbat</option></select></div>
+                            <div class="form-group"><label>Fan Motor (Indoor/Outdoor)</label><select id="chk-fan" class="form-control"><option>Normal</option><option>Berisik/Rusak</option></select></div>
+                            <div class="form-group"><label>Tekanan Freon / Refrigerant</label><select id="chk-freon" class="form-control"><option>Normal</option><option>Kurang</option></select></div>
+                            <div class="form-group"><label>Koneksi Terminal Listrik</label><select id="chk-terminal" class="form-control"><option>Aman</option><option>Kendor/Terbakar</option></select></div>
+                            <div class="form-group"><label>Status Akhir PM</label><select id="chk-status" class="form-control"><option>Selesai</option><option>Butuh Perbaikan Lanjut</option></select></div>
+                        </div>
+                        <button class="btn-primary" style="width:100%; margin-top:1rem;" onclick="submitChecklistPM()">Simpan Hasil Pemeriksaan</button>
+                    </div>
+                </div>
+
+                <!-- CMMS: Cuci AC & Dokumentasi -->
+                <div id="view-cmms-cuci" class="view">
+                    <h2>Cuci AC & Dokumentasi</h2>
+                    
+                    <div class="glass-panel" style="margin-bottom: 2rem;">
+                        <h3>Buat Laporan Pekerjaan (Cuci / Perbaikan)</h3>
+                        <div class="form-group">
+                            <label>Pilih AC</label>
+                            <select id="doc-id-ac" class="form-control"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Jenis Kegiatan</label>
+                            <select id="doc-kegiatan" class="form-control">
+                                <option value="Cuci AC">Cuci AC</option>
+                                <option value="Perbaikan">Perbaikan Ringan</option>
+                                <option value="Penggantian Part">Penggantian Sparepart</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Keterangan Pekerjaan</label>
+                            <input type="text" id="doc-keterangan" class="form-control" placeholder="Jelaskan apa saja yang dilakukan...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>📷 Foto Dokumentasi</label>
+                            <div class="photo-grid">
+                                <div class="photo-box" id="box-doc-before" onclick="document.getElementById('cam-doc-before').click()">
+                                    <span id="lbl-doc-before">Foto <b>BEFORE</b></span>
+                                    <img id="img-doc-before" class="hidden">
+                                </div>
+                                <div class="photo-box" id="box-doc-after" onclick="document.getElementById('cam-doc-after').click()">
+                                    <span id="lbl-doc-after">Foto <b>AFTER</b></span>
+                                    <img id="img-doc-after" class="hidden">
+                                </div>
+                            </div>
+                            <input type="file" accept="image/*" id="cam-doc-before" class="hidden" onchange="previewDocPhoto(event, 'before')">
+                            <input type="file" accept="image/*" id="cam-doc-after" class="hidden" onchange="previewDocPhoto(event, 'after')">
+                        </div>
+                        
+                        <div class="form-group" style="margin-top:1rem;">
+                            <label style="color:var(--primary); font-weight:bold;">Ajukan Approval (Opsional)</label>
+                            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">Jika pekerjaan ini butuh persetujuan Supervisor/Eng. Support.</p>
+                            <div style="display:flex; gap:1rem;">
+                                <input type="text" id="doc-spv" class="form-control" placeholder="Nama Supervisor">
+                                <input type="text" id="doc-eng" class="form-control" placeholder="Nama Engineering Support">
+                            </div>
+                        </div>
+
+                        <button class="btn-primary" style="width:100%; margin-top:1rem;" onclick="submitDokumentasi()">Upload & Simpan Laporan</button>
+                    </div>
+
+                    <div class="glass-panel" id="approval-section">
+                        <h3>Daftar Menunggu Approval</h3>
+                        <ul id="approval-list" class="job-list">
+                            <!-- Injected dynamically -->
+                        </ul>
+                    </div>
+                </div>
 
                 <!-- View: Home -->
                 <div id="view-home" class="view active">
