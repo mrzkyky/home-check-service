@@ -7,10 +7,12 @@ RUN npm ci
 
 COPY . .
 
-# Build step is optional here if we want to run dev server
-# RUN npm run build
+# Build for production
+RUN npm run build
 
 ENV HOSTNAME="0.0.0.0"
+ENV NODE_ENV=production
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+# Run production server (not dev)
+CMD ["npm", "start"]
