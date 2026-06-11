@@ -22,26 +22,27 @@ export function OverviewChart() {
         <div className="h-[350px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.5} />
               <XAxis 
                 dataKey="name" 
-                stroke="#888888"
+                stroke="#94a3b8"
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
               />
               <YAxis
-                stroke="#888888"
+                stroke="#94a3b8"
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => `${value}`}
               />
               <Tooltip 
-                cursor={{ fill: 'transparent' }}
-                contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0' }}
+                cursor={{ fill: '#334155', opacity: 0.4 }}
+                contentStyle={{ borderRadius: '8px', border: '1px solid #334155', backgroundColor: '#0f172a', color: '#f8fafc' }}
+                itemStyle={{ color: '#38bdf8' }}
               />
-              <Bar dataKey="tickets" fill="#0ea5e9" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="tickets" fill="#38bdf8" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

@@ -12,15 +12,15 @@ import {
 
 export function Header() {
   return (
-    <header className="h-16 border-b bg-background flex items-center justify-between px-6">
+    <header className="h-16 border-b border-border/50 bg-background/40 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-50">
       {/* Search / Left Side */}
       <div className="flex items-center gap-4 flex-1">
-        <div className="relative w-96 max-w-md hidden md:flex items-center">
-          <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="relative w-96 max-w-md hidden md:flex items-center group">
+          <Search className="absolute left-3 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <input
             type="search"
             placeholder="Search assets, tickets, or users..."
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-9"
+            className="flex h-10 w-full rounded-full border border-border/50 bg-muted/30 px-3 py-1 text-sm shadow-sm transition-all focus:bg-background focus:ring-1 focus:ring-primary focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 pl-10 outline-none"
           />
         </div>
       </div>

@@ -5,7 +5,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 
 const inter = Inter({
-  variable: "--font-inter",
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -20,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} antialiased h-screen overflow-hidden flex bg-background text-foreground`}>
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} font-sans antialiased h-screen overflow-hidden flex bg-background text-foreground selection:bg-primary/30 selection:text-primary`}>
         <Sidebar />
         <div className="flex flex-col flex-1 min-w-0">
           <Header />

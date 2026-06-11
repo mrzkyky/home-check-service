@@ -10,7 +10,10 @@ import {
 
 export default function Dashboard() {
   return (
-    <div className="flex-1 space-y-4">
+    <div className="flex-1 space-y-6 relative">
+      {/* Subtle Background Glow */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[100px] -z-10 pointer-events-none" />
+      
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard Overview</h2>
         <div className="flex items-center space-x-2">
