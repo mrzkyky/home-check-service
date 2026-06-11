@@ -6,6 +6,7 @@ import { Server, Zap, Flame, CheckCircle, AlertTriangle, ShieldCheck, Ticket } f
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
 export default function Dashboard() {
+  const kpiData = [
     { title: "Open Tickets", value: "3", icon: Ticket, color: "text-blue-500", bg: "bg-blue-500/10" },
     { title: "Active Permits", value: "12", icon: ShieldCheck, color: "text-emerald-500", bg: "bg-emerald-500/10" },
     { title: "Pending Approvals", value: "5", icon: CheckCircle, color: "text-amber-500", bg: "bg-amber-500/10" },
