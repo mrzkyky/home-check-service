@@ -6,6 +6,7 @@ import { Plus, Ticket, AlertCircle, Clock, CheckCircle2, MoreVertical, Search, A
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 export default function TicketingPage() {
   const [tickets] = useState([
@@ -41,7 +42,7 @@ export default function TicketingPage() {
           <p className="text-muted-foreground mt-1">Manage, assign, and resolve facility incident tickets.</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button><Plus className="mr-2 h-4 w-4" /> Create Ticket</Button>
+          <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Create Ticket</Button>
         </div>
       </div>
 
@@ -95,7 +96,8 @@ export default function TicketingPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[800px]">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left text-muted-foreground font-medium">Ticket ID</th>
@@ -135,6 +137,7 @@ export default function TicketingPage() {
               ))}
             </tbody>
           </table>
+        </div>
         </CardContent>
       </Card>
     </div>

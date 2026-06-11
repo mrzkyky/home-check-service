@@ -6,6 +6,7 @@ import { Plus, Videotape, Eye, ArrowLeft, VideoOff, PlayCircle } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 export default function CCTVPage() {
   const [cctvList] = useState([
@@ -31,12 +32,13 @@ export default function CCTVPage() {
       </div>
 
       <div className="flex items-center justify-end">
-        <Button><Plus className="mr-2 h-4 w-4" /> Add Camera</Button>
+        <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add Camera</Button>
       </div>
 
       <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardContent className="p-0">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[800px]">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left font-medium text-muted-foreground">Camera Location</th>
@@ -62,7 +64,7 @@ export default function CCTVPage() {
                     )}
                   </td>
                   <td className="p-4 text-right">
-                    <Button variant="ghost" size="sm" disabled={c.status === "OFFLINE"}>
+                    <Button variant="ghost" size="sm" disabled={c.status === "OFFLINE"} onClick={() => toast("Membuka stream CCTV...")}>
                       <Eye className="mr-2 h-4 w-4" /> View Live
                     </Button>
                   </td>
@@ -70,6 +72,7 @@ export default function CCTVPage() {
               ))}
             </tbody>
           </table>
+        </div>
         </CardContent>
       </Card>
     </div>

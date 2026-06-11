@@ -39,7 +39,8 @@ export default function MaintenancePage() {
           <CardTitle className="flex items-center gap-2"><Calendar className="h-5 w-5" /> Maintenance Calendar</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[800px]">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left font-medium text-muted-foreground">Date</th>
@@ -71,6 +72,7 @@ export default function MaintenancePage() {
               ))}
             </tbody>
           </table>
+        </div>
         </CardContent>
       </Card>
     </div>

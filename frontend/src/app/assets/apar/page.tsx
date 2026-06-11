@@ -5,6 +5,7 @@ import { Plus, Flame, Search, CheckCircle2, AlertTriangle, XCircle } from "lucid
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 export default function APARPage() {
   const [apars] = useState([
@@ -30,7 +31,7 @@ export default function APARPage() {
           <p className="text-muted-foreground mt-1">Manage Fire Extinguishers, monthly inspections, and expiry tracking.</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button><Plus className="mr-2 h-4 w-4" /> Add APAR</Button>
+          <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add APAR</Button>
         </div>
       </div>
 
@@ -76,7 +77,8 @@ export default function APARPage() {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[800px]">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left text-muted-foreground font-medium">Location</th>
@@ -106,6 +108,7 @@ export default function APARPage() {
               ))}
             </tbody>
           </table>
+        </div>
         </CardContent>
       </Card>
     </div>

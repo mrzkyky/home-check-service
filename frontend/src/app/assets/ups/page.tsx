@@ -6,6 +6,7 @@ import { Plus, Zap, Battery, BatteryCharging, AlertTriangle, ArrowLeft } from "l
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 export default function UPSPage() {
   const [upsList] = useState([
@@ -31,12 +32,13 @@ export default function UPSPage() {
       </div>
 
       <div className="flex items-center justify-end">
-        <Button><Plus className="mr-2 h-4 w-4" /> Add UPS</Button>
+        <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add UPS</Button>
       </div>
 
       <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardContent className="p-0">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[800px]">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left font-medium text-muted-foreground">Brand/Model</th>
@@ -76,6 +78,7 @@ export default function UPSPage() {
               ))}
             </tbody>
           </table>
+        </div>
         </CardContent>
       </Card>
     </div>

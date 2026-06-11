@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { toast } from "sonner";
 
 export default function KWHPage() {
   const [readings] = useState([
@@ -29,7 +30,7 @@ export default function KWHPage() {
           <p className="text-muted-foreground mt-1">Daily electricity readings and consumption tracking.</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button><Plus className="mr-2 h-4 w-4" /> Input Daily Reading</Button>
+          <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Input Daily Reading</Button>
         </div>
       </div>
 
@@ -86,7 +87,8 @@ export default function KWHPage() {
           <CardTitle>Daily Reading Log</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[800px]">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
                 <th className="p-4 text-left text-muted-foreground font-medium">Meter & Location</th>
@@ -115,6 +117,7 @@ export default function KWHPage() {
               ))}
             </tbody>
           </table>
+        </div>
         </CardContent>
       </Card>
     </div>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface AC {
   id: number;
@@ -61,7 +62,7 @@ export default function ACAssetsPage() {
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline"><Filter className="mr-2 h-4 w-4" /> Filter</Button>
-          <Button><Plus className="mr-2 h-4 w-4" /> Add AC Asset</Button>
+          <Button onClick={() => toast("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add AC Asset</Button>
         </div>
       </div>
 
@@ -81,7 +82,8 @@ export default function ACAssetsPage() {
         </CardHeader>
         <CardContent className="p-0">
           <div className="relative w-full overflow-auto">
-            <table className="w-full caption-bottom text-sm">
+            <div className="overflow-x-auto">
+          <table className="w-full caption-bottom text-sm">
               <thead className="[&_tr]:border-b border-border/50 bg-muted/30">
                 <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Serial Number</th>
@@ -130,6 +132,7 @@ export default function ACAssetsPage() {
                 ))}
               </tbody>
             </table>
+        </div>
           </div>
         </CardContent>
       </Card>
