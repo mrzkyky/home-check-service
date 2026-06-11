@@ -1417,7 +1417,7 @@ window.submitMonitoring = async function() {
     let catatan = document.getElementById('mon-catatan').value;
     let tanggal = new Date().toISOString().split('T')[0];
     
-    if(!id_ac || !suhu || !kelembaban) return alert("Pilih AC, Suhu, dan Kelembaban!");
+    if(!id_ac || !suhu || !kelembaban) return Swal.fire('Peringatan', 'Pilih AC, Suhu, dan Kelembaban!', 'warning');
 
     try {
         let res = await fetch(`${API_BASE}/cmms/monitoring`, {
@@ -1429,14 +1429,16 @@ window.submitMonitoring = async function() {
             })
         });
         if(res.ok) {
-            alert("Monitoring tersimpan!");
+            Swal.fire('Berhasil!', 'Monitoring tersimpan!', 'success');
             document.getElementById('mon-suhu').value = "";
             document.getElementById('mon-kelembaban').value = "";
             document.getElementById('mon-catatan').value = "";
             loadMonitoringHistory();
         }
-    } catch(e) { alert("Error simpan monitoring"); }
+    } catch(e) { Swal.fire('Error', 'Gagal simpan monitoring', 'error'); }
 }
+
+window.monitoringChartInstance = null;
 
 window.loadMonitoringHistory = async function() {
     try {
@@ -1446,29 +1448,63 @@ window.loadMonitoringHistory = async function() {
         tbody.innerHTML = '';
         if(res.ok && data.data) {
             let normal = 0, abnormal = 0;
+            let chartLabels = [];
+            let chartSuhu = [];
+            let chartKelembaban = [];
+
             data.data.forEach(m => {
                 let isBocor = m.kebocoran ? "Bocor" : "Aman";
-                let color = (m.status_unit !== 'Normal' || m.kebocoran) ? "red" : "green";
-                if(color === "red") abnormal++; else normal++;
+                let color = (m.status_unit !== 'Normal' || m.kebocoran) ? "var(--danger)" : "var(--success)";
+                let icon = (m.status_unit !== 'Normal' || m.kebocoran) ? '<i class="ph ph-warning-circle"></i>' : '<i class="ph ph-check-circle"></i>';
+                if(color === "var(--danger)") abnormal++; else normal++;
                 
+                chartLabels.push(m.tanggal + " (AC "+m.id_ac+")");
+                chartSuhu.push(m.suhu);
+                chartKelembaban.push(m.kelembaban);
+
                 tbody.innerHTML += `
-                    <tr style="border-bottom:1px solid #e2e8f0;">
-                        <td style="padding:10px;">${m.tanggal}</td>
-                        <td style="padding:10px;">AC ID: ${m.id_ac}</td>
-                        <td style="padding:10px;">${m.suhu}°C</td>
-                        <td style="padding:10px;">${m.kelembaban}%</td>
-                        <td style="padding:10px; color:${color}; font-weight:bold;">${m.status_unit} / ${isBocor}</td>
+                    <tr class="mon-row" style="border-bottom:1px solid #e2e8f0;">
+                        <td style="padding:12px;">${m.tanggal}</td>
+                        <td style="padding:12px;" class="ac-id-text">AC ID: ${m.id_ac}</td>
+                        <td style="padding:12px;"><b>${m.suhu}°C</b></td>
+                        <td style="padding:12px;">${m.kelembaban}%</td>
+                        <td style="padding:12px; color:${color}; font-weight:600;">${icon} ${m.status_unit} / ${isBocor}</td>
                     </tr>
                 `;
             });
             document.getElementById('stat-normal').innerText = normal;
             document.getElementById('stat-abnormal').innerText = abnormal;
+
+            // Render Chart
+            if(window.monitoringChartInstance) window.monitoringChartInstance.destroy();
+            let ctx = document.getElementById('monitoringChart').getContext('2d');
+            window.monitoringChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels.reverse(),
+                    datasets: [
+                        { label: 'Suhu (°C)', data: chartSuhu.reverse(), borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.2)', fill: true, tension: 0.4 },
+                        { label: 'Kelembaban (%)', data: chartKelembaban.reverse(), borderColor: '#7c3aed', backgroundColor: 'rgba(124, 58, 237, 0.2)', fill: true, tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
         }
     } catch(e) { console.error("Load monitoring error", e); }
 }
 
+window.filterMonitoringTable = function() {
+    let input = document.getElementById('search-monitoring').value.toLowerCase();
+    let rows = document.querySelectorAll('.mon-row');
+    rows.forEach(row => {
+        let text = row.querySelector('.ac-id-text').innerText.toLowerCase();
+        if(text.includes(input)) row.style.display = '';
+        else row.style.display = 'none';
+    });
+}
+
 window.openNewJadwalPMForm = function() {
-    alert("Pembuatan Jadwal PM akan tersedia. Saat ini gunakan API / DB langsung.");
+    Swal.fire('Fitur Mendatang', 'Pembuatan Jadwal PM dari UI akan segera dirilis.', 'info');
 }
 
 const originalSwitchView = window.switchView;
@@ -1507,7 +1543,7 @@ window.submitDokumentasi = async function() {
     let aFile = document.getElementById('cam-doc-after').files[0];
     let tanggal = new Date().toISOString().split('T')[0];
 
-    if(!id_ac || !kegiatan) return alert("Pilih AC dan Kegiatan!");
+    if(!id_ac || !kegiatan) return Swal.fire('Peringatan', 'Pilih AC dan Kegiatan!', 'warning');
 
     let formData = new FormData();
     formData.append("tanggal", tanggal);
@@ -1529,11 +1565,11 @@ window.submitDokumentasi = async function() {
                         tanggal, id_ac: parseInt(id_ac), pekerjaan: kegiatan, pelaksana: currentUser.name, supervisor: spv || "", engineering_support: eng || ""
                     })
                 });
-                alert("Dokumentasi tersimpan & Approval diajukan!");
+                Swal.fire('Berhasil!', 'Dokumentasi tersimpan & Approval diajukan!', 'success');
             } else {
-                alert("Dokumentasi tersimpan!");
+                Swal.fire('Berhasil!', 'Dokumentasi tersimpan!', 'success');
             }
             switchView('home');
         }
-    } catch(e) { alert("Error simpan dokumentasi!"); }
+    } catch(e) { Swal.fire('Error', 'Gagal simpan dokumentasi!', 'error'); }
 }

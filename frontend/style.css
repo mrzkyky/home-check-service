@@ -1,26 +1,26 @@
 :root {
-  --bg-color: #f8fafc;
-  --panel-bg: rgba(255, 255, 255, 0.9);
-  --border-color: rgba(226, 232, 240, 0.8);
+  --bg-color: #f1f5f9;
+  --panel-bg: rgba(255, 255, 255, 0.8);
+  --border-color: rgba(255, 255, 255, 0.6);
   --text-main: #0f172a;
   --text-muted: #64748b;
-  --primary: #0ea5e9;
-  --secondary: #7c3aed;
-  --dark-sidebar: #0f172a;
+  --primary: #2563eb;
+  --secondary: #4f46e5;
+  --dark-sidebar: rgba(15, 23, 42, 0.95);
   --danger: #ef4444;
   --success: #10b981;
   --warning: #f59e0b;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-float: 0 20px 25px -5px rgba(124, 58, 237, 0.15), 0 10px 10px -5px rgba(14, 165, 233, 0.04);
+  --shadow-float: 0 20px 25px -5px rgba(37, 99, 235, 0.15), 0 10px 10px -5px rgba(79, 70, 229, 0.04);
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Outfit', sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -32,9 +32,8 @@ body {
   flex-direction: column;
   overflow: hidden;
   background-image: 
-    radial-gradient(at 0% 0%, hsla(240, 60%, 88%, 0.4) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(240, 60%, 90%, 0.3) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, hsla(240, 60%, 92%, 0.25) 0px, transparent 50%);
+    radial-gradient(circle at 15% 50%, rgba(37, 99, 235, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(79, 70, 229, 0.08), transparent 25%);
   background-attachment: fixed;
 }
 
@@ -295,11 +294,11 @@ h3 {
 }
 
 .task-card {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
   padding: 2rem 1.5rem;
   text-align: center;
   color: var(--text-main);
@@ -309,14 +308,14 @@ h3 {
   flex-direction: column;
   gap: 1rem;
   align-items: center;
-  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.08), 0 2px 8px rgba(14, 165, 233, 0.04);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 .task-card:hover {
-  transform: translateY(-10px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(124, 58, 237, 0.15), 0 8px 16px rgba(14, 165, 233, 0.08);
-  border-color: rgba(124, 58, 237, 0.2);
-  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-color: rgba(37, 99, 235, 0.3);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .task-card:active {
@@ -326,10 +325,6 @@ h3 {
 
 .task-card .icon {
   font-size: 3rem;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 4px 6px rgba(32, 32, 99, 0.2));
   transition: transform 0.3s;
 }
 
@@ -387,22 +382,23 @@ h3 {
   margin-bottom: 0.6rem;
 }
 
-input, textarea, .form-control {
+input, textarea, select, .form-control {
   width: 100%;
   padding: 1rem;
-  background: white;
+  background: rgba(255, 255, 255, 0.8);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--text-main);
   font-size: 1rem;
   outline: none;
-  transition: all 0.2s;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+  transition: all 0.3s;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
 
-input:focus, textarea:focus {
+input:focus, textarea:focus, select:focus, .form-control:focus {
+  background: #fff;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(32, 32, 99, 0.1);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
 
 textarea {
@@ -558,4 +554,32 @@ button {
 @media (max-width: 768px) {
   .menu-toggle { display: block; }
   .photo-grid { grid-template-columns: 1fr; }
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white;
+  }
+  .app-header, .sidebar, .menu-toggle, .back-btn, button {
+    display: none !important;
+  }
+  .main-content {
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+  }
+  .glass-panel {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    background: white;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .view {
+    display: none !important;
+  }
+  .view.active {
+    display: block !important;
+  }
 }
