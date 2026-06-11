@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Cpu, Zap, Server, ShieldCheck, Videotape, Network } from "lucide-react";
+import { Cpu, Zap, Server, ShieldCheck, Videotape, Network, Flame, Activity } from "lucide-react";
 
 export default function AssetsPage() {
   const assetTypes = [
     { name: "Air Conditioners", icon: Cpu, href: "/assets/ac", desc: "Manage AC units, monitoring, and PMs" },
-    { name: "UPS", icon: Zap, href: "/assets/ups", desc: "Uninterruptible Power Supplies" },
     { name: "Servers", icon: Server, href: "/assets/servers", desc: "Physical and virtual servers" },
+    { name: "Fire Extinguisher (APAR)", icon: Flame, href: "/assets/apar", desc: "Fire safety equipment & inspection" },
+    { name: "KWH Meters", icon: Activity, href: "/assets/kwh", desc: "Electricity consumption monitoring" },
+    { name: "UPS", icon: Zap, href: "/assets/ups", desc: "Uninterruptible Power Supplies" },
     { name: "CCTV", icon: Videotape, href: "/assets/cctv", desc: "Surveillance cameras" },
     { name: "Routers/Switches", icon: Network, href: "/assets/network", desc: "Network equipments" },
   ];
