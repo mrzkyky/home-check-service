@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.api import ac, server_room, apar, kwh, dashboard
+from app.api import ac, server_room, apar, kwh, dashboard, upload
 
 # Create all tables (dev mode)
 Base.metadata.create_all(bind=engine)
@@ -27,6 +27,7 @@ app.include_router(server_room.router, prefix="/api/v1/servers", tags=["Server R
 app.include_router(apar.router, prefix="/api/v1/apar", tags=["APAR"])
 app.include_router(kwh.router, prefix="/api/v1/kwh", tags=["KWH Monitoring"])
 app.include_router(dashboard.router, prefix="/api/v1/dashboard", tags=["Dashboard"])
+app.include_router(upload.router, prefix="/api/v1/upload", tags=["Media Upload"])
 
 @app.get("/")
 def read_root():

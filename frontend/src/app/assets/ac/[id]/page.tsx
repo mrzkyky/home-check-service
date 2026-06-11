@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Thermometer, Droplets, Camera, CheckSquare, Settings2, Activity, ShieldCheck, History } from "lucide-react";
 import { useState } from "react";
+import { FileUpload } from "@/components/ui/FileUpload";
 
 export default function ACDetailPage() {
   const params = useParams();
@@ -126,19 +127,18 @@ export default function ACDetailPage() {
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium flex items-center gap-2"><Camera className="h-5 w-5 text-primary" /> Documentation</h3>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="border-2 border-dashed border-border/50 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-2 hover:bg-muted/20 transition-colors cursor-pointer">
-                  <Camera className="h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm font-medium">Upload "Before" Photos</p>
-                  <p className="text-xs text-muted-foreground">Supports multiple images (MinIO)</p>
-                </div>
-                <div className="border-2 border-dashed border-border/50 rounded-xl p-8 flex flex-col items-center justify-center text-center gap-2 hover:bg-muted/20 transition-colors cursor-pointer">
-                  <Camera className="h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm font-medium">Upload "After" Photos</p>
-                  <p className="text-xs text-muted-foreground">Supports multiple images (MinIO)</p>
-                </div>
+            {/* Photos Dropzone (MinIO Integration) */}
+            <div className="pt-4 border-t border-border/50">
+              <h4 className="font-medium text-sm mb-4">Documentation (MinIO Storage)</h4>
+              <div className="grid gap-4 md:grid-cols-2">
+                <FileUpload 
+                  label="Before Maintenance Photo" 
+                  onUploadSuccess={(url) => console.log("Before URL:", url)} 
+                />
+                <FileUpload 
+                  label="After Maintenance Photo" 
+                  onUploadSuccess={(url) => console.log("After URL:", url)} 
+                />
               </div>
             </div>
             
