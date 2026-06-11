@@ -1,5 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.database import engine, Base
+from app.api import ac
+
+# Create all tables (dev mode)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="FiberCore EOMS API",
@@ -15,6 +20,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register routers
+app.include_router(ac.router, prefix="/api/v1/ac", tags=["AC Management"])
 
 @app.get("/")
 def read_root():
