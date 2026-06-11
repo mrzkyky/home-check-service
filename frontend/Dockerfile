@@ -10,6 +10,7 @@ COPY . .
 # Build step is optional here if we want to run dev server
 # RUN npm run build
 
-EXPOSE 80
+ENV HOSTNAME="0.0.0.0"
+EXPOSE 3000
 
-CMD ["npm", "run", "dev", "--", "-H", "0.0.0.0", "-p", "80"]
+CMD ["npm", "run", "dev"]
