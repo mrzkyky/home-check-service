@@ -5,12 +5,15 @@ import {
   Wrench,
   Building2,
   KeyRound,
-  Ticket
+  Ticket,
+  ShieldCheck,
+  Server
 } from 'lucide-react';
 
 const navItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Asset Management', href: '/assets', icon: Box },
+  { name: 'Approval Center', href: '/approvals', icon: ShieldCheck },
+  { name: 'Asset Management', href: '/assets', icon: Server },
   { name: 'Preventive Maintenance', href: '/maintenance', icon: Wrench },
   { name: 'Facility Inspection', href: '/inspection', icon: Building2 },
   { name: 'Access Management', href: '/access', icon: KeyRound },
