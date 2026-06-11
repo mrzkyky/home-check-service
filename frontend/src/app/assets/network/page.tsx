@@ -18,7 +18,7 @@ export default function NetworkPage() {
     <div className="flex-1 space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/assets">
-          <Button variant="outline" size="icon" className="rounded-full bg-background/50 backdrop-blur-xl border-border/50">
+          <Button variant="outline" size="icon" className="rounded-full bg-background/50 backdrop-blur-sm border-border/50">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
@@ -34,7 +34,7 @@ export default function NetworkPage() {
         <Button><Plus className="mr-2 h-4 w-4" /> Add Device</Button>
       </div>
 
-      <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+      <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardContent className="p-0">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 border-b border-border/50">

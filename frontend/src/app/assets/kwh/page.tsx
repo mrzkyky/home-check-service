@@ -34,7 +34,7 @@ export default function KWHPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2"><TrendingUp className="h-5 w-5 text-primary" /> Consumption Trend</CardTitle>
           </CardHeader>
@@ -57,7 +57,7 @@ export default function KWHPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-lg">Recent Anomalies</CardTitle>
           </CardHeader>
@@ -81,7 +81,7 @@ export default function KWHPage() {
         </Card>
       </div>
 
-      <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+      <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardHeader className="border-b border-border/50 pb-4">
           <CardTitle>Daily Reading Log</CardTitle>
         </CardHeader>

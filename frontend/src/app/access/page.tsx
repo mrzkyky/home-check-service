@@ -5,6 +5,7 @@ import { KeyRound, Plus, CheckCircle, XCircle, Clock, Search } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 export default function AccessPage() {
   const [logs] = useState([
@@ -22,11 +23,11 @@ export default function AccessPage() {
           </h2>
           <p className="text-muted-foreground mt-1">Control and audit visitor access permits to critical facilities.</p>
         </div>
-        <Button><Plus className="mr-2 h-4 w-4" /> Request Permit</Button>
+        <Button onClick={() => toast("Portal permohonan sedang disiapkan!")}><Plus className="mr-2 h-4 w-4" /> Request Permit</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Active Permits Today</CardTitle>
           </CardHeader>
@@ -34,7 +35,7 @@ export default function AccessPage() {
             <div className="text-2xl font-bold text-emerald-500">2</div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Pending Requests</CardTitle>
           </CardHeader>
@@ -42,7 +43,7 @@ export default function AccessPage() {
             <div className="text-2xl font-bold text-amber-500">5</div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Visitors (This Week)</CardTitle>
           </CardHeader>
@@ -52,7 +53,7 @@ export default function AccessPage() {
         </Card>
       </div>
 
-      <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+      <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardHeader className="border-b border-border/50 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle>Access Permit Logs</CardTitle>

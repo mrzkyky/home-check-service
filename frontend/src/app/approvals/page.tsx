@@ -51,7 +51,7 @@ export default function ApprovalCenterPage() {
         </Button>
       </div>
 
-      <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+      <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardContent className="p-0">
           <table className="w-full text-sm">
             <thead className="bg-muted/30 border-b border-border/50">

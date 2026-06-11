@@ -65,7 +65,7 @@ export default function ACAssetsPage() {
         </div>
       </div>
 
-      <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+      <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardHeader className="border-b border-border/50 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle>AC Master Data</CardTitle>

@@ -35,7 +35,7 @@ export default function APARPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Active Units</CardTitle>
           </CardHeader>
@@ -43,7 +43,7 @@ export default function APARPage() {
             <div className="text-2xl font-bold text-emerald-500">142</div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Expiring Soon (30 Days)</CardTitle>
           </CardHeader>
@@ -51,7 +51,7 @@ export default function APARPage() {
             <div className="text-2xl font-bold text-amber-500">1</div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Expired Units</CardTitle>
           </CardHeader>
@@ -61,7 +61,7 @@ export default function APARPage() {
         </Card>
       </div>
 
-      <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+      <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardHeader className="border-b border-border/50 pb-4">
           <div className="flex items-center justify-between">
             <CardTitle>APAR Master Data</CardTitle>

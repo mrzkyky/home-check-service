@@ -5,6 +5,7 @@ import { Building2, Plus, ClipboardCheck, Flame, Server, AlertTriangle } from "l
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 export default function InspectionPage() {
   const [inspections] = useState([
@@ -22,11 +23,11 @@ export default function InspectionPage() {
           </h2>
           <p className="text-muted-foreground mt-1">Daily rounds, room cleanliness, and fire safety (APAR) inspection logs.</p>
         </div>
-        <Button><Plus className="mr-2 h-4 w-4" /> Log Inspection</Button>
+        <Button onClick={() => toast("Fitur tambah log sedang dikembangkan!")}><Plus className="mr-2 h-4 w-4" /> Log Inspection</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Server Room Patrols (This Month)</CardTitle>
             <Server className="h-4 w-4 text-muted-foreground" />
@@ -36,7 +37,7 @@ export default function InspectionPage() {
             <p className="text-xs text-muted-foreground mt-1">93% completion rate</p>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">APAR Inspections (This Month)</CardTitle>
             <Flame className="h-4 w-4 text-muted-foreground" />
@@ -48,19 +49,19 @@ export default function InspectionPage() {
         </Card>
       </div>
 
-      <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+      <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
         <CardHeader className="border-b border-border/50 pb-4">
           <CardTitle className="flex items-center gap-2"><ClipboardCheck className="h-5 w-5" /> Recent Inspection Logs</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
             <thead className="bg-muted/30 border-b border-border/50">
               <tr>
-                <th className="p-4 text-left font-medium text-muted-foreground">ID</th>
-                <th className="p-4 text-left font-medium text-muted-foreground">Type & Area</th>
-                <th className="p-4 text-left font-medium text-muted-foreground">Inspector & Date</th>
+                <th className="p-4 text-left font-medium text-muted-foreground w-24">ID</th>
+                <th className="p-4 text-left font-medium text-muted-foreground w-40">Type & Area</th>
+                <th className="p-4 text-left font-medium text-muted-foreground w-48">Inspector & Date</th>
                 <th className="p-4 text-left font-medium text-muted-foreground">Findings</th>
-                <th className="p-4 text-left font-medium text-muted-foreground">Status</th>
+                <th className="p-4 text-left font-medium text-muted-foreground w-32">Status</th>
               </tr>
             </thead>
             <tbody>

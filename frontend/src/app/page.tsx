@@ -34,7 +34,7 @@ export default function Dashboard() {
         {kpiData.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
-            <Card key={i} className="border-border/50 bg-background/50 backdrop-blur-xl hover:border-primary/50 transition-colors">
+            <Card key={i} className="border-border/50 bg-background/50 backdrop-blur-sm hover:border-primary/50 transition-colors">
               <CardContent className="p-6 flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">{kpi.title}</p>
@@ -50,7 +50,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Energy Consumption Trend</CardTitle>
           </CardHeader>
@@ -72,7 +72,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>System Health Status</CardTitle>
           </CardHeader>

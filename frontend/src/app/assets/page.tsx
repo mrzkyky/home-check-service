@@ -24,7 +24,7 @@ export default function AssetsPage() {
           const Icon = asset.icon;
           return (
             <Link key={asset.name} href={asset.href}>
-              <Card className="hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 group cursor-pointer border-border/50 bg-background/50 backdrop-blur-xl">
+              <Card className="hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 group cursor-pointer border-border/50 bg-background/50 backdrop-blur-sm">
                 <CardHeader className="flex flex-row items-center gap-4">
                   <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                     <Icon className="size-6 text-primary" />

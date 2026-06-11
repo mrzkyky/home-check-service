@@ -12,7 +12,7 @@ import {
 
 export function Header() {
   return (
-    <header className="h-16 border-b border-border/50 bg-background/40 backdrop-blur-xl flex items-center justify-between px-6 sticky top-0 z-50">
+    <header className="h-16 border-b border-border/50 bg-background/40 backdrop-blur-sm flex items-center justify-between px-6 sticky top-0 z-50">
       {/* Search / Left Side */}
       <div className="flex items-center gap-4 flex-1">
         <div className="relative w-96 max-w-md hidden md:flex items-center group">

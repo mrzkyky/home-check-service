@@ -50,7 +50,7 @@ export default function ServerRoomsPage() {
       </div>
 
       {activeTab === "rooms" && (
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Registered Rooms</CardTitle>
           </CardHeader>
@@ -86,7 +86,7 @@ export default function ServerRoomsPage() {
       )}
 
       {activeTab === "permits" && (
-        <Card className="border-border/50 bg-background/50 backdrop-blur-xl">
+        <Card className="border-border/50 bg-background/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle>Permit Requests</CardTitle>
           </CardHeader>
