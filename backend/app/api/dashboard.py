@@ -6,6 +6,7 @@ from app.models.ac import ACMaster
 from app.models.server_room import ServerRoom, AccessPermit, PermitStatus
 from app.models.apar import APARMaster, APARStatus
 from app.models.kwh import KWHReading
+from app.models.ticket import Ticket, TicketStatus
 
 router = APIRouter()
 
@@ -37,6 +38,8 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
     
     high_kwh_alerts = db.query(KWHReading).filter(KWHReading.is_high_consumption == True).count()
 
+    total_open_tickets = db.query(Ticket).filter(Ticket.status.in_([TicketStatus.OPEN, TicketStatus.IN_PROGRESS])).count()
+
     return {
         "total_branches": total_branches,
         "total_rooms": total_rooms,
@@ -45,5 +48,6 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
         "apar_expired": apar_expired,
         "apar_due_inspection": apar_expiring_soon,
         "high_temp_alerts": high_temp_alerts,
-        "high_consumption_alerts": high_kwh_alerts
+        "high_consumption_alerts": high_kwh_alerts,
+        "total_open_tickets": total_open_tickets
     }

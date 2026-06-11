@@ -2,11 +2,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Server, Zap, Flame, CheckCircle, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Server, Zap, Flame, CheckCircle, AlertTriangle, ShieldCheck, Ticket } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 
 export default function Dashboard() {
-  const kpiData = [
+    { title: "Open Tickets", value: "3", icon: Ticket, color: "text-blue-500", bg: "bg-blue-500/10" },
     { title: "Active Permits", value: "12", icon: ShieldCheck, color: "text-emerald-500", bg: "bg-emerald-500/10" },
     { title: "Pending Approvals", value: "5", icon: CheckCircle, color: "text-amber-500", bg: "bg-amber-500/10" },
     { title: "APAR Expired", value: "1", icon: Flame, color: "text-rose-500", bg: "bg-rose-500/10" },
@@ -29,7 +29,7 @@ export default function Dashboard() {
         <h2 className="text-3xl font-bold tracking-tight">Executive Dashboard</h2>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {kpiData.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
