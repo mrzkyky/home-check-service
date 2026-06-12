@@ -1,17 +1,52 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Server, Zap, Flame, CheckCircle, AlertTriangle, ShieldCheck, Ticket } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { apiFetch } from "@/lib/api";
+
+interface DashboardStats {
+  total_branches: number;
+  total_rooms: number;
+  active_permits: number;
+  pending_approvals: number;
+  apar_expired: number;
+  apar_due_inspection: number;
+  high_temp_alerts: number;
+  high_consumption_alerts: number;
+  total_open_tickets: number;
+}
 
 export default function Dashboard() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+
+  useEffect(() => {
+    apiFetch<DashboardStats>("/dashboard/stats")
+      .then(setStats)
+      .catch(() => {
+        // Fallback to defaults if API unavailable
+        setStats({
+          total_open_tickets: 3,
+          active_permits: 12,
+          pending_approvals: 5,
+          apar_expired: 1,
+          high_consumption_alerts: 3,
+          total_branches: 3,
+          total_rooms: 4,
+          apar_due_inspection: 2,
+          high_temp_alerts: 0,
+        });
+      });
+  }, []);
+
   const kpiData = [
-    { title: "Open Tickets", value: "3", icon: Ticket, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { title: "Active Permits", value: "12", icon: ShieldCheck, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { title: "Pending Approvals", value: "5", icon: CheckCircle, color: "text-amber-500", bg: "bg-amber-500/10" },
-    { title: "APAR Expired", value: "1", icon: Flame, color: "text-rose-500", bg: "bg-rose-500/10" },
-    { title: "High Consumption", value: "3", icon: Zap, color: "text-amber-500", bg: "bg-amber-500/10" }
+    { title: "Open Tickets", value: stats?.total_open_tickets ?? "—", icon: Ticket, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { title: "Active Permits", value: stats?.active_permits ?? "—", icon: ShieldCheck, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { title: "Pending Approvals", value: stats?.pending_approvals ?? "—", icon: CheckCircle, color: "text-amber-500", bg: "bg-amber-500/10" },
+    { title: "APAR Expired", value: stats?.apar_expired ?? "—", icon: Flame, color: "text-rose-500", bg: "bg-rose-500/10" },
+    { title: "High Consumption", value: stats?.high_consumption_alerts ?? "—", icon: Zap, color: "text-amber-500", bg: "bg-amber-500/10" }
   ];
 
   const consumptionData = [

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Search, Filter, Cpu, Settings2, MoreHorizontal } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Search, Filter, Cpu, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogBody, DialogFooter, FormField, inputClassName, selectClassName } from "@/components/ui/dialog";
 import Link from "next/link";
-import { toast } from "sonner";
+import { apiFetch, submitForm } from "@/lib/api";
 
 interface AC {
   id: number;
@@ -20,38 +21,43 @@ interface AC {
 }
 
 export default function ACAssetsPage() {
+  const [showAdd, setShowAdd] = useState(false);
   const [acs, setAcs] = useState<AC[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
 
-  useEffect(() => {
-    // In real app, fetch from Next.js API route or backend directly
-    // fetch("http://localhost:8000/api/v1/ac").then(...)
-    setTimeout(() => {
-      setAcs([
-        {
-          id: 1,
-          branch_unit: "Jatinegara",
-          room: "Server Room A",
-          function: "Main",
-          brand: "Daikin",
-          type: "Cassette",
-          capacity: "3 PK",
-          serial_number: "DKN-2023-X9821",
-        },
-        {
-          id: 2,
-          branch_unit: "Jatinegara",
-          room: "Server Room A",
-          function: "Backup",
-          brand: "Panasonic",
-          type: "Split Wall",
-          capacity: "2 PK",
-          serial_number: "PNS-2021-B7123",
-        }
-      ]);
-      setLoading(false);
-    }, 1000);
-  }, []);
+  const fetchAcs = () => {
+    apiFetch<AC[]>("/ac")
+      .then(setAcs)
+      .catch(() => setAcs([]))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchAcs(); }, []);
+
+  const filtered = acs.filter(ac => {
+    const q = search.toLowerCase();
+    return !q || ac.serial_number.toLowerCase().includes(q) || ac.room.toLowerCase().includes(q) || ac.branch_unit.toLowerCase().includes(q);
+  });
+
+  const handleSubmit = async () => {
+    const form = formRef.current;
+    if (!form) return;
+    const fd = new FormData(form);
+    await submitForm("/ac", {
+      branch_unit: fd.get("branch_unit"),
+      room: fd.get("room"),
+      brand: fd.get("brand"),
+      type: fd.get("type"),
+      capacity: fd.get("capacity"),
+      function: fd.get("function"),
+      serial_number: fd.get("serial_number"),
+    }, {
+      successMsg: "AC asset added successfully!",
+      onSuccess: () => { setShowAdd(false); fetchAcs(); },
+    });
+  };
 
   return (
     <div className="flex-1 space-y-6">
@@ -62,7 +68,7 @@ export default function ACAssetsPage() {
         </div>
         <div className="flex items-center space-x-2">
           <Button variant="outline"><Filter className="mr-2 h-4 w-4" /> Filter</Button>
-          <Button onClick={() => alert("Fitur tambah data segera hadir!")}><Plus className="mr-2 h-4 w-4" /> Add AC Asset</Button>
+          <Button onClick={() => setShowAdd(true)}><Plus className="mr-2 h-4 w-4" /> Add AC Asset</Button>
         </div>
       </div>
 
@@ -72,70 +78,97 @@ export default function ACAssetsPage() {
             <CardTitle>AC Master Data</CardTitle>
             <div className="relative w-64">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <input
-                type="search"
-                placeholder="Search by serial or room..."
-                className="flex h-9 w-full rounded-md border border-input bg-background/50 px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring pl-9"
-              />
+              <input type="search" placeholder="Search by serial or room..." value={search} onChange={e => setSearch(e.target.value)} className="flex h-9 w-full rounded-md border border-input bg-background/50 px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring pl-9" />
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="relative w-full overflow-auto">
-            <div className="overflow-x-auto w-full">
-          <table className="w-full caption-bottom text-sm">
-              <thead className="[&_tr]:border-b border-border/50 bg-muted/30">
-                <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Serial Number</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Location</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Brand & Type</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Function</th>
-                  <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-sm table-fixed">
+              <thead className="bg-muted/30 border-b border-border/50">
+                <tr>
+                  <th className="p-4 text-left font-medium text-muted-foreground w-1/4">Serial Number</th>
+                  <th className="p-4 text-left font-medium text-muted-foreground w-1/4">Location</th>
+                  <th className="p-4 text-left font-medium text-muted-foreground w-1/4">Brand & Type</th>
+                  <th className="p-4 text-left font-medium text-muted-foreground w-28">Function</th>
+                  <th className="p-4 text-right font-medium text-muted-foreground w-32">Actions</th>
                 </tr>
               </thead>
-              <tbody className="[&_tr:last-child]:border-0">
+              <tbody>
                 {loading ? (
                   <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Loading AC Data...</td></tr>
-                ) : acs.map((ac) => (
+                ) : filtered.length === 0 ? (
+                  <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">No AC assets found.</td></tr>
+                ) : filtered.map((ac) => (
                   <tr key={ac.id} className="border-b border-border/50 transition-colors hover:bg-muted/30">
-                    <td className="p-4 align-middle font-medium">
-                      <div className="flex items-center gap-2">
-                        <Cpu className="h-4 w-4 text-primary" />
-                        {ac.serial_number}
-                      </div>
+                    <td className="p-4 font-medium">
+                      <div className="flex items-center gap-2"><Cpu className="h-4 w-4 text-primary" />{ac.serial_number}</div>
                     </td>
-                    <td className="p-4 align-middle">
-                      <div className="flex flex-col">
-                        <span className="font-medium">{ac.branch_unit}</span>
-                        <span className="text-xs text-muted-foreground">{ac.room}</span>
-                      </div>
+                    <td className="p-4">
+                      <div className="flex flex-col"><span className="font-medium">{ac.branch_unit}</span><span className="text-xs text-muted-foreground">{ac.room}</span></div>
                     </td>
-                    <td className="p-4 align-middle">
-                      <div className="flex flex-col">
-                        <span>{ac.brand}</span>
-                        <span className="text-xs text-muted-foreground">{ac.type} • {ac.capacity}</span>
-                      </div>
+                    <td className="p-4">
+                      <div className="flex flex-col"><span>{ac.brand}</span><span className="text-xs text-muted-foreground">{ac.type} • {ac.capacity}</span></div>
                     </td>
-                    <td className="p-4 align-middle">
-                      <Badge variant={ac.function === "Main" ? "default" : "secondary"} className={ac.function === "Main" ? "bg-primary/20 text-primary hover:bg-primary/30" : ""}>
-                        {ac.function}
-                      </Badge>
+                    <td className="p-4">
+                      <Badge variant={ac.function === "Main" ? "default" : "secondary"} className={ac.function === "Main" ? "bg-primary/20 text-primary hover:bg-primary/30" : ""}>{ac.function}</Badge>
                     </td>
-                    <td className="p-4 align-middle text-right">
+                    <td className="p-4 text-right">
                       <Link href={`/assets/ac/${ac.id}`}>
-                        <Button variant="ghost" size="sm" className="hover:text-primary">
-                          <Settings2 className="mr-2 h-4 w-4" /> Manage
-                        </Button>
+                        <Button variant="ghost" size="sm" className="hover:text-primary"><Settings2 className="mr-2 h-4 w-4" /> Manage</Button>
                       </Link>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-        </div>
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+        <DialogContent>
+          <DialogHeader onClose={() => setShowAdd(false)}>
+            <DialogTitle>Tambah Unit AC Baru</DialogTitle>
+            <DialogDescription>Daftarkan unit AC baru ke dalam sistem monitoring.</DialogDescription>
+          </DialogHeader>
+          <form ref={formRef} onSubmit={e => e.preventDefault()}>
+            <DialogBody>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Cabang" required>
+                  <select name="branch_unit" className={selectClassName} required><option value="">Pilih Cabang</option><option>Jatinegara</option><option>Sudirman</option><option>Kuningan</option></select>
+                </FormField>
+                <FormField label="Ruangan" required>
+                  <input name="room" className={inputClassName} placeholder="Contoh: Server Room A" required />
+                </FormField>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Brand" required>
+                  <select name="brand" className={selectClassName} required><option value="">Pilih Brand</option><option>Daikin</option><option>Panasonic</option><option>Gree</option><option>Samsung</option></select>
+                </FormField>
+                <FormField label="Tipe" required>
+                  <select name="type" className={selectClassName} required><option value="">Pilih Tipe</option><option>Cassette</option><option>Split Wall</option><option>Standing Floor</option><option>Ducting</option></select>
+                </FormField>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Kapasitas" required>
+                  <select name="capacity" className={selectClassName} required><option value="">Pilih PK</option><option>1 PK</option><option>1.5 PK</option><option>2 PK</option><option>3 PK</option><option>5 PK</option></select>
+                </FormField>
+                <FormField label="Fungsi" required>
+                  <select name="function" className={selectClassName} required><option value="">Pilih Fungsi</option><option>Main</option><option>Backup</option></select>
+                </FormField>
+              </div>
+              <FormField label="Serial Number" required>
+                <input name="serial_number" className={inputClassName} placeholder="Contoh: DKN-2023-X9821" required />
+              </FormField>
+            </DialogBody>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAdd(false)}>Batal</Button>
+              <Button onClick={handleSubmit}><Plus className="mr-2 h-4 w-4" /> Simpan AC</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

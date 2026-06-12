@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.api import ac, server_room, apar, kwh, dashboard, upload, ticket, ups, cctv, network
+from app.api import ac, server_room, apar, kwh, dashboard, upload, ticket, ups, cctv, network, maintenance, inspection, server
+
+# Import new models so they are registered with Base.metadata
+from app.models import maintenance as _maint_model, inspection as _insp_model, server as _srv_model  # noqa: F401
 
 # Create all tables (dev mode)
 Base.metadata.create_all(bind=engine)
@@ -32,6 +35,9 @@ app.include_router(ticket.router, prefix="/api/v1/tickets", tags=["Ticketing"])
 app.include_router(ups.router, prefix="/api/v1/ups", tags=["UPS"])
 app.include_router(cctv.router, prefix="/api/v1/cctv", tags=["CCTV"])
 app.include_router(network.router, prefix="/api/v1/network", tags=["Network"])
+app.include_router(maintenance.router, prefix="/api/v1/maintenance", tags=["Maintenance"])
+app.include_router(inspection.router, prefix="/api/v1/inspections", tags=["Inspections"])
+app.include_router(server.router, prefix="/api/v1/servers_master", tags=["Servers Master"])
 
 @app.get("/")
 def read_root():
