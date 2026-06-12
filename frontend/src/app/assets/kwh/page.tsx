@@ -116,12 +116,26 @@ export default function KWHPage() {
           <form ref={formRef} onSubmit={e => e.preventDefault()}>
             <DialogBody>
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Cabang" required><select name="branch" className={selectClassName} required><option value="">Pilih Cabang</option><option>Jatinegara</option><option>Sudirman</option><option>Kuningan</option></select></FormField>
+                <FormField label="Cabang" required>
+                  <input name="branch" list="branch-options" className={inputClassName} placeholder="Pilih atau Ketik Cabang" required />
+                  <datalist id="branch-options">
+                    <option value="Jatinegara" />
+                    <option value="Sudirman" />
+                    <option value="Kuningan" />
+                  </datalist>
+                </FormField>
                 <FormField label="Lokasi Panel" required><input name="panel_name" className={inputClassName} placeholder="Contoh: Panel Utama Lt.1" required /></FormField>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Pembacaan Awal (kWh)" required><input name="current_reading" type="number" step="0.01" className={inputClassName} placeholder="0" required /></FormField>
-                <FormField label="Tipe Meter"><select name="meter_type" className={selectClassName}><option value="">Pilih Tipe</option><option>Analog</option><option>Digital</option><option>Smart Meter</option></select></FormField>
+                <FormField label="Tipe Meter">
+                  <input name="meter_type" list="meter-type-options" className={inputClassName} placeholder="Pilih atau Ketik Tipe" />
+                  <datalist id="meter-type-options">
+                    <option value="Analog" />
+                    <option value="Digital" />
+                    <option value="Smart Meter" />
+                  </datalist>
+                </FormField>
               </div>
             </DialogBody>
             <DialogFooter>

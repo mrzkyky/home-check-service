@@ -131,15 +131,40 @@ export default function ServersPage() {
             <DialogBody>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Hostname" required><input name="hostname" className={inputClassName} placeholder="Contoh: prod-web-01" required /></FormField>
-                <FormField label="Sistem Operasi" required><select name="os" className={selectClassName} required><option value="">Pilih OS</option><option>Ubuntu 22.04</option><option>CentOS 8</option><option>Windows Server 2022</option><option>Debian 12</option></select></FormField>
+                <FormField label="Sistem Operasi" required>
+                  <input name="os" list="os-options" className={inputClassName} placeholder="Pilih atau Ketik OS" required />
+                  <datalist id="os-options">
+                    <option value="Ubuntu 22.04" />
+                    <option value="CentOS 8" />
+                    <option value="Windows Server 2022" />
+                    <option value="Debian 12" />
+                  </datalist>
+                </FormField>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="CPU" required><input name="cpu" className={inputClassName} placeholder="Contoh: Intel Xeon E5" required /></FormField>
-                <FormField label="RAM" required><select name="ram" className={selectClassName} required><option value="">Pilih RAM</option><option>16 GB</option><option>32 GB</option><option>64 GB</option><option>128 GB</option><option>256 GB</option></select></FormField>
+                <FormField label="RAM" required>
+                  <input name="ram" list="ram-options" className={inputClassName} placeholder="Pilih atau Ketik RAM" required />
+                  <datalist id="ram-options">
+                    <option value="16 GB" />
+                    <option value="32 GB" />
+                    <option value="64 GB" />
+                    <option value="128 GB" />
+                    <option value="256 GB" />
+                  </datalist>
+                </FormField>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Storage" required><input name="storage" className={inputClassName} placeholder="Contoh: 2 TB SSD" required /></FormField>
-                <FormField label="Branch / Unit" required><input name="branch_unit" className={inputClassName} placeholder="Contoh: Main Data Center" required /></FormField>
+                <FormField label="Branch / Unit" required>
+                  <input name="branch_unit" list="branch-options" className={inputClassName} placeholder="Contoh: Main Data Center" required />
+                  <datalist id="branch-options">
+                    <option value="Main Data Center" />
+                    <option value="Jatinegara" />
+                    <option value="Sudirman" />
+                    <option value="Kuningan" />
+                  </datalist>
+                </FormField>
               </div>
             </DialogBody>
             <DialogFooter>

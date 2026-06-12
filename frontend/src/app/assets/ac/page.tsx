@@ -136,7 +136,12 @@ export default function ACAssetsPage() {
             <DialogBody>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Cabang" required>
-                  <select name="branch_unit" className={selectClassName} required><option value="">Pilih Cabang</option><option>Jatinegara</option><option>Sudirman</option><option>Kuningan</option></select>
+                  <input name="branch_unit" list="branch-options" className={inputClassName} placeholder="Pilih atau Ketik Cabang" required />
+                  <datalist id="branch-options">
+                    <option value="Jatinegara" />
+                    <option value="Sudirman" />
+                    <option value="Kuningan" />
+                  </datalist>
                 </FormField>
                 <FormField label="Ruangan" required>
                   <input name="room" className={inputClassName} placeholder="Contoh: Server Room A" required />
@@ -144,18 +149,41 @@ export default function ACAssetsPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Brand" required>
-                  <select name="brand" className={selectClassName} required><option value="">Pilih Brand</option><option>Daikin</option><option>Panasonic</option><option>Gree</option><option>Samsung</option></select>
+                  <input name="brand" list="brand-options" className={inputClassName} placeholder="Pilih atau Ketik Brand" required />
+                  <datalist id="brand-options">
+                    <option value="Daikin" />
+                    <option value="Panasonic" />
+                    <option value="Gree" />
+                    <option value="Samsung" />
+                  </datalist>
                 </FormField>
                 <FormField label="Tipe" required>
-                  <select name="type" className={selectClassName} required><option value="">Pilih Tipe</option><option>Cassette</option><option>Split Wall</option><option>Standing Floor</option><option>Ducting</option></select>
+                  <input name="type" list="type-options" className={inputClassName} placeholder="Pilih atau Ketik Tipe" required />
+                  <datalist id="type-options">
+                    <option value="Cassette" />
+                    <option value="Split Wall" />
+                    <option value="Standing Floor" />
+                    <option value="Ducting" />
+                  </datalist>
                 </FormField>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Kapasitas" required>
-                  <select name="capacity" className={selectClassName} required><option value="">Pilih PK</option><option>1 PK</option><option>1.5 PK</option><option>2 PK</option><option>3 PK</option><option>5 PK</option></select>
+                  <input name="capacity" list="capacity-options" className={inputClassName} placeholder="Pilih atau Ketik PK" required />
+                  <datalist id="capacity-options">
+                    <option value="1 PK" />
+                    <option value="1.5 PK" />
+                    <option value="2 PK" />
+                    <option value="3 PK" />
+                    <option value="5 PK" />
+                  </datalist>
                 </FormField>
                 <FormField label="Fungsi" required>
-                  <select name="function" className={selectClassName} required><option value="">Pilih Fungsi</option><option>Main</option><option>Backup</option></select>
+                  <input name="function" list="function-options" className={inputClassName} placeholder="Pilih atau Ketik Fungsi" required />
+                  <datalist id="function-options">
+                    <option value="Main" />
+                    <option value="Backup" />
+                  </datalist>
                 </FormField>
               </div>
               <FormField label="Serial Number" required>

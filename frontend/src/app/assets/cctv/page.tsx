@@ -132,14 +132,28 @@ export default function CCTVPage() {
           <form ref={formRef} onSubmit={e => e.preventDefault()}>
             <DialogBody>
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Cabang" required><select name="branch" className={selectClassName} required><option value="">Pilih Cabang</option><option>Jatinegara</option><option>Sudirman</option><option>Kuningan</option></select></FormField>
+                <FormField label="Cabang" required>
+                  <input name="branch" list="branch-options" className={inputClassName} placeholder="Pilih atau Ketik Cabang" required />
+                  <datalist id="branch-options">
+                    <option value="Jatinegara" />
+                    <option value="Sudirman" />
+                    <option value="Kuningan" />
+                  </datalist>
+                </FormField>
                 <FormField label="Lokasi" required><input name="location" className={inputClassName} placeholder="Contoh: Lobby Utama" required /></FormField>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Brand" required><input name="brand" className={inputClassName} placeholder="Contoh: Hikvision, Dahua" required /></FormField>
                 <FormField label="IP Address" required><input name="ip_address" className={inputClassName} placeholder="192.168.x.x" required /></FormField>
               </div>
-              <FormField label="Resolusi" required><select name="resolution" className={selectClassName} required><option value="">Pilih Resolusi</option><option>720p</option><option>1080p</option><option>4K</option></select></FormField>
+              <FormField label="Resolusi" required>
+                <input name="resolution" list="resolution-options" className={inputClassName} placeholder="Pilih atau Ketik Resolusi" required />
+                <datalist id="resolution-options">
+                  <option value="720p" />
+                  <option value="1080p" />
+                  <option value="4K" />
+                </datalist>
+              </FormField>
             </DialogBody>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAdd(false)}>Batal</Button>

@@ -146,7 +146,18 @@ export default function TicketingPage() {
               <FormField label="Judul Insiden" required><input name="title" className={inputClassName} placeholder="Contoh: AC Compressor Failure" required /></FormField>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Kategori" required>
-                  <select name="category" className={selectClassName} required><option value="">Pilih Kategori</option><option>AC</option><option>UPS</option><option>Network</option><option>Server</option><option>CCTV</option><option>APAR</option><option>Electrical</option><option>Plumbing</option><option>Other</option></select>
+                  <input name="category" list="category-options" className={inputClassName} placeholder="Pilih atau Ketik Kategori" required />
+                  <datalist id="category-options">
+                    <option value="AC" />
+                    <option value="UPS" />
+                    <option value="Network" />
+                    <option value="Server" />
+                    <option value="CCTV" />
+                    <option value="APAR" />
+                    <option value="Electrical" />
+                    <option value="Plumbing" />
+                    <option value="Other" />
+                  </datalist>
                 </FormField>
                 <FormField label="Prioritas" required>
                   <select name="priority" className={selectClassName} required><option value="">Pilih Prioritas</option><option>CRITICAL</option><option>HIGH</option><option>MEDIUM</option><option>LOW</option></select>

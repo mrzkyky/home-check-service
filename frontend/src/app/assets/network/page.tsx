@@ -129,12 +129,38 @@ export default function NetworkPage() {
           <form ref={formRef} onSubmit={e => e.preventDefault()}>
             <DialogBody>
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Cabang" required><select name="branch" className={selectClassName} required><option value="">Pilih Cabang</option><option>Jatinegara</option><option>Sudirman</option><option>Kuningan</option></select></FormField>
+                <FormField label="Cabang" required>
+                  <input name="branch" list="branch-options" className={inputClassName} placeholder="Pilih atau Ketik Cabang" required />
+                  <datalist id="branch-options">
+                    <option value="Jatinegara" />
+                    <option value="Sudirman" />
+                    <option value="Kuningan" />
+                  </datalist>
+                </FormField>
                 <FormField label="Lokasi Rack" required><input name="location" className={inputClassName} placeholder="Contoh: Rack Server Lt.1" required /></FormField>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Brand" required><select name="brand" className={selectClassName} required><option value="">Pilih Brand</option><option>Cisco</option><option>MikroTik</option><option>Aruba</option><option>Ubiquiti</option><option>HP/HPE</option></select></FormField>
-                <FormField label="Tipe Perangkat" required><select name="device_type" className={selectClassName} required><option value="">Pilih Tipe</option><option>Core Switch</option><option>Distribution Switch</option><option>Access Switch</option><option>Router</option><option>Access Point</option><option>Firewall</option></select></FormField>
+                <FormField label="Brand" required>
+                  <input name="brand" list="brand-options" className={inputClassName} placeholder="Pilih atau Ketik Brand" required />
+                  <datalist id="brand-options">
+                    <option value="Cisco" />
+                    <option value="MikroTik" />
+                    <option value="Aruba" />
+                    <option value="Ubiquiti" />
+                    <option value="HP/HPE" />
+                  </datalist>
+                </FormField>
+                <FormField label="Tipe Perangkat" required>
+                  <input name="device_type" list="device-type-options" className={inputClassName} placeholder="Pilih atau Ketik Tipe" required />
+                  <datalist id="device-type-options">
+                    <option value="Core Switch" />
+                    <option value="Distribution Switch" />
+                    <option value="Access Switch" />
+                    <option value="Router" />
+                    <option value="Access Point" />
+                    <option value="Firewall" />
+                  </datalist>
+                </FormField>
               </div>
               <FormField label="IP Address" required><input name="ip_address" className={inputClassName} placeholder="10.0.x.x" required /></FormField>
             </DialogBody>

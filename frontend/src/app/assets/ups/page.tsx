@@ -131,14 +131,38 @@ export default function UPSPage() {
           <form ref={formRef} onSubmit={e => e.preventDefault()}>
             <DialogBody>
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Cabang" required><select name="branch" className={selectClassName} required><option value="">Pilih Cabang</option><option>Jatinegara</option><option>Sudirman</option><option>Kuningan</option></select></FormField>
+                <FormField label="Cabang" required>
+                  <input name="branch" list="branch-options" className={inputClassName} placeholder="Pilih atau Ketik Cabang" required />
+                  <datalist id="branch-options">
+                    <option value="Jatinegara" />
+                    <option value="Sudirman" />
+                    <option value="Kuningan" />
+                  </datalist>
+                </FormField>
                 <FormField label="Lokasi" required><input name="location" className={inputClassName} placeholder="Contoh: Server Room A" required /></FormField>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Brand" required><select name="brand" className={selectClassName} required><option value="">Pilih Brand</option><option>APC</option><option>Eaton</option><option>CyberPower</option><option>Vertiv</option></select></FormField>
+                <FormField label="Brand" required>
+                  <input name="brand" list="brand-options" className={inputClassName} placeholder="Pilih atau Ketik Brand" required />
+                  <datalist id="brand-options">
+                    <option value="APC" />
+                    <option value="Eaton" />
+                    <option value="CyberPower" />
+                    <option value="Vertiv" />
+                  </datalist>
+                </FormField>
                 <FormField label="Model" required><input name="model" className={inputClassName} placeholder="Contoh: Smart-UPS 3000" required /></FormField>
               </div>
-              <FormField label="Kapasitas" required><select name="capacity" className={selectClassName} required><option value="">Pilih Kapasitas</option><option>1 kVA</option><option>1.5 kVA</option><option>3 kVA</option><option>6 kVA</option><option>10 kVA</option></select></FormField>
+              <FormField label="Kapasitas" required>
+                <input name="capacity" list="capacity-options" className={inputClassName} placeholder="Pilih atau Ketik Kapasitas" required />
+                <datalist id="capacity-options">
+                  <option value="1 kVA" />
+                  <option value="1.5 kVA" />
+                  <option value="3 kVA" />
+                  <option value="6 kVA" />
+                  <option value="10 kVA" />
+                </datalist>
+              </FormField>
             </DialogBody>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAdd(false)}>Batal</Button>

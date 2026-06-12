@@ -155,12 +155,12 @@ export default function APARPage() {
             <DialogBody>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Cabang" required>
-                  <select name="branch" className={selectClassName} required>
-                    <option value="">Pilih Cabang</option>
-                    <option>Jatinegara</option>
-                    <option>Sudirman</option>
-                    <option>Kuningan</option>
-                  </select>
+                  <input name="branch" list="branch-options" className={inputClassName} placeholder="Pilih atau Ketik Cabang" required />
+                  <datalist id="branch-options">
+                    <option value="Jatinegara" />
+                    <option value="Sudirman" />
+                    <option value="Kuningan" />
+                  </datalist>
                 </FormField>
                 <FormField label="Lokasi Penempatan" required>
                   <input name="location" className={inputClassName} placeholder="Contoh: Lobby Utama" required />
@@ -168,22 +168,22 @@ export default function APARPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Jenis APAR" required>
-                  <select name="type" className={selectClassName} required>
-                    <option value="">Pilih Jenis</option>
-                    <option>Dry Chemical</option>
-                    <option>CO2</option>
-                    <option>Foam</option>
-                    <option>Halon Free</option>
-                  </select>
+                  <input name="type" list="type-options" className={inputClassName} placeholder="Pilih atau Ketik Jenis" required />
+                  <datalist id="type-options">
+                    <option value="Dry Chemical" />
+                    <option value="CO2" />
+                    <option value="Foam" />
+                    <option value="Halon Free" />
+                  </datalist>
                 </FormField>
                 <FormField label="Kapasitas" required>
-                  <select name="capacity" className={selectClassName} required>
-                    <option value="">Pilih Kapasitas</option>
-                    <option>3 kg</option>
-                    <option>6 kg</option>
-                    <option>9 kg</option>
-                    <option>12 kg</option>
-                  </select>
+                  <input name="capacity" list="capacity-options" className={inputClassName} placeholder="Pilih atau Ketik Kapasitas" required />
+                  <datalist id="capacity-options">
+                    <option value="3 kg" />
+                    <option value="6 kg" />
+                    <option value="9 kg" />
+                    <option value="12 kg" />
+                  </datalist>
                 </FormField>
               </div>
               <FormField label="Tanggal Kadaluarsa" required>
