@@ -19,7 +19,7 @@ class ACMaster(Base):
     brand = Column(String)
     type = Column(String)
     capacity = Column(String)
-    serial_number = Column(String, unique=True, index=True)
+    serial_number = Column(String, nullable=True, index=True)
     vendor = Column(String)
     
     # Audit trail

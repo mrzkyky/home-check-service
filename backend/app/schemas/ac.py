@@ -11,7 +11,7 @@ class ACMasterBase(BaseModel):
     brand: str
     type: str
     capacity: str
-    serial_number: str
+    serial_number: Optional[str] = None
     vendor: str
 
 class ACMasterCreate(ACMasterBase):

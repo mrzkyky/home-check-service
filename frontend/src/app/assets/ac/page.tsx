@@ -17,7 +17,7 @@ interface AC {
   brand: string;
   type: string;
   capacity: string;
-  serial_number: string;
+  serial_number: string | null;
 }
 
 export default function ACAssetsPage() {
@@ -38,7 +38,8 @@ export default function ACAssetsPage() {
 
   const filtered = acs.filter(ac => {
     const q = search.toLowerCase();
-    return !q || ac.serial_number.toLowerCase().includes(q) || ac.room.toLowerCase().includes(q) || ac.branch_unit.toLowerCase().includes(q);
+    const sn = ac.serial_number || "";
+    return !q || sn.toLowerCase().includes(q) || ac.room.toLowerCase().includes(q) || ac.branch_unit.toLowerCase().includes(q);
   });
 
   const handleSubmit = async () => {
@@ -102,7 +103,7 @@ export default function ACAssetsPage() {
                 ) : filtered.map((ac) => (
                   <tr key={ac.id} className="border-b border-border/50 transition-colors hover:bg-muted/30">
                     <td className="p-4 font-medium">
-                      <div className="flex items-center gap-2"><Cpu className="h-4 w-4 text-primary" />{ac.serial_number}</div>
+                      <div className="flex items-center gap-2"><Cpu className="h-4 w-4 text-primary" />{ac.serial_number || "-"}</div>
                     </td>
                     <td className="p-4">
                       <div className="flex flex-col"><span className="font-medium">{ac.branch_unit}</span><span className="text-xs text-muted-foreground">{ac.room}</span></div>
@@ -186,8 +187,8 @@ export default function ACAssetsPage() {
                   </datalist>
                 </FormField>
               </div>
-              <FormField label="Serial Number" required>
-                <input name="serial_number" className={inputClassName} placeholder="Contoh: DKN-2023-X9821" required />
+              <FormField label="Serial Number (Opsional)">
+                <input name="serial_number" className={inputClassName} placeholder="Contoh: DKN-2023-X9821" />
               </FormField>
             </DialogBody>
             <DialogFooter>
