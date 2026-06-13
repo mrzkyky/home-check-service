@@ -24,9 +24,10 @@ def get_db():
 
 @router.post("/", response_model=ACMasterResponse, status_code=status.HTTP_201_CREATED)
 def create_ac_master(ac: ACMasterCreate, db: Session = Depends(get_db)):
-    db_ac = db.query(ACMaster).filter(ACMaster.serial_number == ac.serial_number).first()
-    if db_ac:
-        raise HTTPException(status_code=400, detail="Serial number already registered")
+    if ac.serial_number:
+        db_ac = db.query(ACMaster).filter(ACMaster.serial_number == ac.serial_number).first()
+        if db_ac:
+            raise HTTPException(status_code=400, detail="Serial number already registered")
     
     new_ac = ACMaster(**ac.model_dump())
     db.add(new_ac)

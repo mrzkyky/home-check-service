@@ -53,7 +53,7 @@ export default function ACAssetsPage() {
       type: fd.get("type"),
       capacity: fd.get("capacity"),
       function: fd.get("function"),
-      serial_number: fd.get("serial_number"),
+      serial_number: fd.get("serial_number") || null,
     }, {
       successMsg: "AC asset added successfully!",
       onSuccess: () => { setShowAdd(false); fetchAcs(); },
